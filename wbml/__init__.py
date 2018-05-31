@@ -2,4 +2,7 @@
 
 from __future__ import absolute_import, division, print_function
 
-from .core import *
+from .util import *
+from .net import *
+from .random import *
+from .vi import *
