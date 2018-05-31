@@ -1,11 +1,9 @@
-import numpy as np
 import tensorflow as tf
 from lab.tf import B
 from stheno.tf import Normal
 
 from wbml.vi import QNormalDiag, elbo
 
-B.set_default_dtype(np.float64)
 s = tf.Session()
 
 # Define a prior and likelihood and generate data.
