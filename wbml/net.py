@@ -91,40 +91,6 @@ class Dense(Layer):
         return [self._A, self._b]
 
 
-class RNNLayer:
-    def __init__(self, width, s2=1., nonlinearity=tf.nn.relu, normalise=False,
-                 eps=1e-6):
-        self.width = width
-        self._A = None
-        self._B = None
-        self._c = None
-        self._s2 = s2
-        self._nonlinearity = nonlinearity
-
-        if normalise:
-            self._norm_layer = Normalise(eps)
-        else:
-            self._norm_layer = Identity()
-
-    def initialise(self, input_size):
-        self._A = B.Variable(self._s2 ** .5 * B.randn([self.width, self.width]))
-        self._B = B.Variable(self._s2 ** .5 * B.randn([self.width, input_size]))
-        self._c = B.Variable(self._s2 ** .5 * B.randn([self.width, 1]))
-        self._norm_layer.initialise(input_size)
-
-    def __call__(self, h, x):
-        z = B.matmul(self._A, h) + B.matmul(self._B, x) + self._c
-        return self._norm_layer(self._nonlinearity(z))
-
-    def weights(self):
-        return B.concat([B.reshape(self._A, [-1]),
-                         B.reshape(self._B, [-1]),
-                         B.reshape(self._c, [-1])], axis=0)
-
-    def vars(self):
-        return [self._A, self._B, self._c]
-
-
 class AbstractNet(object):
     __metaclass__ = ABCMeta
 
