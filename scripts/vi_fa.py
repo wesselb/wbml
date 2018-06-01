@@ -1,7 +1,7 @@
+import numpy as np
 import tensorflow as tf
 from lab.tf import B
 from stheno.tf import Normal, Diagonal, UniformDiagonal
-import numpy as np
 
 from wbml import elbo, vars32
 

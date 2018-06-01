@@ -2,6 +2,7 @@ nose
 coveralls
 numpy
 scipy
+sklearn
 autograd
 tensorflow
 git+git://github.com/wesselb/plum@master#egg=plum

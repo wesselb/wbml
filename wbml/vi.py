@@ -3,7 +3,7 @@
 from __future__ import absolute_import, division, print_function
 
 import tensorflow as tf
-from lab import B
+from lab.tf import B
 
 
 def elbo(lik, p, q, num_samples=1):

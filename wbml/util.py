@@ -7,7 +7,7 @@ from operator import mul
 
 import numpy as np
 import tensorflow as tf
-from lab import B
+from lab.tf import B
 
 __all__ = ['Packer', 'Vars', 'vars32', 'vars64']
 
@@ -29,21 +29,30 @@ class Packer(object):
 
 
 class Vars(object):
-    def __init__(self, dtype=None):
+    def __init__(self, dtype=np.float32):
         self.latents = []
         self.dtype = dtype
 
+    def init(self, session):
+        session.run(tf.variables_initializer(self.latents))
+
     def get(self, init=None, shape=(), dtype=None):
-        return self._generate(init, shape, dtype)
+        dtype = self._resolve_dtype(dtype)
+        init = B.randn(shape, dtype=dtype) if init is None else init
+        return self._generate(init, dtype)
 
     def positive(self, init=None, shape=(), dtype=None):
-        return B.exp(self._generate(init, shape, dtype, np.log))
+        dtype = self._resolve_dtype(dtype)
+        init = B.rand(shape, dtype=dtype) if init is None else init
+        return B.exp(self._generate(B.log(init), dtype))
 
-    def _generate(self, init, shape, dtype, f=lambda x: x):
-        init = B.randn(shape) if init is None else f(init)
+    def _generate(self, init, dtype):
         latent = B.Variable(init, dtype=dtype)
         self.latents.append(latent)
         return latent
+
+    def _resolve_dtype(self, dtype):
+        return self.dtype if dtype is None else dtype
 
 
 vars32 = Vars(np.float32)

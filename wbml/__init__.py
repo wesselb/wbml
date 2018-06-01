@@ -4,5 +4,7 @@ from __future__ import absolute_import, division, print_function
 
 from .util import *
 from .net import *
-from .random import *
+from .lr import *
+from .data import *
 from .vi import *
+
