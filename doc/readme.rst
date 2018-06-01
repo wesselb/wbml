@@ -1,5 +1,7 @@
-Read Me
-=======
+WBML
+====
+
+Machine learning stuff
 
 |Build| |Coverage Status| |Latest Docs|
 

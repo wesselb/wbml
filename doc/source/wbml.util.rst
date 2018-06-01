@@ -1,7 +1,7 @@
-wbml.core module
+wbml.util module
 ================
 
-.. automodule:: wbml.core
+.. automodule:: wbml.util
     :members:
     :undoc-members:
     :show-inheritance:
