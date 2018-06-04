@@ -15,14 +15,23 @@ __all__ = ['Packer', 'Vars', 'vars32', 'vars64']
 class Packer(object):
     def __init__(self, *objs):
         self._shapes = [B.shape(obj) for obj in objs]
+        self._ranks = [B.rank(obj) for obj in objs]
+        self._lengths = [Packer.calc_length(shape, rank)
+                         for shape, rank in zip(self._shapes, self._ranks)]
+
+    @staticmethod
+    def calc_length(shape, rank):
+        length = 1
+        for i in range(rank):
+            length *= shape[i]
+        return length
 
     def pack(self, *objs):
         return tf.concat([B.reshape(obj, [-1]) for obj in objs], axis=0)
 
     def unpack(self, package):
         i, outs = 0, []
-        for shape in self._shapes:
-            length = reduce(mul, shape, 1)
+        for shape, length in zip(self._shapes, self._lengths):
             outs.append(B.reshape(package[i:i + length], shape))
             i += length
         return outs
@@ -46,8 +55,11 @@ class Vars(object):
         init = B.rand(shape, dtype=dtype) if init is None else init
         return B.exp(self._generate(B.log(init), dtype))
 
+    def pos(self, *args, **kw_args):
+        return self.positive(*args, **kw_args)
+
     def _generate(self, init, dtype):
-        latent = B.Variable(init, dtype=dtype)
+        latent = B.Variable(B.cast(init, dtype=dtype), dtype=dtype)
         self.latents.append(latent)
         return latent
 
