@@ -74,7 +74,8 @@ class Dense(Layer):
         return self.nonlinearity(B.matmul(self.A, x) + self.b)
 
     def weights(self):
-        return B.concat([B.reshape(self.A, [-1]), B.reshape(self.b, [-1])])
+        return B.concat([B.reshape(self.A, [-1]),
+                         B.reshape(self.b, [-1])], axis=0)
 
 
 class AbstractNet(object):
@@ -106,7 +107,7 @@ class Net(AbstractNet):
         return x
 
 
-def feedforward(widths, vars=vars32):
+def feedforward(widths, vars=vars32, nonlinearity=tf.nn.relu, normalise=True):
     """A standard feedforward neural net.
 
     Args:
@@ -114,12 +115,15 @@ def feedforward(widths, vars=vars32):
             widths.
         vars (instance of :class:`.util.Vars`, optional): Variable storage.
             Defaults to the global `vars32`.
+        nonlinearity (function): Nonlinearity to use.
+        normalise (bool): Interleave with normalisation layers.
     """
     if len(widths) < 2:
         raise ValueError('Must specify at least width of input and output.')
     layers = []
     for w in widths[1:-1]:
-        layers.append(Dense(w))
-        layers.append(Normalise())
+        layers.append(Dense(w, nonlinearity=nonlinearity))
+        if normalise:
+            layers.append(Normalise())
     layers.append(Dense(widths[-1], nonlinearity=identity))
     return Net(widths[0], layers, vars=vars)
