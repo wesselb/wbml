@@ -22,7 +22,7 @@ its = 1000
 
 # Get number of weights of NN.
 # TODO: Refactor this.
-n_w = int(feedforward(**nn_config).weights().get_shape()[0])
+n_w = B.shape_int(feedforward(**nn_config).weights())[0]
 
 # Construct prior, q-distribution for weights, and likelihood.
 p_w = Normal(UniformDiagonal(B.cast(1., dtype=np.float32), n_w))
