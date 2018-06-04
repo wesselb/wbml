@@ -21,7 +21,7 @@ nn_config = {
 its = 4000
 
 # Get number of weights of NN.
-# TODO: Refactor this.
+# TODO: Refactor this. This now creates unnessarily many variables.
 n_w = B.shape_int(feedforward(**nn_config).weights())[0]
 
 # Construct prior, q-distribution for weights, and likelihood.
