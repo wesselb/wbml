@@ -9,7 +9,7 @@ import numpy as np
 import tensorflow as tf
 from lab.tf import B
 
-__all__ = ['Packer', 'Vars', 'vars32', 'vars64']
+__all__ = ['Packer', 'Vars', 'vars32', 'vars64', 'VarsFrom']
 
 
 class Packer(object):
@@ -38,9 +38,10 @@ class Packer(object):
 
 
 class Vars(object):
-    def __init__(self, dtype=np.float32):
+    def __init__(self, dtype=np.float32, epsilon=1e-6):
         self.latents = []
         self.dtype = dtype
+        self.epsilon = epsilon
 
     def init(self, session):
         session.run(tf.variables_initializer(self.latents))
@@ -53,7 +54,8 @@ class Vars(object):
     def positive(self, init=None, shape=(), dtype=None):
         dtype = self._resolve_dtype(dtype)
         init = B.rand(shape, dtype=dtype) if init is None else init
-        return B.exp(self._generate(B.log(init), dtype))
+        return B.exp(self._generate(B.log(init), dtype)) + \
+               B.cast(self.epsilon, dtype=dtype)
 
     def pos(self, *args, **kw_args):
         return self.positive(*args, **kw_args)
@@ -65,6 +67,18 @@ class Vars(object):
 
     def _resolve_dtype(self, dtype):
         return self.dtype if dtype is None else dtype
+
+
+class VarsFrom(object):
+    def __init__(self, resource):
+        self._resource = resource
+        self._i = 0
+
+    def get(self, shape):
+        length = reduce(mul, shape, 1)
+        out = B.reshape(self._resource[self._i: self._i + length], shape)
+        self._i += length
+        return out
 
 
 vars32 = Vars(np.float32)
