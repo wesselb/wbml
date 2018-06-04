@@ -16,7 +16,7 @@ z_true = s.run(prior.sample())
 y = s.run((lik_noise + z_true).sample(100))
 
 # Define likelihood and q distribution.
-lik = lik_noise + y
+lik = lambda x: B.sum((lik_noise + y).log_pdf(x))
 q = Normal(Diagonal(vars32.positive(shape=[d])), vars32.get(shape=[d, 1]))
 
 # Construct objective.
