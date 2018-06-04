@@ -14,21 +14,21 @@ x = (x - np.mean(x)) / np.std(x)
 y = (y - np.mean(y)) / np.std(y)
 
 nn_config = {
-    'widths': (1, 20, 20, 20, 20, 1),
+    'widths': (1, 20, 20, 1),
     'normalise': True,
     'nonlinearity': tf.nn.relu
 }
-its = 1000
+its = 4000
 
 # Get number of weights of NN.
 # TODO: Refactor this.
 n_w = B.shape_int(feedforward(**nn_config).weights())[0]
 
 # Construct prior, q-distribution for weights, and likelihood.
-p_w = Normal(UniformDiagonal(B.cast(1., dtype=np.float32), n_w))
-q_w = Normal(Diagonal(1e-3 * vars32.pos(shape=[n_w])),
+p_w = Normal(UniformDiagonal(vars32.pos(), n_w))
+q_w = Normal(Diagonal(1e-1 * vars32.pos(shape=[n_w])),
              vars32.get(shape=[n_w, 1]))
-lik_noise = vars32.pos(1e-1)
+lik_noise = vars32.pos(1e-3)
 
 
 def lik(w):
@@ -41,7 +41,7 @@ obj = -elbo(lik, p_w, q_w)
 
 # Peform optimisation.
 s = tf.Session()
-opt = tf.train.AdamOptimizer(1e-3).minimize(obj)
+opt = tf.train.AdamOptimizer(1e-2).minimize(obj)
 s.run(tf.global_variables_initializer())
 for i in range(its):
     _, val = s.run([opt, obj])
