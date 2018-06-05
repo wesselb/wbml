@@ -27,4 +27,4 @@ def elbo(lik, p, q, num_samples=1):
 
 @dispatch(object, Normal, Normal, [object])
 def elbo(lik, p, q, num_samples=1):
-    return B.mean(map_cols(lik, q.sample(num_samples))) - p.kl(q)
+    return B.mean(map_cols(lik, q.sample(num_samples))) - q.kl(p)
