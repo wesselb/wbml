@@ -83,3 +83,14 @@ class VarsFrom(object):
 
 vars32 = Vars(np.float32)
 vars64 = Vars(np.float64)
+
+
+def inv_perm(perm):
+    out = [0 for _ in range(len(perm))]
+    for i, p in enumerate(perm):
+        out[p] = i
+    return out
+
+
+def identity(x):
+    return x
