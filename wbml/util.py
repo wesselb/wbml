@@ -16,16 +16,7 @@ __all__ = ['Packer', 'Vars', 'vars32', 'vars64', 'VarsFrom', 'inv_perm',
 class Packer(object):
     def __init__(self, *objs):
         self._shapes = [B.shape(obj) for obj in objs]
-        self._ranks = [B.rank(obj) for obj in objs]
-        self._lengths = [Packer.calc_length(shape, rank)
-                         for shape, rank in zip(self._shapes, self._ranks)]
-
-    @staticmethod
-    def calc_length(shape, rank):
-        length = 1
-        for i in range(rank):
-            length *= shape[i]
-        return length
+        self._lengths = [B.length(obj) for obj in objs]
 
     def pack(self, *objs):
         return tf.concat([B.reshape(obj, [-1]) for obj in objs], axis=0)

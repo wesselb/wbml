@@ -9,7 +9,6 @@ import pickle
 import numpy as np
 from lab.tf import B
 from plum import Dispatcher, Referentiable, Self
-from sklearn.decomposition import PCA
 
 __all__ = ['Data', 'CSVReader', 'normalise_norm', 'normalise_01']
 
@@ -70,18 +69,6 @@ class Data(Referentiable):
         mean_x = np.mean(self.x, axis=0)[None, :]
         std_x = np.std(self.x, axis=0)[None, :]
         return Data((self.x - mean_x) / std_x, self.y)
-
-    def pca(self, n_components, get_transform=False):
-        pca = PCA(n_components=n_components)
-        pca.fit(self.x)
-
-        def transform(data):
-            return Data(pca.transform(data.x), data.y)
-
-        if get_transform:
-            return transform(self), transform
-        else:
-            return transform(self)
 
     def cast(self, dtype):
         return Data(B.cast(self.x, dtype), B.cast(self.y, dtype))
