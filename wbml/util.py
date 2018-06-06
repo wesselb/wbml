@@ -9,7 +9,8 @@ import numpy as np
 import tensorflow as tf
 from lab.tf import B
 
-__all__ = ['Packer', 'Vars', 'vars32', 'vars64', 'VarsFrom']
+__all__ = ['Packer', 'Vars', 'vars32', 'vars64', 'VarsFrom', 'inv_perm',
+           'identity']
 
 
 class Packer(object):
