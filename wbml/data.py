@@ -11,7 +11,7 @@ from lab.tf import B
 from plum import Dispatcher, Referentiable, Self
 from sklearn.decomposition import PCA
 
-__all__ = ['Data', 'CSVReader']
+__all__ = ['Data', 'CSVReader', 'normalise_norm', 'normalise_01']
 
 dispatch = Dispatcher()
 
@@ -165,3 +165,34 @@ class CSVReader:
                 outs.append({name: out[name] for name in group_field_names})
 
         return outs[0] if len(outs) == 1 else outs
+
+
+@dispatch([object])
+def normalise_01(*xs):
+    return [normalise_01(x) for x in xs]
+
+
+@dispatch(object)
+def normalise_01(x):
+    def apply(f, x, axes):
+        for axis in axes:
+            x = f(x, axis=axis, keepdims=True)
+        return x
+
+    axes = (0, 2) if B.rank(x) == 3 else (1,)
+    min = apply(np.min, x, axes)
+    max = apply(np.max, x, axes)
+    return (x - min) / (max - min)
+
+
+@dispatch([object])
+def normalise_norm(*xs):
+    return [normalise_norm(x) for x in xs]
+
+
+@dispatch(object)
+def normalise_norm(x):
+    axes = (0, 2) if B.rank(x) == 3 else (1,)
+    mean = np.mean(x, axis=axes)
+    std = np.std(x, axis=axes)
+    return (x - mean) / (std + B.epsilon)
