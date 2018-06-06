@@ -3,21 +3,22 @@ import numpy as np
 import tensorflow as tf
 from lab.tf import B
 
-from wbml.data import normalise_01
+from wbml.data import normalise_01, normalise_norm
 from wbml import rnn
 
 x = np.linspace(-20, 20, 80, dtype=np.float32)[:, None, None]
 y = np.sin(x)
 
 # Normalise inputs and outputs.
-x, y = normalise_01(x, y)
+x = normalise_01(x)
+y = normalise_norm(y)
 
-# Split
+# Split data.
 i = int(x.shape[0] * .5)
 x_train = x[:i, :, :]
 y_train = y[:i, :, :]
 
-f = rnn(1, 1, ((10, 10),))
+f = rnn(1, 1, ((10, 10),), gru=True)
 y_rnn = f(x_train)
 obj = B.mean((y_train - y_rnn) ** 2)
 

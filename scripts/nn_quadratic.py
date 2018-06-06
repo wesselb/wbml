@@ -3,13 +3,14 @@ import numpy as np
 import tensorflow as tf
 from lab.tf import B
 
-from wbml import ff, normalise_01
+from wbml import ff, normalise_01, normalise_norm
 
 x = np.linspace(-10, 10, 100, dtype=np.float32)[None, :]
 y = x ** 2
 
 # Normalise inputs and outputs.
-x, y = normalise_01(x, y)
+x = normalise_01(x)
+y = normalise_norm(y)
 
 y_nn = ff(1, 1, (10, 10))(x)
 obj = B.mean((y - y_nn) ** 2)

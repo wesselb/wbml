@@ -10,7 +10,7 @@ import tensorflow as tf
 from lab.tf import B
 
 __all__ = ['Packer', 'Vars', 'vars32', 'vars64', 'VarsFrom', 'inv_perm',
-           'identity']
+           'identity', 'map_cols']
 
 
 class Packer(object):
@@ -95,3 +95,7 @@ def inv_perm(perm):
 
 def identity(x):
     return x
+
+
+def map_cols(f, xs):
+    return tf.map_fn(lambda x: f(x[:, None]), B.transpose(xs))

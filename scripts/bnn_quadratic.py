@@ -4,13 +4,14 @@ import tensorflow as tf
 from lab.tf import B
 from stheno import Normal, Diagonal, UniformDiagonal
 
-from wbml import ff, vars32, VarsFrom, elbo, normalise_01
+from wbml import ff, vars32, VarsFrom, elbo, normalise_01, normalise_norm
 
 x = np.linspace(-10, 10, 100, dtype=np.float32)[None, :]
 y = x ** 2 + 5 * np.random.randn(*x.shape)
 
 # Normalise inputs and outputs.
-x, y = normalise_01(x, y)
+x = normalise_01(x)
+y = normalise_norm(y)
 
 f = ff(1, 1, (20, 20))
 its = 4000
@@ -31,7 +32,7 @@ def lik(w):
 # Construct objective
 obj = -elbo(lik, p_w, q_w)
 
-# Peform optimisation.
+# Perform optimisation.
 s = tf.Session()
 opt = tf.train.AdamOptimizer(1e-2).minimize(obj)
 s.run(tf.global_variables_initializer())
@@ -42,10 +43,10 @@ for i in range(its):
 
 # Make predictions.
 f.initialise(VarsFrom(q_w.sample()))
-pred = f(x)[0, :]
+pred = f(x)
 
 # Estimate predictive.
-preds = [s.run(pred) for _ in range(50)]
+preds = [s.run(pred).flatten() for _ in range(50)]
 mean = np.mean(preds, axis=0)
 lower = np.percentile(preds, 2.5, axis=0)
 upper = np.percentile(preds, 100 - 2.5, axis=0)

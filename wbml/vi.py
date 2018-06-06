@@ -2,18 +2,15 @@
 
 from __future__ import absolute_import, division, print_function
 
-import tensorflow as tf
 from lab.tf import B
 from plum import Dispatcher
 from stheno import Normal
 
+from .util import map_cols
+
 dispatch = Dispatcher()
 
 __all__ = ['elbo']
-
-
-def map_cols(f, xs):
-    return tf.map_fn(lambda x: f(x[:, None]), B.transpose(xs))
 
 
 @dispatch(object, object, object, [object])

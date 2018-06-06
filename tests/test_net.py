@@ -4,10 +4,11 @@ from __future__ import absolute_import, division, print_function
 
 import tensorflow as tf
 import numpy as np
+from lab.tf import B
 
 # noinspection PyUnresolvedReferences
 from . import eq, neq, lt, le, ge, gt, raises, call, ok, lam, eprint
-from wbml import ff, Vars
+from wbml import ff, Vars, rnn
 
 
 def test_construction():
@@ -34,3 +35,17 @@ def test_construction():
     vars64.init(s)
     y = s.run(nn(np.random.randn(10, 5).astype(np.float64)))
     yield eq, y.shape, (20, 5)
+
+
+def test_num_weights():
+    vars32 = Vars(np.float32)
+    nn = ff(10, 20, (30, 40))
+    nn.initialise(vars32)
+
+    yield eq, B.shape_int(nn.weights())[0], nn.num_weights(), 'ff'
+
+    vars32 = Vars(np.float32)
+    nn = rnn(10, 20, ((30, 40), (40, 50)))
+    nn.initialise(vars32)
+
+    yield eq, B.shape_int(nn.weights())[0], nn.num_weights(), 'rnn'

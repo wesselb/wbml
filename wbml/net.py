@@ -50,7 +50,10 @@ class Identity(Layer):
 class FeedForwardLayer(Layer):
     __metaclass__ = ABCMeta
 
-    def __call__(self, x):
+    def __call__(self, *xs):
+        # Stack inputs.
+        x = B.concat(xs, axis=0)
+
         if B.rank(x) == 2:
             return self._apply(x)
         else:
@@ -63,7 +66,7 @@ class FeedForwardLayer(Layer):
             x = self._apply(x)
 
             # Shape back.
-            x = B.reshape(x, shape)
+            x = B.reshape(x, [self.width, shape[1], shape[2]])
             return B.transpose(x, inv_perm([1, 2, 0]))
 
     @abstractmethod
@@ -110,7 +113,7 @@ class Dense(FeedForwardLayer):
                          B.reshape(self.b, [-1])], axis=0)
 
     def num_weights(self, input_size):
-        return self.width * input_size + self.width
+        return self.width * (input_size + 1)
 
 
 class Linear(Dense):
@@ -154,26 +157,34 @@ class Net(object):
         return num_weights
 
 
-class Elman(Layer):
+class GRU(Layer):
     def __init__(self, width, hidden_width, nonlinearity=tf.nn.sigmoid):
         self.nonlinearity = nonlinearity
         self.width = width
         self.hidden_width = hidden_width
+        self.f_z = Dense(self.hidden_width, nonlinearity=tf.nn.sigmoid)
+        self.f_r = Dense(self.hidden_width, nonlinearity=tf.nn.sigmoid)
         self.f_h = Dense(self.hidden_width, nonlinearity=self.nonlinearity)
-        self.f_y = Dense(self.width, nonlinearity=self.nonlinearity)
         self.h0 = None
 
     def initialise(self, input_size, vars):
         self.h0 = vars.get(shape=[self.hidden_width, 1])
+        self.f_z.initialise(self.hidden_width + input_size, vars)
+        self.f_r.initialise(self.hidden_width + input_size, vars)
         self.f_h.initialise(self.hidden_width + input_size, vars)
-        self.f_y.initialise(self.hidden_width, vars)
 
     def __call__(self, xs):
         batch_size = B.shape(xs)[2]
 
         def loop(prev, x):
-            h = self.f_h(B.concat([prev[0], x], axis=0))
-            y = self.f_y(h)
+            prev_h, prev_y = prev
+
+            # Gate logic:
+            z = self.f_z(prev_h, x)
+            r = self.f_r(prev_h, x)
+            h = (1 - z) * prev_h + z * self.f_h(r * prev_h, x)
+            y = h
+
             return h, y
 
         y0 = B.zeros((self.width, batch_size), dtype=B.dtype(xs))
@@ -182,11 +193,51 @@ class Elman(Layer):
 
     def weights(self):
         return B.concat([B.reshape(self.h0, [-1]),
-                         self.f_h.weights(),
-                         self.f_y.weights()], axis=0)
+                         self.f_z.weights(),
+                         self.f_r.weights(),
+                         self.f_h.weights()], axis=0)
 
     def num_weights(self, input_size):
-        return self.hidden_width + self.f_h(input_size) + self.f_y(input_size)
+        return self.hidden_width + \
+               self.f_z.num_weights(self.hidden_width + input_size) + \
+               self.f_r.num_weights(self.hidden_width + input_size) + \
+               self.f_h.num_weights(self.hidden_width + input_size)
+
+
+class Elman(Layer):
+    def __init__(self, width, hidden_width, nonlinearity=tf.nn.sigmoid):
+        self.nonlinearity = nonlinearity
+        self.width = width
+        self.hidden_width = hidden_width
+        self.f_h = Dense(self.hidden_width, nonlinearity=self.nonlinearity)
+        self.h0 = None
+
+    def initialise(self, input_size, vars):
+        self.h0 = vars.get(shape=[self.hidden_width, 1])
+        self.f_h.initialise(self.hidden_width + input_size, vars)
+
+    def __call__(self, xs):
+        batch_size = B.shape(xs)[2]
+
+        def loop(prev, x):
+            prev_h, prev_y = prev
+
+            # Gate logic:
+            h = self.f_h(prev_h, x)
+            y = h
+
+            return h, y
+
+        y0 = B.zeros((self.width, batch_size), dtype=B.dtype(xs))
+        h0 = B.tile(self.h0, (1, batch_size))
+        return tf.scan(loop, xs, initializer=(h0, y0))[1]
+
+    def weights(self):
+        return B.concat([B.reshape(self.h0, [-1]), self.f_h.weights()], axis=0)
+
+    def num_weights(self, input_size):
+        return self.hidden_width + \
+               self.f_h.num_weights(self.hidden_width + input_size)
 
 
 def ff(input_size, output_size, widths,
@@ -209,7 +260,8 @@ def ff(input_size, output_size, widths,
     return Net(input_size, layers)
 
 
-def rnn(input_size, output_size, widths, nonlinearity=tf.nn.sigmoid):
+def rnn(input_size, output_size, widths,
+        nonlinearity=tf.nn.sigmoid, normalise=False, gru=True):
     """A standard recurrent neural net.
 
     Args:
@@ -217,9 +269,16 @@ def rnn(input_size, output_size, widths, nonlinearity=tf.nn.sigmoid):
         output_size (int): Size of output.
         widths (tuple of tuple): Widths of the layers.
         nonlinearity (function): Nonlinearity to use.
+        normalise (bool): Interleave with normalisation layers.
+        gru (bool): Use GRU layers instead of Elman layers.
     """
+    layer_type = GRU if gru else Elman
     layers = []
     for width, hidden_width in widths:
-        layers.append(Elman(width, hidden_width, nonlinearity=nonlinearity))
+        layers.append(layer_type(width, hidden_width,
+                                 nonlinearity=nonlinearity))
+        if normalise:
+            layers.append(Normalise())
+    layers.append(Dense(output_size, nonlinearity=nonlinearity))
     layers.append(Linear(output_size))
     return Net(input_size, layers)
