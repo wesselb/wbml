@@ -4,36 +4,28 @@ import tensorflow as tf
 from lab.tf import B
 from stheno import Normal, Diagonal, UniformDiagonal
 
-from wbml import feedforward, vars32, VarsFrom, elbo
+from wbml import ff, vars32, VarsFrom, elbo, normalise_01
 
 x = np.linspace(-10, 10, 100, dtype=np.float32)[None, :]
 y = x ** 2 + 5 * np.random.randn(*x.shape)
 
 # Normalise inputs and outputs.
-x = (x - np.mean(x)) / np.std(x)
-y = (y - np.mean(y)) / np.std(y)
+x, y = normalise_01(x, y)
 
-nn_config = {
-    'widths': (1, 20, 20, 1),
-    'normalise': True,
-    'nonlinearity': tf.nn.relu
-}
+f = ff(1, 1, (20, 20))
 its = 4000
 
-# Get number of weights of NN.
-# TODO: Refactor this. This now creates unnessarily many variables.
-n_w = B.shape_int(feedforward(**nn_config).weights())[0]
-
 # Construct prior, q-distribution for weights, and likelihood.
-p_w = Normal(UniformDiagonal(vars32.pos(), n_w))
-q_w = Normal(Diagonal(1e-1 * vars32.pos(shape=[n_w])),
+n_w = f.num_weights()
+p_w = Normal(UniformDiagonal(1e-2 * vars32.pos(), n_w))
+q_w = Normal(Diagonal(1e-3 * vars32.pos(shape=[n_w])),
              vars32.get(shape=[n_w, 1]))
 lik_noise = vars32.pos(1e-3)
 
 
 def lik(w):
-    f = feedforward(**dict(nn_config, vars=VarsFrom(w)))(x)
-    return B.sum(Normal(UniformDiagonal(lik_noise, 1), f).log_pdf(y))
+    f.initialise(VarsFrom(w))
+    return B.sum(Normal(UniformDiagonal(lik_noise, 1), f(x)).log_pdf(y))
 
 
 # Construct objective
@@ -49,8 +41,8 @@ for i in range(its):
         print(i, val)
 
 # Make predictions.
-nn = feedforward(**dict(nn_config, vars=VarsFrom(q_w.sample())))
-pred = nn(x)[0, :]
+f.initialise(VarsFrom(q_w.sample()))
+pred = f(x)[0, :]
 
 # Estimate predictive.
 preds = [s.run(pred) for _ in range(50)]
