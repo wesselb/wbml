@@ -17,7 +17,7 @@ def test_vars():
     vs = Vars(np.float32)
     a = vs.get(1.)
     b = vs.get(2.)
-    yield eq, len(vs.latents), 2
+    yield eq, len(vs.vars), 2
     yield eq, a.dtype.as_numpy_dtype, np.float32
     yield eq, b.dtype.as_numpy_dtype, np.float32
     vs.init(s)
@@ -25,7 +25,7 @@ def test_vars():
     vs = Vars(np.float64)
     a = vs.get(1.)
     b = vs.get(2.)
-    yield eq, len(vs.latents), 2
+    yield eq, len(vs.vars), 2
     yield eq, a.dtype.as_numpy_dtype, np.float64
     yield eq, b.dtype.as_numpy_dtype, np.float64
     vs.init(s)

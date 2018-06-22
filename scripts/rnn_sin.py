@@ -18,7 +18,7 @@ i = int(x.shape[0] * .5)
 x_train = x[:i, :, :]
 y_train = y[:i, :, :]
 
-f = rnn(1, 1, ((10, 10),), gru=True)
+f = rnn(1, 1, (10,))
 y_rnn = f(x_train)
 obj = B.mean((y_train - y_rnn) ** 2)
 

@@ -158,20 +158,19 @@ class Net(object):
 
 
 class GRU(Layer):
-    def __init__(self, width, hidden_width, nonlinearity=tf.nn.sigmoid):
+    def __init__(self, width, nonlinearity=tf.nn.sigmoid):
         self.nonlinearity = nonlinearity
         self.width = width
-        self.hidden_width = hidden_width
-        self.f_z = Dense(self.hidden_width, nonlinearity=tf.nn.sigmoid)
-        self.f_r = Dense(self.hidden_width, nonlinearity=tf.nn.sigmoid)
-        self.f_h = Dense(self.hidden_width, nonlinearity=self.nonlinearity)
+        self.f_z = Dense(self.width, nonlinearity=tf.nn.sigmoid)
+        self.f_r = Dense(self.width, nonlinearity=tf.nn.sigmoid)
+        self.f_h = Dense(self.width, nonlinearity=self.nonlinearity)
         self.h0 = None
 
     def initialise(self, input_size, vars):
-        self.h0 = vars.get(shape=[self.hidden_width, 1])
-        self.f_z.initialise(self.hidden_width + input_size, vars)
-        self.f_r.initialise(self.hidden_width + input_size, vars)
-        self.f_h.initialise(self.hidden_width + input_size, vars)
+        self.h0 = vars.get(shape=[self.width, 1])
+        self.f_z.initialise(self.width + input_size, vars)
+        self.f_r.initialise(self.width + input_size, vars)
+        self.f_h.initialise(self.width + input_size, vars)
 
     def __call__(self, xs):
         batch_size = B.shape(xs)[2]
@@ -198,23 +197,22 @@ class GRU(Layer):
                          self.f_h.weights()], axis=0)
 
     def num_weights(self, input_size):
-        return self.hidden_width + \
-               self.f_z.num_weights(self.hidden_width + input_size) + \
-               self.f_r.num_weights(self.hidden_width + input_size) + \
-               self.f_h.num_weights(self.hidden_width + input_size)
+        return self.width + \
+               self.f_z.num_weights(self.width + input_size) + \
+               self.f_r.num_weights(self.width + input_size) + \
+               self.f_h.num_weights(self.width + input_size)
 
 
 class Elman(Layer):
-    def __init__(self, width, hidden_width, nonlinearity=tf.nn.sigmoid):
+    def __init__(self, width, nonlinearity=tf.nn.sigmoid):
         self.nonlinearity = nonlinearity
         self.width = width
-        self.hidden_width = hidden_width
-        self.f_h = Dense(self.hidden_width, nonlinearity=self.nonlinearity)
+        self.f_h = Dense(self.width, nonlinearity=self.nonlinearity)
         self.h0 = None
 
     def initialise(self, input_size, vars):
-        self.h0 = vars.get(shape=[self.hidden_width, 1])
-        self.f_h.initialise(self.hidden_width + input_size, vars)
+        self.h0 = vars.get(shape=[self.width, 1])
+        self.f_h.initialise(self.width + input_size, vars)
 
     def __call__(self, xs):
         batch_size = B.shape(xs)[2]
@@ -236,12 +234,13 @@ class Elman(Layer):
         return B.concat([B.reshape(self.h0, [-1]), self.f_h.weights()], axis=0)
 
     def num_weights(self, input_size):
-        return self.hidden_width + \
-               self.f_h.num_weights(self.hidden_width + input_size)
+        return self.width + \
+               self.f_h.num_weights(self.width + input_size)
 
 
 def ff(input_size, output_size, widths,
-       nonlinearity=tf.nn.relu, normalise=True):
+       nonlinearity=tf.nn.relu,
+       normalise=True):
     """A standard feed-forward neural net.
 
     Args:
@@ -261,24 +260,31 @@ def ff(input_size, output_size, widths,
 
 
 def rnn(input_size, output_size, widths,
-        nonlinearity=tf.nn.sigmoid, normalise=False, gru=True):
+        nonlinearity=tf.nn.sigmoid,
+        normalise=False,
+        gru=True,
+        final_dense=False):
     """A standard recurrent neural net.
 
     Args:
         input_size (int): Size of input.
         output_size (int): Size of output.
-        widths (tuple of tuple): Widths of the layers.
+        widths (tuple of int): Widths of the layers.
         nonlinearity (function): Nonlinearity to use.
-        normalise (bool): Interleave with normalisation layers.
-        gru (bool): Use GRU layers instead of Elman layers.
+        normalise (bool, optional): Interleave with normalisation layers.
+            Defaults to `False`.
+        gru (bool, optional): Use GRU layers instead of Elman layers. Defaults
+            to `True`.
+        final_dense (bool, optional): Append a final dense layer. Defaults to
+            `False`.
     """
     layer_type = GRU if gru else Elman
     layers = []
-    for width, hidden_width in widths:
-        layers.append(layer_type(width, hidden_width,
-                                 nonlinearity=nonlinearity))
+    for width in widths:
+        layers.append(layer_type(width, nonlinearity=nonlinearity))
         if normalise:
             layers.append(Normalise())
-    layers.append(Dense(output_size, nonlinearity=nonlinearity))
+    if final_dense:
+        layers.append(Dense(output_size, nonlinearity=nonlinearity))
     layers.append(Linear(output_size))
     return Net(input_size, layers)

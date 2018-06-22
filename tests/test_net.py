@@ -44,11 +44,11 @@ def test_num_weights():
     yield eq, B.shape_int(nn.weights())[0], nn.num_weights(), 'ff'
 
     vars32 = Vars(np.float32)
-    nn = rnn(10, 20, ((30, 40), (40, 50)))
+    nn = rnn(10, 20, (30, 40))
     nn.initialise(vars32)
     yield eq, B.shape_int(nn.weights())[0], nn.num_weights(), 'rnn'
 
     vars32 = Vars(np.float32)
-    nn = rnn(10, 20, ((30, 40), (40, 50)), gru=False, normalise=True)
+    nn = rnn(10, 20, (30, 40), gru=False, normalise=True, final_dense=True)
     nn.initialise(vars32)
     yield eq, B.shape_int(nn.weights())[0], nn.num_weights(), 'rnn 2'

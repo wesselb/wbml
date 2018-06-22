@@ -31,12 +31,12 @@ class Packer(object):
 
 class Vars(object):
     def __init__(self, dtype=np.float32, epsilon=1e-6):
-        self.latents = []
+        self.vars = []
         self.dtype = dtype
         self.epsilon = epsilon
 
     def init(self, session):
-        session.run(tf.variables_initializer(self.latents))
+        session.run(tf.variables_initializer(self.vars))
 
     def get(self, init=None, shape=(), dtype=None):
         dtype = self._resolve_dtype(dtype)
@@ -54,7 +54,7 @@ class Vars(object):
 
     def _generate(self, init, dtype):
         latent = B.Variable(B.cast(init, dtype=dtype), dtype=dtype)
-        self.latents.append(latent)
+        self.vars.append(latent)
         return latent
 
     def _resolve_dtype(self, dtype):
@@ -62,13 +62,13 @@ class Vars(object):
 
 
 class VarsFrom(object):
-    def __init__(self, resource):
-        self._resource = resource
+    def __init__(self, source):
+        self._source = source
         self._i = 0
 
     def get(self, shape):
         length = reduce(mul, shape, 1)
-        out = B.reshape(self._resource[self._i: self._i + length], shape)
+        out = B.reshape(self._source[self._i: self._i + length], shape)
         self._i += length
         return out
 

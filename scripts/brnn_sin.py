@@ -13,7 +13,7 @@ y = np.sin(x) + .1 * np.random.randn(*x.shape).astype(np.float32)
 x = normalise_01(x)
 y = normalise_norm(y)
 
-f = rnn(1, 1, ((10, 10),), gru=False)
+f = rnn(1, 1, (10,))
 its = 5000
 
 # Construct prior, q-distribution for weights, and likelihood.
