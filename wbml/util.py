@@ -30,35 +30,92 @@ class Packer(object):
 
 
 class Vars(object):
+    """Variable storage manager.
+
+    Args:
+        dtype (data type, optional): Data type of the variables. Defaults to
+            `np.float32`.
+        epsilon (float, optional): Epsilon for various things. Defaults to
+            `1e-6`.
+    """
+
     def __init__(self, dtype=np.float32, epsilon=1e-6):
         self.vars = []
         self.dtype = dtype
         self.epsilon = epsilon
+        self.names = dict()
 
     def init(self, session):
+        """Initialise the variables.
+
+        Args:
+            session (:class:`tf.Session`): TensorFlow session.
+        """
         session.run(tf.variables_initializer(self.vars))
 
-    def get(self, init=None, shape=(), dtype=None):
+    def get(self, init=None, shape=(), dtype=None, name=None):
+        """Get a variable.
+
+        Args:
+            init (tensor, optional): Initialisation of the variable. Defaults
+                to a N(0, 1) draw.
+            shape (tuple[int], optional): Shape of the variable. Defaults to
+                scalar.
+            dtype (data type, optional): Data type of the variable. Defaults to
+                that of the storage.
+            name (str, optional): Name of the variable.
+
+        Returns:
+            tensor: Variable.
+        """
         dtype = self._resolve_dtype(dtype)
         init = B.randn(shape, dtype=dtype) if init is None else init
-        return self._generate(init, dtype)
+        return self._generate(init, dtype, name)
 
-    def positive(self, init=None, shape=(), dtype=None):
+    def positive(self, init=None, shape=(), dtype=None, name=None):
+        """Get a positive variable.
+
+        Args:
+            init (tensor, optional): Initialisation of the variable. Defaults
+                to a Uniform(0, 1) draw.
+            shape (tuple[int], optional): Shape of the variable. Defaults to
+                scalar.
+            dtype (data type, optional): Data type of the variable. Defaults to
+                that of the storage.
+            name (str, optional): Name of the variable.
+
+        Returns:
+            tensor: Variable.
+        """
         dtype = self._resolve_dtype(dtype)
         init = B.rand(shape, dtype=dtype) if init is None else init
-        return B.exp(self._generate(B.log(init), dtype)) + \
+        return B.exp(self._generate(B.log(init), dtype, name)) + \
                B.cast(self.epsilon, dtype=dtype)
 
     def pos(self, *args, **kw_args):
+        """Alias for :meth:`.util.Vars.positive`."""
         return self.positive(*args, **kw_args)
 
-    def _generate(self, init, dtype):
+    def _generate(self, init, dtype, name):
         latent = B.Variable(B.cast(init, dtype=dtype), dtype=dtype)
         self.vars.append(latent)
+        if name is not None:
+            self.names[name] = latent
         return latent
 
     def _resolve_dtype(self, dtype):
         return self.dtype if dtype is None else dtype
+
+    def __getitem__(self, name):
+        """Get a variable by name.
+
+        Args:
+            name (str): Name of variable.
+
+        Returns:
+            tensor: Variable.
+        """
+        return self.names[name]
 
 
 class VarsFrom(object):
