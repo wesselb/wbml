@@ -4,8 +4,9 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 import tensorflow as tf
-from wbml import Vars, Packer
+from wbml import Vars, Packer, Initialiser
 from lab.tf import B
+from itertools import product
 
 # noinspection PyUnresolvedReferences
 from . import eq, neq, lt, le, ge, gt, raises, call, ok, lam, eprint
@@ -37,6 +38,45 @@ def test_vars_positive():
     xs = [vs.positive() for _ in range(10)]
     vs.init(s)
     yield ok, all([x > 0 for x in s.run(xs)])
+
+
+def test_vars_assignment():
+    s = tf.Session()
+    vs = Vars()
+
+    # Generate some variables.
+    vs.get(1., name='a')
+    vs.pos(2., name='b')
+    vs.init(s)
+
+    yield eq, 1., s.run(vs['a'])
+    yield eq, 2., s.run(vs['b'])
+
+    # Assign new values.
+    s.run(vs.assign('a', 3.))
+    s.run(vs.assign('b', 4.))
+
+    yield eq, 3., s.run(vs['a'])
+    yield eq, 4., s.run(vs['b'])
+
+
+def test_initialiser():
+    s = tf.Session()
+    vs = Vars()
+    init = Initialiser()
+
+    a = vs.get(1., name='a')
+    b = vs.pos(2., name='b')
+    vs.init(s)
+
+    init.assign('a', [3., 4.])
+    init.assign('b', [5., 6.])
+    inits = init.generate(vs)
+
+    for initialiser, values in zip(inits, product([3., 4.], [5., 6.])):
+        s.run(initialiser)
+        yield eq, s.run(a), values[0]
+        yield eq, s.run(b), values[1]
 
 
 def test_packer():
