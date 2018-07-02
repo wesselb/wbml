@@ -158,7 +158,7 @@ class Net(object):
 
 
 class GRU(Layer):
-    def __init__(self, width, nonlinearity=tf.nn.sigmoid):
+    def __init__(self, width, nonlinearity=tf.nn.tanh):
         self.nonlinearity = nonlinearity
         self.width = width
         self.f_z = Dense(self.width, nonlinearity=tf.nn.sigmoid)
