@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import, division, print_function
 
-from lab.tf import B
+from lab import B
 from plum import Dispatcher
 from stheno import Normal
 
@@ -15,6 +15,17 @@ __all__ = ['elbo']
 
 @dispatch(object, object, object, [object])
 def elbo(lik, p, q, num_samples=1):
+    """Construct the ELBO.
+
+    Args:
+        lik (distribution): Likelihood.
+        p (distribution): Prior.
+        q (distribution): Approximate posterior.
+        num_samples (int, optional): Number of samples. Defaults to `1`.
+
+    Returns:
+        tensor: ELBO.
+    """
     samples = q.sample(num_samples)
     log_lik = B.mean(map_cols(lik, samples))
     log_prior = B.mean(p.log_pdf(samples))

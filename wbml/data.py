@@ -7,7 +7,7 @@ import os
 import pickle
 
 import numpy as np
-from lab.tf import B
+from lab import B
 from plum import Dispatcher, Referentiable, Self
 
 __all__ = ['Data', 'CSVReader', 'normalise_norm', 'normalise_01']

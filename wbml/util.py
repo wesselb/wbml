@@ -7,22 +7,43 @@ from operator import mul
 from itertools import product
 
 import numpy as np
-import tensorflow as tf
-from lab.tf import B
+from lab import B
 
 __all__ = ['Packer', 'Vars', 'vars32', 'vars64', 'VarsFrom', 'inv_perm',
            'identity', 'map_cols', 'Initialiser']
 
 
 class Packer(object):
+    """Pack objects into a vector.
+
+    Args:
+        *objs (tensor): Objects to pack.
+    """
+
     def __init__(self, *objs):
         self._shapes = [B.shape(obj) for obj in objs]
         self._lengths = [B.length(obj) for obj in objs]
 
     def pack(self, *objs):
-        return tf.concat([B.reshape(obj, [-1]) for obj in objs], axis=0)
+        """Pack objects.
+
+        Args:
+            *objs (tensor): Objects to pack.
+
+        Returns:
+            tensor: Vector representation of the objects.
+        """
+        return B.concat([B.reshape(obj, [-1]) for obj in objs], axis=0)
 
     def unpack(self, package):
+        """Unpack vector.
+
+        Args:
+            package (tensor): Vector to unpack.
+
+        Returns:
+            tuple[tensor]: Original objects.
+        """
         i, outs = 0, []
         for shape, length in zip(self._shapes, self._lengths):
             outs.append(B.reshape(package[i:i + length], shape))
@@ -66,14 +87,11 @@ class Vars(object):
     Args:
         dtype (data type, optional): Data type of the variables. Defaults to
             `np.float32`.
-        epsilon (float, optional): Epsilon for various things. Defaults to
-            `1e-6`.
     """
 
-    def __init__(self, dtype=np.float32, epsilon=1e-6):
+    def __init__(self, dtype=np.float32):
         self.vars = []
         self.dtype = dtype
-        self.epsilon = epsilon
         self.vars_by_name = {}
         self.assigners = {}
 
@@ -81,9 +99,9 @@ class Vars(object):
         """Initialise the variables.
 
         Args:
-            session (:class:`tf.Session`): TensorFlow session.
+            session (:class:`B.Session`): TensorFlow session.
         """
-        session.run(tf.variables_initializer(self.vars))
+        session.run(B.variables_initializer(self.vars))
 
     def get(self, init=None, shape=(), dtype=None, name=None):
         """Get a variable.
@@ -211,6 +229,14 @@ vars64 = Vars(np.float64)
 
 
 def inv_perm(perm):
+    """Invert a permutation.
+
+    Args:
+        perm (list): Permutation to invert.
+
+    Returns:
+        list: Inverse permutation.
+    """
     out = [0 for _ in range(len(perm))]
     for i, p in enumerate(perm):
         out[p] = i
@@ -218,8 +244,25 @@ def inv_perm(perm):
 
 
 def identity(x):
+    """Identity function.
+
+    Args:
+        x (object): Input.
+
+    Returns:
+        object: `x`.
+    """
     return x
 
 
 def map_cols(f, xs):
-    return tf.map_fn(lambda x: f(x[:, None]), B.transpose(xs))
+    """Map the columns of a matrix on a function.
+
+    Args:
+        f (function): Function to map.
+        xs (tensor): Matrix onto which to map the function.
+
+    Returns:
+        tensor: Result.
+    """
+    return B.map_fn(lambda x: f(x[:, None]), B.transpose(xs))

@@ -4,7 +4,6 @@ from __future__ import absolute_import, division, print_function
 
 from abc import abstractmethod, ABCMeta
 
-import tensorflow as tf
 from lab import B
 
 from .util import vars32, inv_perm, identity
@@ -95,11 +94,11 @@ class Normalise(FeedForwardLayer):
 
 
 class Dense(FeedForwardLayer):
-    def __init__(self, width, nonlinearity=tf.nn.relu):
+    def __init__(self, width, nonlinearity=None):
         self.width = width
         self.A = None
         self.b = None
-        self.nonlinearity = nonlinearity
+        self.nonlinearity = B.relu if nonlinearity is None else nonlinearity
 
     def initialise(self, input_size, vars):
         self.A = vars.get(shape=[self.width, input_size])
@@ -158,11 +157,11 @@ class Net(object):
 
 
 class GRU(Layer):
-    def __init__(self, width, nonlinearity=tf.nn.tanh):
-        self.nonlinearity = nonlinearity
+    def __init__(self, width, nonlinearity=None):
+        self.nonlinearity = B.tahn if nonlinearity is None else nonlinearity
         self.width = width
-        self.f_z = Dense(self.width, nonlinearity=tf.nn.sigmoid)
-        self.f_r = Dense(self.width, nonlinearity=tf.nn.sigmoid)
+        self.f_z = Dense(self.width, nonlinearity=B.sigmoid)
+        self.f_r = Dense(self.width, nonlinearity=B.sigmoid)
         self.f_h = Dense(self.width, nonlinearity=self.nonlinearity)
         self.h0 = None
 
@@ -188,7 +187,7 @@ class GRU(Layer):
 
         y0 = B.zeros((self.width, batch_size), dtype=B.dtype(xs))
         h0 = B.tile(self.h0, (1, batch_size))
-        return tf.scan(loop, xs, initializer=(h0, y0))[1]
+        return B.scan(loop, xs, initializer=(h0, y0))[1]
 
     def weights(self):
         return B.concat([B.reshape(self.h0, [-1]),
@@ -204,8 +203,8 @@ class GRU(Layer):
 
 
 class Elman(Layer):
-    def __init__(self, width, nonlinearity=tf.nn.sigmoid):
-        self.nonlinearity = nonlinearity
+    def __init__(self, width, nonlinearity=None):
+        self.nonlinearity = B.sigmoid if nonlinearity is None else nonlinearity
         self.width = width
         self.f_h = Dense(self.width, nonlinearity=self.nonlinearity)
         self.h0 = None
@@ -228,7 +227,7 @@ class Elman(Layer):
 
         y0 = B.zeros((self.width, batch_size), dtype=B.dtype(xs))
         h0 = B.tile(self.h0, (1, batch_size))
-        return tf.scan(loop, xs, initializer=(h0, y0))[1]
+        return B.scan(loop, xs, initializer=(h0, y0))[1]
 
     def weights(self):
         return B.concat([B.reshape(self.h0, [-1]), self.f_h.weights()], axis=0)
@@ -238,18 +237,19 @@ class Elman(Layer):
                self.f_h.num_weights(self.width + input_size)
 
 
-def ff(input_size, output_size, widths,
-       nonlinearity=tf.nn.relu,
-       normalise=True):
+def ff(input_size, output_size, widths, nonlinearity=None, normalise=True):
     """A standard feed-forward neural net.
 
     Args:
         input_size (int): Size of input.
         output_size (int): Size of output.
         widths (tuple of int): Widths of the layers.
-        nonlinearity (function): Nonlinearity to use.
-        normalise (bool): Interleave with normalisation layers.
+        nonlinearity (function, optional): Nonlinearity to use. Defaults to
+            ReLUs.
+        normalise (bool, optional): Interleave with normalisation layers.
+            Defaults to `True`.
     """
+    nonlinearity = B.relu if nonlinearity is None else nonlinearity
     layers = []
     for width in widths:
         layers.append(Dense(width, nonlinearity=nonlinearity))
@@ -260,7 +260,7 @@ def ff(input_size, output_size, widths,
 
 
 def rnn(input_size, output_size, widths,
-        nonlinearity=tf.nn.sigmoid,
+        nonlinearity=None,
         normalise=False,
         gru=True,
         final_dense=False):
@@ -270,7 +270,8 @@ def rnn(input_size, output_size, widths,
         input_size (int): Size of input.
         output_size (int): Size of output.
         widths (tuple of int): Widths of the layers.
-        nonlinearity (function): Nonlinearity to use.
+        nonlinearity (function, optional): Nonlinearity to use. Defaults to
+            sigmoid.
         normalise (bool, optional): Interleave with normalisation layers.
             Defaults to `False`.
         gru (bool, optional): Use GRU layers instead of Elman layers. Defaults
@@ -278,6 +279,7 @@ def rnn(input_size, output_size, widths,
         final_dense (bool, optional): Append a final dense layer. Defaults to
             `False`.
     """
+    nonlinearity = B.sigmoid if nonlinearity is None else nonlinearity
     layer_type = GRU if gru else Elman
     layers = []
     for width in widths:
