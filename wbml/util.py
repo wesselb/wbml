@@ -8,6 +8,7 @@ from itertools import product
 
 import numpy as np
 from lab import B
+from plum import Dispatcher, Self, Referentiable
 
 __all__ = ['Packer', 'Vars', 'vars32', 'vars64', 'VarsFrom', 'inv_perm',
            'identity', 'map_cols', 'Initialiser']
@@ -81,19 +82,39 @@ class Initialiser(object):
                 for value in product(*values)]
 
 
-class Vars(object):
+class Vars(Referentiable):
     """Variable storage manager.
 
     Args:
         dtype (data type, optional): Data type of the variables. Defaults to
             `np.float32`.
     """
+    _dispatch = Dispatcher(in_class=Self)
 
     def __init__(self, dtype=np.float32):
         self.vars = []
         self.dtype = dtype
-        self.vars_by_name = {}
+        self.generators = {}
         self.assigners = {}
+        self.lookup = {}
+
+    def _convert(self, init, dtype):
+        return B.array(init, dtype=dtype)
+
+    def _resolve_dtype(self, dtype):
+        return self.dtype if dtype is None else dtype
+
+    def _new_latent(self, init, name):
+        latent = B.Variable(init)
+        self.vars.append(latent)
+        if name:
+            self.lookup[name] = latent
+        return latent
+
+    def _store(self, generator, assigner, name):
+        if name:
+            self.generators[name] = generator
+            self.assigners[name] = assigner
 
     def init(self, session):
         """Initialise the variables.
@@ -102,6 +123,21 @@ class Vars(object):
             session (:class:`B.Session`): TensorFlow session.
         """
         session.run(B.variables_initializer(self.vars))
+
+    def get_vars(self, *names):
+        """Get variables by name.
+
+        Args:
+            *names (hashable): Names of the variables.
+
+        Returns:
+            list[tensor]: Variables specified by `names`. If no names are
+                specified, all variables are returned.
+        """
+        if len(names) == 0:
+            return self.vars
+        else:
+            return [self.lookup[name] for name in names]
 
     def get(self, init=None, shape=(), dtype=None, name=None):
         """Get a variable.
@@ -113,46 +149,39 @@ class Vars(object):
                 scalar.
             dtype (data type, optional): Data type of the variable. Defaults to
                 that of the storage.
-            name (str, optional): Name of the variable.
+            name (hashable, optional): Name of the variable.
 
         Returns:
             tensor: Variable.
         """
+        # If the name already exists, return that variable.
+        try:
+            return self[name]
+        except KeyError:
+            pass
+
         # Resolve data type.
-        dtype = self.dtype if dtype is None else dtype
+        dtype = self._resolve_dtype(dtype)
 
         # Generate initialisation if necessary.
-        init = B.randn(shape, dtype=dtype) if init is None else init
+        if init is None:
+            init = B.randn(shape, dtype=dtype)
+        else:
+            init = self._convert(init, dtype)
 
-        # Generate the latent variable and store it.
-        latent = B.Variable(B.cast(init, dtype=dtype), dtype=dtype)
-        self.vars.append(latent)
+        # Construct latent variable
+        latent = self._new_latent(init, name)
 
-        # Contruct the observed variable.
-        observed = latent
+        # Construct generator and assigner.
+        def generate():
+            return latent
 
-        # If a name is given, generate an assignment method and store it by
-        # name.
-        if name is not None:
-            def assign(value):
-                return B.assign(latent, value)
+        def assign(value):
+            return B.assign(latent, value)
 
-            self.assigners[name] = assign
-            self.vars_by_name[name] = observed
-
-        return observed
-
-    def assign(self, name, value):
-        """Assign a value to a variable.
-
-        Args:
-            name (str): Name of variable to assign value to.
-            value (tensor): Value to assign.
-
-        Returns:
-            tensor: TensorFlow tensor that can be run to perform the assignment.
-        """
-        return self.assigners[name](value)
+        # Store and return variable.
+        self._store(generate, assign, name)
+        return generate()
 
     def positive(self, init=None, shape=(), dtype=None, name=None):
         """Get a positive variable.
@@ -164,52 +193,66 @@ class Vars(object):
                 scalar.
             dtype (data type, optional): Data type of the variable. Defaults to
                 that of the storage.
-            name (str, optional): Name of the variable.
+            name (hashable, optional): Name of the variable.
 
         Returns:
             tensor: Variable.
         """
+        # If the name already exists, return that variable.
+        try:
+            return self[name]
+        except KeyError:
+            pass
+
         # Resolve data type.
-        dtype = self.dtype if dtype is None else dtype
+        dtype = self._resolve_dtype(dtype)
 
         # Generate initialisation if necessary.
         if init is None:
             init = B.log(B.rand(shape, dtype=dtype))
         else:
-            init = B.log(init)
+            init = B.log(self._convert(init, dtype=dtype))
 
-        # Generate the latent variable and store it.
-        latent = B.Variable(B.cast(init, dtype=dtype), dtype=dtype)
-        self.vars.append(latent)
+        # Construct latent variable
+        latent = self._new_latent(init, name)
 
-        # Construct the observed variable.
-        observed = B.exp(latent)
+        # Construct generator and assigner and store.
+        def generate():
+            return B.exp(latent)
 
-        # If a name is given, generate an assignment method and store it by
-        # name.
-        if name is not None:
-            def assign(value):
-                return B.assign(latent, B.log(value))
+        def assign(value):
+            return B.assign(latent, B.log(value))
 
-            self.assigners[name] = assign
-            self.vars_by_name[name] = observed
-
-        return observed
+        # Store and return variable.
+        self._store(generate, assign, name)
+        return generate()
 
     def pos(self, *args, **kw_args):
         """Alias for :meth:`.util.Vars.positive`."""
         return self.positive(*args, **kw_args)
 
+    def assign(self, name, value):
+        """Assign a value to a variable.
+
+        Args:
+            name (hashable): Name of variable to assign value to.
+            value (tensor): Value to assign.
+
+        Returns:
+            tensor: TensorFlow tensor that can be run to perform the assignment.
+        """
+        return self.assigners[name](value)
+
     def __getitem__(self, name):
         """Get a variable by name.
 
         Args:
-            name (str): Name of variable.
+            name (hashable): Name of variable.
 
         Returns:
             tensor: Variable.
         """
-        return self.vars_by_name[name]
+        return self.generators[name]()
 
 
 class VarsFrom(object):
