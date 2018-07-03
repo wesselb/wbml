@@ -56,9 +56,9 @@ y_test = np.genfromtxt('data/{}weeks/split_{}_ytest.csv'
                        ''.format(weeks, split), delimiter=',')
 
 # Extract sizes.
-p = x_train.shape[1]
-n_train = x_train.shape[0]
-n_test = x_test.shape[0]
+p = y_train.shape[1]
+n_train = y_train.shape[0]
+n_test = y_test.shape[0]
 
 # Construct mixing matrix.
 U, S, _ = np.linalg.svd(ledoit_wolf(y_train)[0])
@@ -80,7 +80,7 @@ def new_lmm():
         # Kernels:
         kernels=[
             # Exp:
-            Exp().stretch(vs.pos(6., name=('exp_ls', i))).select([-1]) *
+            Exp().stretch(vs.pos(24., name=('exp_ls', i))).select([-1]) *
             vs.pos(.3, name=('exp_s2', i)) +
 
             # Exp:
