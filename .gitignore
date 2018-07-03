@@ -18,5 +18,5 @@ local_todo.todo
 data
 
 # MCC experiments
-log*
-fetch.sh
+scripts/log*
+scripts/fetch.sh
