@@ -37,7 +37,7 @@ args = parser.parse_args()
 
 # Model parameters:
 m = args.m
-noise_latent = 0.5
+noise_latent = 0.05
 
 # Experiment parameters:
 weeks = args.weeks
