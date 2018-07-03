@@ -3,7 +3,7 @@
 from __future__ import absolute_import, division, print_function
 
 from lab import B
-from stheno import GP, Delta, Graph, Normal
+from stheno import GP, Delta, Graph, Normal, At
 
 __all__ = ['LMMPPP', 'OLMM']
 
@@ -59,7 +59,7 @@ class LMMPPP(object):
         Args:
             x (tensor): Inputs to sample at.
         """
-        samples = self.graph.sample(*(y @ x for y in self.ys))
+        samples = self.graph.sample(*(At(y)(x) for y in self.ys))
         return B.concat(samples, axis=1)
 
     def lml(self, x, y):
