@@ -16,3 +16,7 @@ cover
 *.swp
 local_todo.todo
 data
+
+# MCC experiments
+log*
+fetch.sh

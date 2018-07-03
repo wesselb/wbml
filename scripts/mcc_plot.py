@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import re
 import sys
+import numpy as np
 
 # Read what is piped to the program.
 out = ''
@@ -35,6 +36,17 @@ eb_means = extract(out, 12, 15)
 eb_lowers = extract(out, 13, 15)
 eb_uppers = extract(out, 14, 15)
 eb_rmse = extract(out, 15, 15)
+
+print('Average scores ({} weeks):'.format(weeks[0]))
+print('  OLMM:')
+print('    NLML: {:-6.0f}'.format(np.mean(model_means)))
+print('    RMSE: {:-6.2f}'.format(np.mean(model_rmse)))
+print('  LW:')
+print('    NLML: {:-6.0f}'.format(np.mean(lw_means)))
+print('    RMSE: {:-6.2f}'.format(np.mean(lw_rmse)))
+print('  EB:')
+print('    NLML: {:-6.0f}'.format(np.mean(eb_means)))
+print('    RMSE: {:-6.2f}'.format(np.mean(eb_rmse)))
 
 plt.figure(figsize=(10, 5))
 plt.title('{} Weeks'.format(weeks[0]))
