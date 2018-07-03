@@ -7,4 +7,5 @@ from .net import *
 from .lr import *
 from .data import *
 from .vi import *
+from .lmm import *
 
