@@ -73,9 +73,9 @@ plt.scatter(splits, eb_lowers, marker='_', s=size, c='tab:green')
 plt.scatter(splits, eb_uppers, marker='_', s=size, c='tab:green')
 
 # Draw means.
-plt.scatter(splits, model_means, label='LMM', c='tab:blue')
-plt.scatter(splits, lw_means, label='LW', c='tab:red')
-plt.scatter(splits, eb_means, label='EB', c='tab:green')
+plt.scatter(splits, model_means, label='LMM', marker='o', c='tab:blue')
+plt.scatter(splits, lw_means, label='LW', marker='x', c='tab:red')
+plt.scatter(splits, eb_means, label='EB', marker='^', c='tab:green')
 
 plt.legend()
 plt.show()
