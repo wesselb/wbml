@@ -20,7 +20,10 @@ def to_np(x):
     Returns:
         tensor: `x` in NumPy.
     """
-    return x.detach().numpy()
+    if isinstance(x, np.ndarray):
+        return x
+    else:
+        return x.detach().numpy()
 
 
 parser = argparse.ArgumentParser()
@@ -33,6 +36,7 @@ parser.add_argument('-w', '--weeks', type=int, default=3,
                     help='Number of weeks.')
 parser.add_argument('-p', '--plot', action='store_true', help='Plot.')
 parser.add_argument('-e', '--explore', action='store_true', help='Explore.')
+parser.add_argument('-u', action='store_true', help='Optimal U.')
 args = parser.parse_args()
 
 # Model parameters:
@@ -74,9 +78,9 @@ y_test = torch.tensor(y_test, dtype=torch.double)
 vs = Vars(torch.double)
 
 
-def new_lmm():
+def new_lmm(init=False):
     """Construct a new LMM."""
-    return OLMM(
+    lmm = OLMM(
         # Kernels:
         kernels=[
             # Exp:
@@ -94,6 +98,8 @@ def new_lmm():
             EQ().stretch(vs.pos(5.0, name=('daily_ls_load', i))).select([4]) *
             EQ().stretch(vs.pos(0.5, name=('daily_ls_time', i)))
                 .periodic(24.).select([-1]) *
+            EQ().stretch(vs.pos(24. * 4., name=('daily_ls_time_window', i))) \
+                .select([-1]) *
             vs.pos(.2, name=('daily_s2', i))
 
             for i in range(m)],
@@ -109,26 +115,33 @@ def new_lmm():
         H=vs.get(H, name='H')
     )
 
+    # Construct optimal U.
+    if args.u and not init:
+        lmm.optimal_U(x_train, y_train)
+
+    return lmm
+
 
 # Plot first and last latent processes.
 if args.explore:
-    x_proj_train = new_lmm().project(y_train)
-    x_proj_test = new_lmm().project(y_test)
+    lmm = new_lmm()
+    x_proj_train = lmm.project(y_train)
+    x_proj_test = lmm.project(y_test)
     plt.figure(figsize=(20, 10))
     for i in range(6):
         plt.subplot(4, 3, 1 + i)
         plt.title('Latent Process {}'.format(i))
         plt.plot(to_np(x_train[:, -1]), to_np(x_proj_train[i]))
-        plt.plot(to_np(x_test[:, -1]), to_np(x_proj_test[i].detach().numpy()))
+        plt.plot(to_np(x_test[:, -1]), to_np(x_proj_test[i]))
     for i in range(6):
         plt.subplot(4, 3, 12 - i)
-        plt.title('Latent Process -{}'.format(i))
-        plt.plot(to_np(x_train[:, -1]), to_np(x_proj_train[-i]))
-        plt.plot(to_np(x_test[:, -1]), to_np(x_proj_test[-i].detach().numpy()))
+        plt.title('Latent Process -{}'.format(i + 1))
+        plt.plot(to_np(x_train[:, -1]), to_np(x_proj_train[-(i + 1)]))
+        plt.plot(to_np(x_test[:, -1]), to_np(x_proj_test[-(i + 1)]))
     plt.show()
 
 # Instantiate optimiser.
-new_lmm()  # Instantiate variables.
+new_lmm(init=True)  # Instantiate variables.
 opt = torch.optim.Adam(vs.get_vars(), lr=5e-2)
 
 

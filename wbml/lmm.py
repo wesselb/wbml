@@ -3,7 +3,7 @@
 from __future__ import absolute_import, division, print_function
 
 from lab import B
-from stheno import GP, Delta, Graph, Normal, At
+from stheno import GP, Delta, Graph, Normal, At, SPD, Diagonal
 
 __all__ = ['LMMPPP', 'OLMM']
 
@@ -119,12 +119,11 @@ class OLMM(object):
         self.noise_obs = noise_obs
         self.noises_latent = noises_latent
 
-        # Compute mixing matrix.
-        U, S_sqrt, _ = B.svd(H)
-        self.H = U * S_sqrt[None, :]
+        # Deconstruct mixing matrix.
+        self.U, self.S_sqrt, _ = B.svd(H)
 
         # Compute projected noises.
-        noises_projected = [noise_obs / S_sqrt[i] ** 2 + noises_latent[i]
+        noises_projected = [noise_obs / self.S_sqrt[i] ** 2 + noises_latent[i]
                             for i in range(self.m)]
 
         # Construct single-output models.
@@ -134,8 +133,44 @@ class OLMM(object):
                           for n, g in zip(noises_projected, self.graphs)]
         self.xs_noisy = [p + n for p, n in zip(self.xs, self.xs_noises)]
 
+        # Construct mixing matrix and projection.
+        self._construct_H_and_P()
+
+    def _construct_H_and_P(self):
+        # Compute mixing matrix.
+        self.H = self.U * self.S_sqrt[None, :]
+
         # Construct data projection.
-        self.P = B.transpose(U) / S_sqrt[:, None]
+        self.P = B.transpose(self.H) / self.S_sqrt[:, None] ** 2
+
+    def optimal_U(self, x, y):
+        """Approximate the optimal `U`.
+
+        Args:
+            x (tensor): Inputs of data.
+            y (tensor): Output of data.
+        """
+        # Compute quadratic forms.
+        n = B.shape(x)[0]
+        Ks = [SPD(s ** 2 * p.kernel(x) +
+                  self.noise_obs * B.eye(n, dtype=B.dtype(self.noise_obs)))
+              for s, p in zip(self.S_sqrt, self.xs)]
+        As = [B.matmul(y, y, tr_a=True) / self.noise_obs - K.quadratic_form(y)
+              for K in Ks]
+
+        # Greedy approximation of optimal U.
+        print('Optimal U step 1/{}...'.format(self.m))
+        U, _, _ = B.svd(As[0])
+        us, V = [U[:, :1]], U[:, 1:]
+        for i in range(1, self.m):
+            print('Optimal U step {}/{}...'.format(i + 1, self.m))
+            U, _, _ = B.svd(B.matmul(B.matmul(V, As[i], tr_a=True), V))
+            us.append(B.matmul(V, U[:, :1]))
+            V = B.matmul(V, U[:, 1:])
+        self.U = B.concat(us, axis=1)
+
+        # Reconstruct mixing matrix and projection.
+        self._construct_H_and_P()
 
     def observe(self, x, y):
         """Observe data.
