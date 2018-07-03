@@ -45,7 +45,7 @@ noise_latent = 0.05
 
 # Experiment parameters:
 weeks = args.weeks
-noise_obs_factor = 1.5
+noise_obs_factor = 10
 split = args.split
 optimiser_iterations = args.its
 
@@ -84,15 +84,12 @@ def new_lmm(init=False):
         # Kernels:
         kernels=[
             # Rough:
-            Exp().stretch(vs.pos(12., name=('exp_ls', i))).select([-1]) *
-            vs.pos(.3, name=('exp_s2', i)) +
+            Exp().stretch(vs.pos(24., name=('exp_ls', i))).select([-1]) *
+            vs.pos(.4, name=('exp_s2', i)) +
 
             # Smooth:
-            EQ().stretch(vs.pos(24., name=('eq_ls', i))).select([-1]) *
-            vs.pos(.3, name=('eq_s2', i)) +
-
-            # Constant:
-            vs.pos(.2, name=('const', i)) +
+            EQ().stretch(vs.pos(36., name=('eq_ls', i))).select([-1]) *
+            vs.pos(.4, name=('eq_s2', i)) +
 
             # Daily periodic, changing and modulated by load:
             EQ().stretch(vs.pos(5.0, name=('daily_ls_load', i))).select([4]) *
@@ -100,7 +97,7 @@ def new_lmm(init=False):
                 .periodic(24.).select([-1]) *
             EQ().stretch(vs.pos(24. * 4., name=('daily_ls_time_window', i))) \
                 .select([-1]) *
-            vs.pos(.2, name=('daily_s2', i))
+            vs.pos(0.2, name=('daily_s2', i))
 
             for i in range(m)],
 
