@@ -146,6 +146,9 @@ class OLMM(object):
     def optimal_U(self, x, y):
         """Approximate the optimal `U`.
 
+        Note:
+            This assumes no noise on the latent processes.
+
         Args:
             x (tensor): Inputs of data.
             y (tensor): Output of data.
