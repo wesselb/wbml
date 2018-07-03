@@ -12,7 +12,7 @@ from wbml import Vars, OLMM
 
 
 def to_np(x):
-    """Covert a PyTorch tensor to NumPy.
+    """Convert a PyTorch tensor to NumPy.
 
     Args:
         x (tensor): PyTorch tensor.
