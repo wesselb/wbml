@@ -45,7 +45,7 @@ noise_latent = 0.05
 
 # Experiment parameters:
 weeks = args.weeks
-noise_obs_factor = 10
+noise_obs = 0.1
 split = args.split
 optimiser_iterations = args.its
 
@@ -58,6 +58,9 @@ x_test = np.genfromtxt('data/{}weeks/split_{}_xtest.csv'
                        ''.format(weeks, split), delimiter=',')
 y_test = np.genfromtxt('data/{}weeks/split_{}_ytest.csv'
                        ''.format(weeks, split), delimiter=',')
+
+# Compute observation noise.
+noise_obs *= np.std(y_train) ** 2
 
 # Extract sizes.
 p = y_train.shape[1]
@@ -102,7 +105,7 @@ def new_lmm(init=False):
             for i in range(m)],
 
         # Observation noise:
-        noise_obs=vs.pos(noise_obs_factor * np.sum(S[m:]) / p, name='noise'),
+        noise_obs=vs.pos(noise_obs, name='noise'),
 
         # Noises on the latent processes:
         noises_latent=B.stack([vs.pos(noise_latent, name=('noise', i))

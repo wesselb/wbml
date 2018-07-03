@@ -12,11 +12,11 @@ for line in sys.stdin:
 def extract(string, n=1, period=1):
     """Periodically read numbers from a string."""
     floats = [float(s) for s in re.findall(r'-?\d+\.?\d*', string)]
-    return floats[n - 1::period]
+    return np.array(floats[n - 1::period])
 
 
-splits = list(map(int, extract(out, 1, 15)))
-weeks = list(map(int, extract(out, 2, 15)))
+splits = extract(out, 1, 15).astype(int)
+weeks = extract(out, 2, 15).astype(int)
 
 # Extract OLMM.
 model_means = extract(out, 3, 15)
@@ -56,26 +56,27 @@ for i in splits:
     plt.axvline(i, 0, 1, c='grey', lw=1.0, linestyle=':')
 
 # Connect bounds.
-# for i, lower, upper in zip(splits, eb_lowers, eb_uppers):
-#     plt.plot([i, i], [lower, upper], c='tab:green')
-# for i, lower, upper in zip(splits, model_lowers, model_uppers):
-#     plt.plot([i, i], [lower, upper], c='tab:blue')
-# for i, lower, upper in zip(splits, lw_lowers, lw_uppers):
-#     plt.plot([i, i], [lower, upper], c='tab:red')
+for i, lower, upper in zip(splits, model_lowers, model_uppers):
+    plt.plot([i, i], [lower, upper], c='tab:blue', lw=1.0)
+for i, lower, upper in zip(splits + 0.2, lw_lowers, lw_uppers):
+    plt.plot([i, i], [lower, upper], c='tab:red', lw=1.0)
+for i, lower, upper in zip(splits + 0.4, eb_lowers, eb_uppers):
+    plt.plot([i, i], [lower, upper], c='tab:green', lw=1.0)
 
 # Draw bounds.
 size = 50
 plt.scatter(splits, model_lowers, marker='_', s=size, c='tab:blue')
 plt.scatter(splits, model_uppers, marker='_', s=size, c='tab:blue')
-plt.scatter(splits, lw_lowers, marker='_', s=size, c='tab:red')
-plt.scatter(splits, lw_uppers, marker='_', s=size, c='tab:red')
-plt.scatter(splits, eb_lowers, marker='_', s=size, c='tab:green')
-plt.scatter(splits, eb_uppers, marker='_', s=size, c='tab:green')
+plt.scatter(splits + 0.2, lw_lowers, marker='_', s=size, c='tab:red')
+plt.scatter(splits + 0.2, lw_uppers, marker='_', s=size, c='tab:red')
+plt.scatter(splits + 0.4, eb_lowers, marker='_', s=size, c='tab:green')
+plt.scatter(splits + 0.4, eb_uppers, marker='_', s=size, c='tab:green')
 
 # Draw means.
 plt.scatter(splits, model_means, label='LMM', marker='o', c='tab:blue')
-plt.scatter(splits, lw_means, label='LW', marker='x', c='tab:red')
-plt.scatter(splits, eb_means, label='EB', marker='^', c='tab:green')
+plt.scatter(splits + 0.2, lw_means, label='LW', marker='o', c='tab:red')
+plt.scatter(splits + 0.4, eb_means, label='EB', marker='o', c='tab:green')
 
+plt.ylim(0, 15000)
 plt.legend()
 plt.show()
