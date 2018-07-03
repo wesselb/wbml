@@ -106,7 +106,7 @@ def new_lmm():
                                for i in range(m)], axis=0),
 
         # Mixing matrix:
-        H=vs.get(H, name='H').detach()
+        H=vs.get(H, name='H')
     )
 
 
