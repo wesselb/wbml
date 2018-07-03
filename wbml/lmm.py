@@ -162,11 +162,9 @@ class OLMM(object):
               for K in Ks]
 
         # Greedy approximation of optimal U.
-        print('Optimal U step 1/{}...'.format(self.m))
         U, _, _ = B.svd(As[0])
         us, V = [U[:, :1]], U[:, 1:]
         for i in range(1, self.m):
-            print('Optimal U step {}/{}...'.format(i + 1, self.m))
             U, _, _ = B.svd(B.matmul(B.matmul(V, As[i], tr_a=True), V))
             us.append(B.matmul(V, U[:, :1]))
             V = B.matmul(V, U[:, 1:])

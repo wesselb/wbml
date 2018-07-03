@@ -150,18 +150,13 @@ def objective():
     nlml = -new_lmm().lml(x_train, y_train) / n_train / p
     opt.zero_grad()
     nlml.backward()
-    print('LML:', nlml)
     return nlml
 
 
 # Perform optimisation.
 for i in range(optimiser_iterations):
-    print('\nPerforming gradient step {}/{}...'
-          ''.format(i + 1, optimiser_iterations))
     start = time()
     opt.step(objective)
-    print('Took {:.2f} seconds.'.format(time() - start))
-    print('Noise:', vs['noise'])
 
 # Condition and predict.
 lmm = new_lmm()
