@@ -128,13 +128,13 @@ if args.explore:
     x_proj_train = lmm.project(y_train)
     x_proj_test = lmm.project(y_test)
     plt.figure(figsize=(20, 10))
-    for i in range(6):
-        plt.subplot(4, 3, 1 + i)
+    for i in range(3):
+        plt.subplot(2, 3, 1 + i)
         plt.title('Latent Process {}'.format(i))
         plt.plot(to_np(x_train[:, -1]), to_np(x_proj_train[i]))
         plt.plot(to_np(x_test[:, -1]), to_np(x_proj_test[i]))
-    for i in range(6):
-        plt.subplot(4, 3, 12 - i)
+    for i in range(3):
+        plt.subplot(2, 3, 6 - i)
         plt.title('Latent Process -{}'.format(i + 1))
         plt.plot(to_np(x_train[:, -1]), to_np(x_proj_train[-(i + 1)]))
         plt.plot(to_np(x_test[:, -1]), to_np(x_proj_test[-(i + 1)]))

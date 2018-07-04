@@ -57,7 +57,7 @@ plt.title('File(s): {}'.format(', '.join(fns)))
 for i in outs[0]['splits']:
     plt.axvline(i, 0, 1, c='grey', lw=1.0, linestyle=':')
 
-gap = 0.3
+gap = 0.2
 for n, (fn, out) in enumerate(zip(fns, outs)):
     shift = gap * n / len(outs)
 
