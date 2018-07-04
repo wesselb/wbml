@@ -5,11 +5,11 @@ from __future__ import absolute_import, division, print_function
 from lab import B
 from stheno import GP, Delta, Graph, Normal, At, SPD, Diagonal
 
-__all__ = ['LMMPPP', 'OLMM']
+__all__ = ['LMMPP', 'OLMM']
 
 
-class LMMPPP(object):
-    """PPP implementation of the linear mixing model.
+class LMMPP(object):
+    """PP implementation of the linear mixing model.
 
     Args:
         kernels (list[:class:`stheno.Kernel`]) Kernels.
