@@ -11,6 +11,16 @@ from stheno import EQ, Normal, Exp
 from wbml import Vars, OLMM
 
 
+def transform(x):
+    """Apply log-transform."""
+    return np.sign(x) * np.log(np.abs(x) + 1)
+
+
+def inverse_transform(x):
+    """Apply inverse log-transform."""
+    return np.sign(x) * np.exp(np.abs(x) - 1)
+
+
 def to_np(x):
     """Convert a PyTorch tensor to NumPy.
 
