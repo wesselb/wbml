@@ -65,9 +65,6 @@ class LMMPP(object):
     def lml(self, x, y):
         """Compute the LML.
 
-        Note:
-            Revert to prior afterwards.
-
         Args:
             x (tensor): Inputs of data.
             y (tensor): Output of data.
@@ -76,10 +73,11 @@ class LMMPP(object):
             tensor: LML of data.
         """
         lml = 0
+        prior = self.graph.checkpoint()
         for i in range(self.p):
-            lml += self.ys[i](x).log_pdf(y[:, i])[0]
+            lml += self.ys[i](x).logpdf(y[:, i])[0]
             self.ys[i].condition(x, y[:, i])
-        self.graph.revert_prior()
+        self.graph.revert(prior)
         return lml
 
     def predict(self, x):
@@ -203,7 +201,7 @@ class OLMM(object):
         # Add contributions of latent processes.
         lml = 0
         for p, n, yi in zip(self.xs_noisy, self.xs_noises, ys_proj):
-            lml += p(x).log_pdf(yi)[0] - n(x).log_pdf(yi)[0]
+            lml += p(x).logpdf(yi)[0] - n(x).logpdf(yi)[0]
 
         # Add regularisation contribution.
         noise_latent = B.matmul(self.H * B.array(self.noises_latent)[None, :],
@@ -211,7 +209,7 @@ class OLMM(object):
         noise_obs = self.noise_obs * B.eye(self.p,
                                            dtype=B.dtype(self.noise_obs))
         d = Normal(noise_obs + noise_latent)
-        lml += B.sum(d.log_pdf(B.transpose(y)))
+        lml += B.sum(d.logpdf(B.transpose(y)))
 
         return lml
 

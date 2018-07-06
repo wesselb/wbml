@@ -28,8 +28,8 @@ def elbo(lik, p, q, num_samples=1):
     """
     samples = q.sample(num_samples)
     log_lik = B.mean(map_cols(lik, samples))
-    log_prior = B.mean(p.log_pdf(samples))
-    log_q = B.mean(q.log_pdf(samples))
+    log_prior = B.mean(p.logpdf(samples))
+    log_q = B.mean(q.logpdf(samples))
     return log_lik - log_prior + log_q
 
 

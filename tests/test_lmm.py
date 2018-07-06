@@ -40,10 +40,6 @@ def test_olmm():
     olmm.observe(x, y)
     yield assert_allclose, lmm_pp.lml(x2, y2), olmm.lml(x2, y2)
 
-    # Need to recondition now: computing LML reverts to prior.
-    lmm_pp.observe(x, y)
-    olmm.observe(x, y)
-
     # Predict.
     preds_pp, means_pp, vars_pp = lmm_pp.predict(x2)
     preds, means, vars = olmm.predict(x2)

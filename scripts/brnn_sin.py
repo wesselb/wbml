@@ -28,7 +28,7 @@ lik_noise = vars32.pos(1e-4)
 def lik(w):
     f.initialise(VarsFrom(w))
     dist = Normal(UniformDiagonal(lik_noise, 1), B.reshape(f(x), [1, -1]))
-    return B.sum(dist.log_pdf(B.reshape(y, [1, -1])))
+    return B.sum(dist.logpdf(B.reshape(y, [1, -1])))
 
 
 # Construct objective

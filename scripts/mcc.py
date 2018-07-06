@@ -181,7 +181,7 @@ lmls, mses = [], []
 for i in range(n_test):
     mean, var, y = means[i], vars[i], B.transpose(y_test[i:i + 1, :])
     mses.append(B.mean((y - mean) ** 2).detach().numpy())
-    lmls.append(-Normal(var, mean).log_pdf(y).detach().numpy())
+    lmls.append(-Normal(var, mean).logpdf(y).detach().numpy())
 
 # Print scores for OLMM.
 lml_mean = np.mean(lmls)
