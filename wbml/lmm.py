@@ -2,10 +2,14 @@
 
 from __future__ import absolute_import, division, print_function
 
+import logging
+
 from lab import B
-from stheno import GP, Delta, Graph, Normal, At, SPD, Diagonal
+from stheno import GP, Delta, Graph, Normal, Dense, Obs, dense, Unique
 
 __all__ = ['LMMPP', 'OLMM']
+
+log = logging.getLogger(__name__)
 
 
 class LMMPP(object):
@@ -23,20 +27,20 @@ class LMMPP(object):
         self.p, self.m = B.shape_int(H)
 
         # Create latent processes.
-        self.xs = [GP(k, graph=self.graph) for k in kernels]
+        xs = [GP(k, graph=self.graph) for k in kernels]
 
         # Create latent noise.
-        self.es_x = [GP(noise * Delta(), graph=self.graph)
-                     for noise in noises_latent]
+        es = [GP(noise * Delta(), graph=self.graph)
+              for noise in noises_latent]
 
         # Create noisy latent processes.
-        self.xs_noisy = [x + e for x, e in zip(self.xs, self.es_x)]
+        xs_noisy = [x + e for x, e in zip(xs, es)]
 
         # Multiply with mixing matrix.
         self.fs = [0 for _ in range(self.p)]
         for i in range(self.p):
             for j in range(self.m):
-                self.fs[i] += H[i, j] * self.xs_noisy[j]
+                self.fs[i] += H[i, j] * xs_noisy[j]
 
         # Create two observed process.
         self.ys = [f + GP(noise_obs * Delta(), graph=self.graph)
@@ -50,8 +54,10 @@ class LMMPP(object):
             x (tensor): Inputs.
             y (tensor): Outputs.
         """
-        for i in range(self.p):
-            self.ys[i].condition(x, y[:, i])
+        obs = Obs(*((self.ys[i](x), y[:, i]) for i in range(self.p)))
+        self.fs = [p | obs for p in self.fs]
+        self.ys = [p | obs for p in self.ys]
+        self.y = self.y | obs
 
     def sample(self, x):
         """Sample data.
@@ -59,7 +65,7 @@ class LMMPP(object):
         Args:
             x (tensor): Inputs to sample at.
         """
-        samples = self.graph.sample(*(At(y)(x) for y in self.ys))
+        samples = self.graph.sample(*(y(x) for y in self.ys))
         return B.concat(samples, axis=1)
 
     def lml(self, x, y):
@@ -72,12 +78,18 @@ class LMMPP(object):
         Returns:
             tensor: LML of data.
         """
+        ys = list(self.ys)
+
+        # Compute the LML using the product rule.
         lml = 0
-        prior = self.graph.checkpoint()
         for i in range(self.p):
-            lml += self.ys[i](x).logpdf(y[:, i])[0]
-            self.ys[i].condition(x, y[:, i])
-        self.graph.revert(prior)
+            # Compute `log p(y_i | y_{1:i - 1})`.
+            lml += ys[i](x).logpdf(y[:, i])[0]
+
+            # Condition the remainder on the observation for `y_i`.
+            obs = Obs(ys[i](x), y[:, i])
+            ys[i:] = [p | obs for p in ys[i:]]
+
         return lml
 
     def predict(self, x):
@@ -87,7 +99,7 @@ class LMMPP(object):
             x (tensor): Inputs to predict at.
 
         Returns:
-            tuple[tensor}: Marginals predictions, spatial means per time, and
+            tuple[tensor]: Marginals predictions, spatial means per time, and
                 spatial variance per time.
         """
         preds = [y.predict(x) for y in self.ys]
@@ -95,7 +107,7 @@ class LMMPP(object):
         for i in range(B.shape_int(x)[0]):
             d = self.y(x[i])
             means.append(d.mean)
-            vars.append(d.var)
+            vars.append(dense(d.var))
         return preds, means, vars
 
 
@@ -153,8 +165,8 @@ class OLMM(object):
         """
         # Compute quadratic forms.
         n = B.shape(x)[0]
-        Ks = [SPD(s ** 2 * p.kernel(x) +
-                  self.noise_obs * B.eye(n, dtype=B.dtype(self.noise_obs)))
+        Ks = [Dense(s ** 2 * p.kernel(x) +
+                    self.noise_obs * B.eye(n, dtype=B.dtype(self.noise_obs)))
               for s, p in zip(self.S_sqrt, self.xs)]
         As = [B.matmul(y, y, tr_a=True) / self.noise_obs - K.quadratic_form(y)
               for K in Ks]
@@ -181,9 +193,11 @@ class OLMM(object):
         # Perform projection.
         ys = self.project(y)
 
-        # Condition latent processes.
-        for p, y in zip(self.xs_noisy, ys):
-            p.condition(x, y)
+        # Condition latent processes and noises.
+        obses = [Obs(p(x), y) for p, y in zip(self.xs_noisy, ys)]
+        self.xs = [p | obs for p, obs in zip(self.xs, obses)]
+        self.xs_noisy = [p | obs for p, obs in zip(self.xs_noisy, obses)]
+        self.xs_noises = [p | obs for p, obs in zip(self.xs_noises, obses)]
 
     def lml(self, x, y):
         """Compute the LML.
@@ -206,8 +220,8 @@ class OLMM(object):
         # Add regularisation contribution.
         noise_latent = B.matmul(self.H * B.array(self.noises_latent)[None, :],
                                 self.H, tr_b=True)
-        noise_obs = self.noise_obs * B.eye(self.p,
-                                           dtype=B.dtype(self.noise_obs))
+        noise_obs = self.noise_obs * \
+                    B.eye(self.p, dtype=B.dtype(self.noise_obs))
         d = Normal(noise_obs + noise_latent)
         lml += B.sum(d.logpdf(B.transpose(y)))
 
@@ -232,14 +246,14 @@ class OLMM(object):
             x (tensor): Inputs to predict at.
 
         Returns:
-            tuple[tensor}: Marginals predictions, spatial means per time, and
+            tuple[tensor]: Marginals predictions, spatial means per time, and
                 spatial variance per time.
         """
 
         # Extract means and variances of the latent processes.
         def extract(p):
             d = p(x)
-            return d.mean, d.var
+            return d.mean, dense(d.var)
 
         x_means, x_vars = zip(*[extract(p) for p in self.xs])
 

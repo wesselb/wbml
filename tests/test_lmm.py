@@ -32,12 +32,15 @@ def test_olmm():
     x2 = np.linspace(4, 7, 5)
     y2 = lmm_pp.sample(x2)
 
-    # Check LML.
+    # Check LML before conditioning.
     yield assert_allclose, lmm_pp.lml(x, y), olmm.lml(x, y)
+    yield assert_allclose, lmm_pp.lml(x2, y2), olmm.lml(x2, y2)
 
     # Check LML after conditioning.
     lmm_pp.observe(x, y)
     olmm.observe(x, y)
+    # `lmm_pp(x, y)` will not equal `olmm.lml(x, y)` due to assumptions
+    # in the OLMM.
     yield assert_allclose, lmm_pp.lml(x2, y2), olmm.lml(x2, y2)
 
     # Predict.
