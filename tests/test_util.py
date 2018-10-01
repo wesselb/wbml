@@ -12,12 +12,12 @@ from itertools import product
 from . import eq, neq, lt, le, ge, gt, raises, call, ok, lam, eprint
 
 
-def test_vars():
+def test_vars_and_init_get():
     s = tf.Session()
 
     vs = Vars(np.float32)
     a = vs.get(1.)
-    b = vs.get(2.)
+    b = vs.get()
     yield eq, len(vs.vars), 2
     yield eq, a.dtype.as_numpy_dtype, np.float32
     yield eq, b.dtype.as_numpy_dtype, np.float32
@@ -25,19 +25,27 @@ def test_vars():
 
     vs = Vars(np.float64)
     a = vs.get(1.)
-    b = vs.get(2.)
+    b = vs.get()
     yield eq, len(vs.vars), 2
     yield eq, a.dtype.as_numpy_dtype, np.float64
     yield eq, b.dtype.as_numpy_dtype, np.float64
     vs.init(s)
 
 
-def test_vars_positive():
+def test_vars_init_positive():
     s = tf.Session()
     vs = Vars()
-    xs = [vs.positive() for _ in range(10)]
+    xs = [vs.pos() for _ in range(10)]
     vs.init(s)
     yield ok, all([x > 0 for x in s.run(xs)])
+
+
+def test_vars_init_bounded():
+    s = tf.Session()
+    vs = Vars()
+    xs = [vs.bnd(lower=0, upper=1) for _ in range(10)]
+    vs.init(s)
+    yield ok, all([0 < x < 1 for x in s.run(xs)])
 
 
 def test_vars_assignment():
@@ -45,19 +53,23 @@ def test_vars_assignment():
     vs = Vars()
 
     # Generate some variables.
-    vs.get(1., name='a')
-    vs.pos(2., name='b')
+    vs.get(1., name='unbounded')
+    vs.pos(2., name='positive')
+    vs.bnd(3., lower=0, upper=10, name='bounded')
     vs.init(s)
 
-    yield eq, 1., s.run(vs['a'])
-    yield eq, 2., s.run(vs['b'])
+    yield eq, 1., s.run(vs['unbounded'])
+    yield eq, 2., s.run(vs['positive'])
+    yield eq, 3., s.run(vs['bounded'])
 
     # Assign new values.
-    s.run(vs.assign('a', 3.))
-    s.run(vs.assign('b', 4.))
+    s.run(vs.assign('unbounded', 4.))
+    s.run(vs.assign('positive', 5.))
+    s.run(vs.assign('bounded', 6.))
 
-    yield eq, 3., s.run(vs['a'])
-    yield eq, 4., s.run(vs['b'])
+    yield eq, 4., s.run(vs['unbounded'])
+    yield eq, 5., s.run(vs['positive'])
+    yield eq, 6., s.run(vs['bounded'])
 
 
 def test_initialiser():

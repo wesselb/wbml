@@ -98,24 +98,6 @@ class Vars(Referentiable):
         self.assigners = {}
         self.lookup = {}
 
-    def _convert(self, init, dtype):
-        return B.array(init, dtype=dtype)
-
-    def _resolve_dtype(self, dtype):
-        return self.dtype if dtype is None else dtype
-
-    def _new_latent(self, init, name):
-        latent = B.Variable(init)
-        self.vars.append(latent)
-        if name:
-            self.lookup[name] = latent
-        return latent
-
-    def _store(self, generator, assigner, name):
-        if name:
-            self.generators[name] = generator
-            self.assigners[name] = assigner
-
     def init(self, session):
         """Initialise the variables.
 
@@ -140,11 +122,10 @@ class Vars(Referentiable):
             return [self.lookup[name] for name in names]
 
     def get(self, init=None, shape=(), dtype=None, name=None):
-        """Get a variable.
+        """Get an unbounded variable.
 
         Args:
-            init (tensor, optional): Initialisation of the variable. Defaults
-                to a N(0, 1) draw.
+            init (tensor, optional): Initialisation of the variable.
             shape (tuple[int], optional): Shape of the variable. Defaults to
                 scalar.
             dtype (data type, optional): Data type of the variable. Defaults to
@@ -154,41 +135,22 @@ class Vars(Referentiable):
         Returns:
             tensor: Variable.
         """
-        # If the name already exists, return that variable.
-        try:
-            return self[name]
-        except KeyError:
-            pass
+        def generate_init(shape, dtype):
+            return B.randn(shape, dtype=dtype)
 
-        # Resolve data type.
-        dtype = self._resolve_dtype(dtype)
-
-        # Generate initialisation if necessary.
-        if init is None:
-            init = B.randn(shape, dtype=dtype)
-        else:
-            init = self._convert(init, dtype)
-
-        # Construct latent variable
-        latent = self._new_latent(init, name)
-
-        # Construct generator and assigner.
-        def generate():
-            return latent
-
-        def assign(value):
-            return B.assign(latent, value)
-
-        # Store and return variable.
-        self._store(generate, assign, name)
-        return generate()
+        return self._get_var(transform=lambda x: x,
+                             inverse_transform=lambda x: x,
+                             init=init,
+                             generate_init=generate_init,
+                             shape=shape,
+                             dtype=dtype,
+                             name=name)
 
     def positive(self, init=None, shape=(), dtype=None, name=None):
         """Get a positive variable.
 
         Args:
-            init (tensor, optional): Initialisation of the variable. Defaults
-                to a Uniform(0, 1) draw.
+            init (tensor, optional): Initialisation of the variable.
             shape (tuple[int], optional): Shape of the variable. Defaults to
                 scalar.
             dtype (data type, optional): Data type of the variable. Defaults to
@@ -198,6 +160,72 @@ class Vars(Referentiable):
         Returns:
             tensor: Variable.
         """
+        def generate_init(shape, dtype):
+            return B.rand(shape, dtype=dtype)
+
+        return self._get_var(transform=lambda x: B.exp(x),
+                             inverse_transform=lambda x: B.log(x),
+                             init=init,
+                             generate_init=generate_init,
+                             shape=shape,
+                             dtype=dtype,
+                             name=name)
+
+    def pos(self, *args, **kw_args):
+        """Alias for :meth:`.util.Vars.positive`."""
+        return self.positive(*args, **kw_args)
+
+    def bounded(self,
+                init=None,
+                lower=1e-4,
+                upper=1e4,
+                shape=(),
+                dtype=None,
+                name=None):
+        """Get a bounded variable.
+
+        Args:
+            init (tensor, optional): Initialisation of the variable.
+            lower (tensor, optional): Lower bound. Defaults to `1e-4`.
+            upper (tensor, optional): Upper bound. Defaults to `1e4`.
+            shape (tuple[int], optional): Shape of the variable. Defaults to
+                scalar.
+            dtype (data type, optional): Data type of the variable. Defaults to
+                that of the storage.
+            name (hashable, optional): Name of the variable.
+
+        Returns:
+            tensor: Variable.
+        """
+        def transform(x):
+            return lower + (upper - lower) / (1 + B.exp(x))
+
+        def inverse_transform(x):
+            return B.log(upper - x) - B.log(x - lower)
+
+        def generate_init(shape, dtype):
+            return lower + B.rand(shape, dtype=dtype) * (upper - lower)
+
+        return self._get_var(transform=transform,
+                             inverse_transform=inverse_transform,
+                             init=init,
+                             generate_init=generate_init,
+                             shape=shape,
+                             dtype=dtype,
+                             name=name)
+
+    def bnd(self, *args, **kw_args):
+        """Alias for :meth:`.util.Vars.bounded`."""
+        return self.bounded(*args, **kw_args)
+
+    def _get_var(self,
+                 transform,
+                 inverse_transform,
+                 init,
+                 generate_init,
+                 shape,
+                 dtype,
+                 name):
         # If the name already exists, return that variable.
         try:
             return self[name]
@@ -205,31 +233,34 @@ class Vars(Referentiable):
             pass
 
         # Resolve data type.
-        dtype = self._resolve_dtype(dtype)
+        dtype = self.dtype if dtype is None else dtype
 
-        # Generate initialisation if necessary.
+        # Resolve initialisation and inverse transform.
         if init is None:
-            init = B.log(B.rand(shape, dtype=dtype))
+            init = generate_init(shape=shape, dtype=dtype)
         else:
-            init = B.log(self._convert(init, dtype=dtype))
+            init = B.array(init, dtype=dtype)
 
-        # Construct latent variable
-        latent = self._new_latent(init, name)
+        # Construct latent variable and store if a name is given.
+        latent = B.Variable(inverse_transform(init))
+        self.vars.append(latent)
+        if name:
+            self.lookup[name] = latent
 
-        # Construct generator and assigner and store.
+        # Construct generator and assigner.
         def generate():
-            return B.exp(latent)
+            return transform(latent)
 
         def assign(value):
-            return B.assign(latent, B.log(value))
+            return B.assign(latent, inverse_transform(value))
 
-        # Store and return variable.
-        self._store(generate, assign, name)
+        # Store if a name is given.
+        if name:
+            self.generators[name] = generate
+            self.assigners[name] = assign
+
+        # Generate the variable and return.
         return generate()
-
-    def pos(self, *args, **kw_args):
-        """Alias for :meth:`.util.Vars.positive`."""
-        return self.positive(*args, **kw_args)
 
     def assign(self, name, value):
         """Assign a value to a variable.

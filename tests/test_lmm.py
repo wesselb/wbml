@@ -39,7 +39,7 @@ def test_olmm():
     # Check LML after conditioning.
     lmm_pp.observe(x, y)
     olmm.observe(x, y)
-    # `lmm_pp(x, y)` will not equal `olmm.lml(x, y)` due to assumptions
+    # `lmm_pp.lml(x, y)` will not equal `olmm.lml(x, y)` due to assumptions
     # in the OLMM.
     yield assert_allclose, lmm_pp.lml(x2, y2), olmm.lml(x2, y2)
 
