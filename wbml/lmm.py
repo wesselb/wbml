@@ -6,6 +6,7 @@ import logging
 
 from lab import B
 from stheno import GP, Delta, Graph, Normal, Dense, Obs, dense, Unique
+from plum import Dispatcher, Referentiable, Self
 
 __all__ = ['LMMPP', 'OLMM']
 
@@ -111,7 +112,7 @@ class LMMPP(object):
         return preds, means, vars
 
 
-class OLMM(object):
+class OLMM(Referentiable):
     """Orthogonal linear mixing model.
 
     Args:
@@ -120,17 +121,29 @@ class OLMM(object):
         noises_latent (tensor): Latent noises. One per latent processes.
         H (tensor): Mixing matrix.
     """
+    _dispatch = Dispatcher(in_class=Self)
 
+    @_dispatch({list, tuple}, B.Numeric, {B.Numeric, list}, B.Numeric)
     def __init__(self, kernels, noise_obs, noises_latent, H):
+        U, S_sqrt, _ = B.svd(H)
+        OLMM.__init__(self, kernels, noise_obs, noises_latent, U, S_sqrt)
+
+    @_dispatch({list, tuple},
+               B.Numeric,
+               {B.Numeric, list},
+               B.Numeric,
+               B.Numeric)
+    def __init__(self, kernels, noise_obs, noises_latent, U, S_sqrt):
         # Determine number of outputs and latent processes.
-        self.p, self.m = B.shape(H)
+        self.p, self.m = B.shape(U)
+
+        # Save components of mixing matrix.
+        self.U = U
+        self.S_sqrt = S_sqrt
 
         # Save noises.
         self.noise_obs = noise_obs
         self.noises_latent = noises_latent
-
-        # Deconstruct mixing matrix.
-        self.U, self.S_sqrt, _ = B.svd(H)
 
         # Compute projected noises.
         noises_projected = [noise_obs / self.S_sqrt[i] ** 2 + noises_latent[i]
@@ -163,19 +176,19 @@ class OLMM(object):
             x (tensor): Inputs of data.
             y (tensor): Output of data.
         """
-        # Compute quadratic forms.
-        n = B.shape(x)[0]
-        Ks = [Dense(s ** 2 * p.kernel(x) +
-                    self.noise_obs * B.eye(n, dtype=B.dtype(self.noise_obs)))
-              for s, p in zip(self.S_sqrt, self.xs)]
-        As = [B.matmul(y, y, tr_a=True) / self.noise_obs - K.quadratic_form(y)
-              for K in Ks]
+        # Construct first `A`.
+        raise NotImplementedError()
+        A = None
 
         # Greedy approximation of optimal U.
         U, _, _ = B.svd(As[0])
         us, V = [U[:, :1]], U[:, 1:]
         for i in range(1, self.m):
-            U, _, _ = B.svd(B.matmul(B.matmul(V, As[i], tr_a=True), V))
+            # Construct `A` for iteration `i`.
+            raise NotImplementedError()
+            A = None
+
+            U, _, _ = B.svd(B.matmul(B.matmul(V, A, tr_a=True), V))
             us.append(B.matmul(V, U[:, :1]))
             V = B.matmul(V, U[:, 1:])
         self.U = B.concat(us, axis=1)
