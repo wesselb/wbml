@@ -2,14 +2,15 @@
 
 from __future__ import absolute_import, division, print_function
 
-import numpy as np
-import tensorflow as tf
-from wbml import Vars, Packer, Initialiser
-from lab.tf import B
 from itertools import product
 
+import numpy as np
+import tensorflow as tf
+from lab.tf import B
+from wbml import Vars, Packer, Initialiser
+
 # noinspection PyUnresolvedReferences
-from . import eq, neq, lt, le, ge, gt, raises, call, ok, lam, eprint
+from . import eq, neq, lt, le, ge, gt, raises, call, ok, lam, eprint, allclose
 
 
 def test_vars_and_init_get():
@@ -60,7 +61,8 @@ def test_vars_assignment():
 
     yield eq, 1., s.run(vs['unbounded'])
     yield eq, 2., s.run(vs['positive'])
-    yield eq, 3., s.run(vs['bounded'])
+    # This test fails on Travis if `eq` is used.
+    yield allclose, 3., s.run(vs['bounded'])
 
     # Assign new values.
     s.run(vs.assign('unbounded', 4.))
