@@ -16,6 +16,8 @@ cover
 *.swp
 local_todo.todo
 data
+*.pdf
+*.pickle
 
 # MCC experiments
 scripts/log*
