@@ -5,8 +5,8 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 from lab import B
-from stheno import GP, Delta, Graph, Normal, Dense, Obs, dense, Unique
 from plum import Dispatcher, Referentiable, Self
+from stheno import GP, Delta, Graph, Normal, Obs, dense
 
 __all__ = ['LMMPP', 'OLMM']
 
