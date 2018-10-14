@@ -95,7 +95,7 @@ def new_lmm(init=False):
     """Construct a new LMM."""
     lmm = OLMM(
         # Kernels:
-        kernels=[
+        [
             # Rough:
             Exp().stretch(vs.pos(24., name=('exp_ls', i))).select([-1]) *
             vs.pos(.4, name=('exp_s2', i)) +
@@ -115,14 +115,14 @@ def new_lmm(init=False):
             for i in range(m)],
 
         # Observation noise:
-        noise_obs=vs.pos(noise_obs, name='noise'),
+        vs.pos(noise_obs, name='noise'),
 
         # Noises on the latent processes:
-        noises_latent=B.stack([vs.pos(noise_latent, name=('noise', i))
-                               for i in range(m)], axis=0),
+        B.stack([vs.pos(noise_latent, name=('noise', i))
+                 for i in range(m)], axis=0),
 
         # Mixing matrix:
-        H=vs.get(H, name='H')
+        vs.get(H, name='H')
     )
 
     # Construct optimal U.

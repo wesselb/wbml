@@ -51,7 +51,6 @@ x_train = np.arange(y_train.shape[0])[:, None]
 y_test = y_train
 x_test = x_train
 
-
 # If number of latent processes is set to `-1`, make it equal to the number of
 # outputs
 if m == -1:
@@ -83,21 +82,19 @@ def new_lmm():
     """Construct a new LMM."""
     return OLMM(
         # Kernels:
-        kernels=[
-            # Smooth:
-            EQ().stretch(vs.pos(30., name=('eq_ls', i))).select([-1]) *
-            vs.pos(1., name=('eq_s2', i))
-            for i in range(m)],
+        [EQ().stretch(vs.pos(30., name=('eq_ls', i))).select([-1]) *
+         vs.pos(1., name=('eq_s2', i))
+         for i in range(m)],
 
         # Observation noise:
-        noise_obs=vs.pos(noise_obs, name='noise_obs'),
+        vs.pos(noise_obs, name='noise_obs'),
 
         # Noises on the latent processes:
-        noises_latent=B.stack([vs.pos(noise_latent, name=('noise_lat', i))
-                               for i in range(m)], axis=0),
+        B.stack([vs.pos(noise_latent, name=('noise_lat', i))
+                 for i in range(m)], axis=0),
 
         # Mixing matrix:
-        H=vs.get(H, name='H')
+        vs.get(H, name='H')
     )
 
 
