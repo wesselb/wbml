@@ -11,7 +11,9 @@ from lab import B
 from plum import Dispatcher, Self, Referentiable
 
 __all__ = ['Packer', 'Vars', 'vars32', 'vars64', 'VarsFrom', 'inv_perm',
-           'identity', 'map_cols', 'Initialiser']
+           'identity', 'map_cols', 'Initialiser', 'construct_display_resolver']
+
+_dispatch = Dispatcher()
 
 
 class Packer(object):
@@ -135,6 +137,7 @@ class Vars(Referentiable):
         Returns:
             tensor: Variable.
         """
+
         def generate_init(shape, dtype):
             return B.randn(shape, dtype=dtype)
 
@@ -160,6 +163,7 @@ class Vars(Referentiable):
         Returns:
             tensor: Variable.
         """
+
         def generate_init(shape, dtype):
             return B.rand(shape, dtype=dtype)
 
@@ -197,6 +201,7 @@ class Vars(Referentiable):
         Returns:
             tensor: Variable.
         """
+
         def transform(x):
             return lower + (upper - lower) / (1 + B.exp(x))
 
@@ -340,3 +345,32 @@ def map_cols(f, xs):
         tensor: Result.
     """
     return B.map_fn(lambda x: f(x[:, None]), B.transpose(xs))
+
+
+def construct_display_resolver(sess):
+    """Construct a resolver displaying variables.
+
+    Args:
+        sess: TensorFlow session
+
+    Returns:
+        function: Resolver.
+    """
+    dispatch = Dispatcher()
+
+    @dispatch(B.TF)
+    def resolve(x):
+        return resolve(sess.run(x))
+
+    @dispatch(object)
+    def resolve(x):
+        x = np.squeeze(x)
+        if B.rank(x) == 0:
+            return '{:.2e}'.format(x)
+        elif B.rank(x) == 1:
+            return '[{}]'.format(', '.join(['{:.2e}'.format(y) for y in x]))
+        else:
+            raise RuntimeError('Cannot nicely display a rank-{} tensor.'
+                               ''.format(B.rank(x)))
+
+    return resolve

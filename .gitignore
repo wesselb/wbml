@@ -15,7 +15,7 @@ cover
 .DS_Store
 *.swp
 local_todo.todo
-data
+/data
 *.pdf
 *.pickle
 
