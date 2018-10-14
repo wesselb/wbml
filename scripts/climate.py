@@ -32,8 +32,6 @@ parser.add_argument('-m', type=int, default=200,
                     help='Number of latent processes.')
 parser.add_argument('-i', '--its', type=int, default=0,
                     help='Number of optimiser iterations.')
-parser.add_argument('-w', '--weeks', type=int, default=3,
-                    help='Number of weeks.')
 parser.add_argument('-p', '--plot', action='store_true', help='Plot.')
 parser.add_argument('-e', '--explore', action='store_true', help='Explore.')
 args = parser.parse_args()
@@ -81,7 +79,7 @@ y_test = torch.tensor(y_test, dtype=torch.double)
 vs = Vars(torch.double)
 
 
-def new_lmm(init=False):
+def new_lmm():
     """Construct a new LMM."""
     return OLMM(
         # Kernels:
@@ -103,7 +101,7 @@ def new_lmm(init=False):
     )
 
 
-# Plot first and last latent processes.
+# Plot first three and last three latent processes.
 if args.explore:
     lmm = new_lmm()
     x_proj_train = lmm.project(y_train)
@@ -122,7 +120,7 @@ if args.explore:
     plt.show()
 
 # Instantiate optimiser.
-new_lmm(init=True)  # Instantiate variables.
+new_lmm()  # Instantiate variables.
 opt = torch.optim.Adam(vs.get_vars(), lr=5e-2)
 
 
@@ -186,10 +184,10 @@ def plot_prediction(x, pred, c, f=None, x_obs=None, y_obs=None, label=None):
     plt.legend()
 
 
-# Plot predictions of 16 randomly chosen outputs.
+# Plot predictions for 16 randomly chosen outputs.
 if args.plot:
     plt.figure(figsize=(20, 10))
-    for num, i in enumerate(np.random.permutation(p)[:16]):
+    for num, i in enumerate(sorted(np.random.permutation(p)[:16])):
         plt.subplot(4, 4, num + 1)
         plt.title('Output {}'.format(i + 1))
         plot_prediction(x_test[:, -1], preds[i], 'green', f=y_test[:, i])
