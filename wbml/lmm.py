@@ -85,7 +85,7 @@ class LMMPP(object):
         lml = 0
         for i in range(self.p):
             # Compute `log p(y_i | y_{1:i - 1})`.
-            lml += ys[i](x).logpdf(y[:, i])[0]
+            lml += ys[i](x).logpdf(y[:, i])
 
             # Condition the remainder on the observation for `y_i`.
             obs = Obs(ys[i](x), y[:, i])
@@ -93,17 +93,17 @@ class LMMPP(object):
 
         return lml
 
-    def predict(self, x):
-        """Predict.
+    def marginals(self, x):
+        """Compute marginals.
 
         Args:
-            x (tensor): Inputs to predict at.
+            x (tensor): Inputs to construct marginals at.
 
         Returns:
-            tuple[tensor]: Marginals predictions, spatial means per time, and
+            tuple[tensor]: Marginals per output, spatial means per time, and
                 spatial variance per time.
         """
-        preds = [y.predict(x) for y in self.ys]
+        preds = [y(x).marginals() for y in self.ys]
         means, vars = [], []
         for i in range(B.shape_int(x)[0]):
             d = self.y(x[i])
@@ -228,7 +228,7 @@ class OLMM(Referentiable):
         # Add contributions of latent processes.
         lml = 0
         for p, n, yi in zip(self.xs_noisy, self.xs_noises, ys_proj):
-            lml += p(x).logpdf(yi)[0] - n(x).logpdf(yi)[0]
+            lml += p(x).logpdf(yi) - n(x).logpdf(yi)
 
         # Add regularisation contribution.
         noise_latent = B.matmul(self.H * B.array(self.noises_latent)[None, :],
@@ -252,14 +252,14 @@ class OLMM(Referentiable):
         """
         return B.unstack(B.matmul(self.P, y, tr_b=True), axis=0)
 
-    def predict(self, x):
-        """Predict.
+    def marginals(self, x):
+        """Compute marginals.
 
         Args:
-            x (tensor): Inputs to predict at.
+            x (tensor): Inputs to construct marginals at.
 
         Returns:
-            tuple[tensor]: Marginals predictions, spatial means per time, and
+            tuple[tensor]: Marginals per output, spatial means per time, and
                 spatial variance per time.
         """
 

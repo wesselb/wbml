@@ -143,7 +143,7 @@ for i in range(optimiser_iterations):
 # Condition and predict.
 lmm = new_lmm()
 lmm.observe(x_train, y_train)
-preds, means, vars = lmm.predict(x_test)
+preds, means, vars = lmm.marginals(x_test)
 
 # Compute scores for OLMM.
 lmls, mses = [], []

@@ -44,8 +44,8 @@ def test_olmm():
     yield assert_allclose, lmm_pp.lml(x2, y2), olmm.lml(x2, y2)
 
     # Predict.
-    preds_pp, means_pp, vars_pp = lmm_pp.predict(x2)
-    preds, means, vars = olmm.predict(x2)
+    preds_pp, means_pp, vars_pp = lmm_pp.marginals(x2)
+    preds, means, vars = olmm.marginals(x2)
 
     # Check predictions per time point.
     for i in range(5):
