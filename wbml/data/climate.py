@@ -13,7 +13,7 @@ __all__ = ['load']
 
 def load():
     # Load observations.
-    obs = nc.Dataset(data_path('stratis', 'erai_T2_1979-2016_daily.nc'))['T2']
+    obs = nc.Dataset(data_path('stratis', 'erai_T2_1979-2016_daily.nc'))['T2'][:, :]
 
     # Load simulators.
     sims = os.listdir(data_path('stratis'))
