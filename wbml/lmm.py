@@ -7,6 +7,7 @@ import logging
 from lab import B
 from plum import Dispatcher, Referentiable, Self
 from stheno import GP, Delta, Graph, Normal, Obs, dense
+import numpy as np
 
 __all__ = ['LMMPP', 'OLMM']
 
@@ -42,6 +43,7 @@ class LMMPP(object):
         for i in range(self.p):
             for j in range(self.m):
                 self.fs[i] += xs_noisy[j] * H[i, j]
+
         # Create two observed process.
         self.ys = [f + GP(noise_obs * Delta(), graph=self.graph)
                    for f in self.fs]
@@ -54,7 +56,14 @@ class LMMPP(object):
             x (tensor): Inputs.
             y (tensor): Outputs.
         """
-        obs = Obs(*((self.ys[i](x), y[:, i]) for i in range(self.p)))
+        # Make x-y tuples, handling missing data.
+        xy_tuples = []
+        for i in range(self.p):
+            mask = ~np.isnan(y[:, i])
+            xy_tuples.append((self.ys[i](x[mask]), y[mask, i]))
+
+        # Condition all processes.
+        obs = Obs(*xy_tuples)
         self.fs = [p | obs for p in self.fs]
         self.ys = [p | obs for p in self.ys]
         self.y = self.y | obs
@@ -83,11 +92,14 @@ class LMMPP(object):
         # Compute the LML using the product rule.
         lml = 0
         for i in range(self.p):
+            # Handle missing data.
+            mask = ~np.isnan(y[:, i])
+
             # Compute `log p(y_i | y_{1:i - 1})`.
-            lml += ys[i](x).logpdf(y[:, i])
+            lml += ys[i](x[mask]).logpdf(y[mask, i])
 
             # Condition the remainder on the observation for `y_i`.
-            obs = Obs(ys[i](x), y[:, i])
+            obs = Obs(ys[i](x[mask]), y[mask, i])
             ys[i:] = [p | obs for p in ys[i:]]
 
         return lml
@@ -122,11 +134,6 @@ class OLMM(Referentiable):
     """
     _dispatch = Dispatcher(in_class=Self)
 
-    @_dispatch({list, tuple}, B.Numeric, {B.Numeric, list}, B.Numeric)
-    def __init__(self, kernels, noise_obs, noises_latent, H):
-        U, S_sqrt, _ = B.svd(H)
-        OLMM.__init__(self, kernels, noise_obs, noises_latent, U, S_sqrt)
-
     @_dispatch({list, tuple},
                B.Numeric,
                {B.Numeric, list},
@@ -157,6 +164,11 @@ class OLMM(Referentiable):
 
         # Construct mixing matrix and projection.
         self._construct_H_and_P()
+
+    @_dispatch({list, tuple}, B.Numeric, {B.Numeric, list}, B.Numeric)
+    def __init__(self, kernels, noise_obs, noises_latent, H):
+        U, S_sqrt, _ = B.svd(H)
+        OLMM.__init__(self, kernels, noise_obs, noises_latent, U, S_sqrt)
 
     def _construct_H_and_P(self):
         # Compute mixing matrix.
