@@ -41,8 +41,7 @@ class LMMPP(object):
         self.fs = [0 for _ in range(self.p)]
         for i in range(self.p):
             for j in range(self.m):
-                self.fs[i] += H[i, j] * xs_noisy[j]
-
+                self.fs[i] += xs_noisy[j] * H[i, j]
         # Create two observed process.
         self.ys = [f + GP(noise_obs * Delta(), graph=self.graph)
                    for f in self.fs]
