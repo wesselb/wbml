@@ -50,6 +50,8 @@ def test_lmm_missing_data():
           lmm.lml(x[[0, 2, 3, 4]], y[[0, 2, 3, 4]]), \
           lmm.lml(x, y2)
 
+    B.backend_to_tf()
+
 
 def test_olmm():
     B.backend_to_np()
@@ -96,3 +98,5 @@ def test_olmm():
         yield assert_allclose, preds_pp[i][0], preds[i][0]
         yield assert_allclose, preds_pp[i][1], preds[i][1]
         yield assert_allclose, preds_pp[i][2], preds[i][2]
+        
+    B.backend_to_tf()
