@@ -36,17 +36,19 @@ parser.add_argument('-i', '--its', type=int, default=20,
                     help='Number of optimiser iterations.')
 parser.add_argument('-p', '--plot', action='store_true', help='Plot.')
 parser.add_argument('-e', '--explore', action='store_true', help='Explore.')
+parser.add_argument('-n', '--model', type=int, default=0, help='Simulator to model.')
 args = parser.parse_args()
 
 
-# Set up results file.
-f = open("results/smoothing.csv", 'w')
-f.write("model_number, naive_rmse, smoothed_rmse, internal_rmse\n")
-f.close()
+# # Set up results file.
+# f = open("results/smoothing.csv", 'w')
+# f.write("model_number, naive_rmse, smoothed_rmse, internal_rmse\n")
+# f.close()
 
 # Iterate over all of the data.
+Nte = 1_000
 obs, sims = load()
-for n_sim in range(28):
+for n_sim in range(args.model, args.model+1):
 
     # Model parameters:
     m = args.m
@@ -60,7 +62,6 @@ for n_sim in range(28):
     y_train = sims[n_sim].reshape(sims[n_sim].shape[0], -1)[:500, :]
     x_train = np.arange(y_train.shape[0])[:, None]
 
-    Nte = 1_000
     y_test = sims[n_sim].reshape(sims[n_sim].shape[0], -1)[:Nte, :]
     x_test = np.arange(y_test.shape[0])[:Nte, None]
     y_obs = obs.reshape(obs.shape[0], -1)[:Nte, :]
@@ -209,3 +210,15 @@ for n_sim in range(28):
     f = open("results/smoothing.csv", 'a')
     f.write(f'{n_sim},{rmse_naive},{rmse_smoothed},{rmse_internal}\n')
     f.close()
+
+# Iterate over all of the data.
+obs, sims = load()
+mean_model = torch.tensor(B.zeros(Nte, obs.shape[1] * obs.shape[2]), dtype=torch.double)
+for n_sim in range(28):
+    y_test = sims[n_sim].reshape(sims[n_sim].shape[0], -1)[:Nte, :]
+    mean_model = mean_model + torch.tensor(y_test, dtype=torch.double)
+
+mean_model /= 28
+
+obs_ = obs.reshape(obs.shape[0], -1)[:Nte, :]
+rmse_mean = B.sqrt(B.mean((mean_model - torch.tensor(obs_, dtype=torch.double)) ** 2))

@@ -167,8 +167,8 @@ class Vars(Referentiable):
         def generate_init(shape, dtype):
             return B.rand(shape, dtype=dtype)
 
-        return self._get_var(transform=lambda x: B.exp(x),
-                             inverse_transform=lambda x: B.log(x),
+        return self._get_var(transform=lambda x: B.log(B.exp(x) + 1) + 1e-3,
+                             inverse_transform=lambda y: B.log(B.exp(y - 1e-3) - 1),
                              init=init,
                              generate_init=generate_init,
                              shape=shape,
