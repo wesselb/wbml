@@ -1,0 +1,583 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>wbml.util &mdash; wbml 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> wbml
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">WBML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Application Programming Interface</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">wbml</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>wbml.util</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for wbml.util</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
+<span class="kn">from</span> <span class="nn">operator</span> <span class="k">import</span> <span class="n">mul</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">product</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">lab</span> <span class="k">import</span> <span class="n">B</span>
+<span class="kn">from</span> <span class="nn">plum</span> <span class="k">import</span> <span class="n">Dispatcher</span><span class="p">,</span> <span class="n">Self</span><span class="p">,</span> <span class="n">Referentiable</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Packer&#39;</span><span class="p">,</span> <span class="s1">&#39;Vars&#39;</span><span class="p">,</span> <span class="s1">&#39;vars32&#39;</span><span class="p">,</span> <span class="s1">&#39;vars64&#39;</span><span class="p">,</span> <span class="s1">&#39;VarsFrom&#39;</span><span class="p">,</span> <span class="s1">&#39;inv_perm&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;identity&#39;</span><span class="p">,</span> <span class="s1">&#39;map_cols&#39;</span><span class="p">,</span> <span class="s1">&#39;Initialiser&#39;</span><span class="p">,</span> <span class="s1">&#39;construct_display_resolver&#39;</span><span class="p">]</span>
+
+<span class="n">_dispatch</span> <span class="o">=</span> <span class="n">Dispatcher</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Packer"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Packer">[docs]</a><span class="k">class</span> <span class="nc">Packer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pack objects into a vector.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *objs (tensor): Objects to pack.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">objs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shapes</span> <span class="o">=</span> <span class="p">[</span><span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lengths</span> <span class="o">=</span> <span class="p">[</span><span class="n">B</span><span class="o">.</span><span class="n">length</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Packer.pack"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Packer.pack">[docs]</a>    <span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">objs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pack objects.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *objs (tensor): Objects to pack.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tensor: Vector representation of the objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">B</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Packer.unpack"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Packer.unpack">[docs]</a>    <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Unpack vector.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            package (tensor): Vector to unpack.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[tensor]: Original objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">outs</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">shape</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shapes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lengths</span><span class="p">):</span>
+            <span class="n">outs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">package</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">length</span><span class="p">],</span> <span class="n">shape</span><span class="p">))</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="n">length</span>
+        <span class="k">return</span> <span class="n">outs</span></div></div>
+
+
+<div class="viewcode-block" id="Initialiser"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Initialiser">[docs]</a><span class="k">class</span> <span class="nc">Initialiser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Variable initialiser.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assignments</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="Initialiser.assign"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Initialiser.assign">[docs]</a>    <span class="k">def</span> <span class="nf">assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Assign values to a particular variable.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of variables.</span>
+<span class="sd">            values (list[tensor]): List of values to assign.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assignments</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span></div>
+
+<div class="viewcode-block" id="Initialiser.generate"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Initialiser.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate initialisers.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            vs (:class:`.util.Vars`): Variable storage.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[list[tensor]]: List of initialisers. Run a initialiser with a</span>
+<span class="sd">                TensorFlow session to set the initialisation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">names</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_assignments</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">return</span> <span class="p">[[</span><span class="n">vs</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">value</span><span class="p">)]</span>
+                <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">values</span><span class="p">)]</span></div></div>
+
+
+<div class="viewcode-block" id="Vars"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Vars">[docs]</a><span class="k">class</span> <span class="nc">Vars</span><span class="p">(</span><span class="n">Referentiable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Variable storage manager.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dtype (data type, optional): Data type of the variables. Defaults to</span>
+<span class="sd">            `np.float32`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_dispatch</span> <span class="o">=</span> <span class="n">Dispatcher</span><span class="p">(</span><span class="n">in_class</span><span class="o">=</span><span class="n">Self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vars</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generators</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assigners</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lookup</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="Vars.init"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Vars.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialise the variables.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            session (:class:`B.Session`): TensorFlow session.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">variables_initializer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Vars.get_vars"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Vars.get_vars">[docs]</a>    <span class="k">def</span> <span class="nf">get_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get variables by name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *names (hashable): Names of the variables.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[tensor]: Variables specified by `names`. If no names are</span>
+<span class="sd">                specified, all variables are returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lookup</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Vars.get"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Vars.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get an unbounded variable.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            init (tensor, optional): Initialisation of the variable.</span>
+<span class="sd">            shape (tuple[int], optional): Shape of the variable. Defaults to</span>
+<span class="sd">                scalar.</span>
+<span class="sd">            dtype (data type, optional): Data type of the variable. Defaults to</span>
+<span class="sd">                that of the storage.</span>
+<span class="sd">            name (hashable, optional): Name of the variable.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tensor: Variable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">generate_init</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+                             <span class="n">inverse_transform</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+                             <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span>
+                             <span class="n">generate_init</span><span class="o">=</span><span class="n">generate_init</span><span class="p">,</span>
+                             <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
+                             <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+                             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vars.positive"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Vars.positive">[docs]</a>    <span class="k">def</span> <span class="nf">positive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a positive variable.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            init (tensor, optional): Initialisation of the variable.</span>
+<span class="sd">            shape (tuple[int], optional): Shape of the variable. Defaults to</span>
+<span class="sd">                scalar.</span>
+<span class="sd">            dtype (data type, optional): Data type of the variable. Defaults to</span>
+<span class="sd">                that of the storage.</span>
+<span class="sd">            name (hashable, optional): Name of the variable.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tensor: Variable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">generate_init</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">B</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+                             <span class="n">inverse_transform</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">B</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+                             <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span>
+                             <span class="n">generate_init</span><span class="o">=</span><span class="n">generate_init</span><span class="p">,</span>
+                             <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
+                             <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+                             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vars.pos"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Vars.pos">[docs]</a>    <span class="k">def</span> <span class="nf">pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Alias for :meth:`.util.Vars.positive`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vars.bounded"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Vars.bounded">[docs]</a>    <span class="k">def</span> <span class="nf">bounded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">lower</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span>
+                <span class="n">upper</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(),</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a bounded variable.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            init (tensor, optional): Initialisation of the variable.</span>
+<span class="sd">            lower (tensor, optional): Lower bound. Defaults to `1e-4`.</span>
+<span class="sd">            upper (tensor, optional): Upper bound. Defaults to `1e4`.</span>
+<span class="sd">            shape (tuple[int], optional): Shape of the variable. Defaults to</span>
+<span class="sd">                scalar.</span>
+<span class="sd">            dtype (data type, optional): Data type of the variable. Defaults to</span>
+<span class="sd">                that of the storage.</span>
+<span class="sd">            name (hashable, optional): Name of the variable.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tensor: Variable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">lower</span> <span class="o">+</span> <span class="p">(</span><span class="n">upper</span> <span class="o">-</span> <span class="n">lower</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">B</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">inverse_transform</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">upper</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">B</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">lower</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">generate_init</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">lower</span> <span class="o">+</span> <span class="n">B</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">upper</span> <span class="o">-</span> <span class="n">lower</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+                             <span class="n">inverse_transform</span><span class="o">=</span><span class="n">inverse_transform</span><span class="p">,</span>
+                             <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span>
+                             <span class="n">generate_init</span><span class="o">=</span><span class="n">generate_init</span><span class="p">,</span>
+                             <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
+                             <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+                             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Vars.bnd"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Vars.bnd">[docs]</a>    <span class="k">def</span> <span class="nf">bnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Alias for :meth:`.util.Vars.bounded`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounded</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">transform</span><span class="p">,</span>
+                 <span class="n">inverse_transform</span><span class="p">,</span>
+                 <span class="n">init</span><span class="p">,</span>
+                 <span class="n">generate_init</span><span class="p">,</span>
+                 <span class="n">shape</span><span class="p">,</span>
+                 <span class="n">dtype</span><span class="p">,</span>
+                 <span class="n">name</span><span class="p">):</span>
+        <span class="c1"># If the name already exists, return that variable.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Resolve data type.</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dtype</span>
+
+        <span class="c1"># Resolve initialisation and inverse transform.</span>
+        <span class="k">if</span> <span class="n">init</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">init</span> <span class="o">=</span> <span class="n">generate_init</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">init</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="c1"># Construct latent variable and store if a name is given.</span>
+        <span class="n">latent</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">init</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">latent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lookup</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">latent</span>
+
+        <span class="c1"># Construct generator and assigner.</span>
+        <span class="k">def</span> <span class="nf">generate</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">transform</span><span class="p">(</span><span class="n">latent</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">assign</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">latent</span><span class="p">,</span> <span class="n">inverse_transform</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+        <span class="c1"># Store if a name is given.</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">generators</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">generate</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assigners</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">assign</span>
+
+        <span class="c1"># Generate the variable and return.</span>
+        <span class="k">return</span> <span class="n">generate</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Vars.assign"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.Vars.assign">[docs]</a>    <span class="k">def</span> <span class="nf">assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Assign a value to a variable.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (hashable): Name of variable to assign value to.</span>
+<span class="sd">            value (tensor): Value to assign.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tensor: TensorFlow tensor that can be run to perform the assignment.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigners</span><span class="p">[</span><span class="n">name</span><span class="p">](</span><span class="n">value</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a variable by name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (hashable): Name of variable.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tensor: Variable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generators</span><span class="p">[</span><span class="n">name</span><span class="p">]()</span></div>
+
+
+<div class="viewcode-block" id="VarsFrom"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.VarsFrom">[docs]</a><span class="k">class</span> <span class="nc">VarsFrom</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_source</span> <span class="o">=</span> <span class="n">source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_i</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="VarsFrom.get"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.VarsFrom.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">mul</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_source</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_i</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_i</span> <span class="o">+</span> <span class="n">length</span><span class="p">],</span> <span class="n">shape</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_i</span> <span class="o">+=</span> <span class="n">length</span>
+        <span class="k">return</span> <span class="n">out</span></div></div>
+
+
+<span class="n">vars32</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">vars64</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="inv_perm"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.inv_perm">[docs]</a><span class="k">def</span> <span class="nf">inv_perm</span><span class="p">(</span><span class="n">perm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Invert a permutation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        perm (list): Permutation to invert.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: Inverse permutation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">perm</span><span class="p">))]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">perm</span><span class="p">):</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="identity"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.identity">[docs]</a><span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Identity function.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (object): Input.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        object: `x`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="map_cols"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.map_cols">[docs]</a><span class="k">def</span> <span class="nf">map_cols</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Map the columns of a matrix on a function.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        f (function): Function to map.</span>
+<span class="sd">        xs (tensor): Matrix onto which to map the function.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tensor: Result.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">map_fn</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]),</span> <span class="n">B</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="construct_display_resolver"><a class="viewcode-back" href="../../source/wbml.util.html#wbml.util.construct_display_resolver">[docs]</a><span class="k">def</span> <span class="nf">construct_display_resolver</span><span class="p">(</span><span class="n">sess</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct a resolver displaying variables.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sess: TensorFlow session</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        function: Resolver.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dispatch</span> <span class="o">=</span> <span class="n">Dispatcher</span><span class="p">()</span>
+
+    <span class="nd">@dispatch</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">TF</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">resolve</span><span class="p">(</span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="nd">@dispatch</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">B</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{:.2e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">B</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">{:.2e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Cannot nicely display a rank-</span><span class="si">{}</span><span class="s1"> tensor.&#39;</span>
+                               <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">resolve</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Wessel Bruinsma.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

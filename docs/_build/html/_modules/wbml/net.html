@@ -1,0 +1,499 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>wbml.net &mdash; wbml 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> wbml
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">WBML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Application Programming Interface</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">wbml</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>wbml.net</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for wbml.net</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">ABCMeta</span>
+
+<span class="kn">from</span> <span class="nn">lab</span> <span class="k">import</span> <span class="n">B</span>
+
+<span class="kn">from</span> <span class="nn">.util</span> <span class="k">import</span> <span class="n">vars32</span><span class="p">,</span> <span class="n">inv_perm</span><span class="p">,</span> <span class="n">identity</span>
+
+
+<div class="viewcode-block" id="Layer"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Layer">[docs]</a><span class="k">class</span> <span class="nc">Layer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
+
+<div class="viewcode-block" id="Layer.initialise"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Layer.initialise">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">,</span> <span class="nb">vars</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Layer.weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Layer.weights">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Layer.num_weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Layer.num_weights">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">num_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="Identity"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Identity">[docs]</a><span class="k">class</span> <span class="nc">Identity</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Identity.initialise"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Identity.initialise">[docs]</a>    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arg</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Identity.weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Identity.weights">[docs]</a>    <span class="k">def</span> <span class="nf">weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">identity</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Identity.num_weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Identity.num_weights">[docs]</a>    <span class="k">def</span> <span class="nf">num_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span></div></div>
+
+
+<div class="viewcode-block" id="FeedForwardLayer"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.FeedForwardLayer">[docs]</a><span class="k">class</span> <span class="nc">FeedForwardLayer</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">xs</span><span class="p">):</span>
+        <span class="c1"># Stack inputs.</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">B</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Shape into one big matrix for efficient application.</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="c1"># Apply.</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="c1"># Shape back.</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]])</span>
+            <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">inv_perm</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Normalise"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Normalise">[docs]</a><span class="k">class</span> <span class="nc">Normalise</span><span class="p">(</span><span class="n">FeedForwardLayer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Normalise.initialise"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Normalise.initialise">[docs]</a>    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">,</span> <span class="nb">vars</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">input_size</span></div>
+
+<div class="viewcode-block" id="Normalise.weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Normalise.weights">[docs]</a>    <span class="k">def</span> <span class="nf">weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">**</span> <span class="o">.</span><span class="mi">5</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">std</span> <span class="o">+</span> <span class="n">B</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Normalise.num_weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Normalise.num_weights">[docs]</a>    <span class="k">def</span> <span class="nf">num_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">input_size</span>
+        <span class="k">return</span> <span class="mi">0</span></div></div>
+
+
+<div class="viewcode-block" id="Dense"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Dense">[docs]</a><span class="k">class</span> <span class="nc">Dense</span><span class="p">(</span><span class="n">FeedForwardLayer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nonlinearity</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">relu</span> <span class="k">if</span> <span class="n">nonlinearity</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nonlinearity</span>
+
+<div class="viewcode-block" id="Dense.initialise"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Dense.initialise">[docs]</a>    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">,</span> <span class="nb">vars</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="nb">vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">input_size</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="nb">vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span></div>
+
+    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonlinearity</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Dense.weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Dense.weights">[docs]</a>    <span class="k">def</span> <span class="nf">weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">B</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+                         <span class="n">B</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Dense.num_weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Dense.num_weights">[docs]</a>    <span class="k">def</span> <span class="nf">num_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="p">(</span><span class="n">input_size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Linear"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Linear">[docs]</a><span class="k">class</span> <span class="nc">Linear</span><span class="p">(</span><span class="n">Dense</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
+        <span class="n">Dense</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="n">identity</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Net"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Net">[docs]</a><span class="k">class</span> <span class="nc">Net</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_size</span> <span class="o">=</span> <span class="n">input_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">layers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_initialised</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="Net.initialise"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Net.initialise">[docs]</a>    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">vars</span><span class="o">=</span><span class="n">vars32</span><span class="p">):</span>
+        <span class="c1"># Initialise layers.</span>
+        <span class="n">cur_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_size</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="n">layer</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="n">cur_size</span><span class="p">,</span> <span class="nb">vars</span><span class="p">)</span>
+            <span class="n">cur_size</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_initialised</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Net.weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Net.weights">[docs]</a>    <span class="k">def</span> <span class="nf">weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">weights</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># Make sure the net is initialised.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_initialised</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initialise</span><span class="p">()</span>
+
+        <span class="c1"># Apply layers.</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+<div class="viewcode-block" id="Net.num_weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Net.num_weights">[docs]</a>    <span class="k">def</span> <span class="nf">num_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">num_weights</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">cur_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_size</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="n">num_weights</span> <span class="o">+=</span> <span class="n">layer</span><span class="o">.</span><span class="n">num_weights</span><span class="p">(</span><span class="n">cur_size</span><span class="p">)</span>
+            <span class="n">cur_size</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">width</span>
+        <span class="k">return</span> <span class="n">num_weights</span></div></div>
+
+
+<div class="viewcode-block" id="GRU"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.GRU">[docs]</a><span class="k">class</span> <span class="nc">GRU</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nonlinearity</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">tahn</span> <span class="k">if</span> <span class="n">nonlinearity</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nonlinearity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_z</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="n">B</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_r</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="n">B</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_h</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nonlinearity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h0</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="GRU.initialise"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.GRU.initialise">[docs]</a>    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">,</span> <span class="nb">vars</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h0</span> <span class="o">=</span> <span class="nb">vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_z</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">+</span> <span class="n">input_size</span><span class="p">,</span> <span class="nb">vars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_r</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">+</span> <span class="n">input_size</span><span class="p">,</span> <span class="nb">vars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_h</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">+</span> <span class="n">input_size</span><span class="p">,</span> <span class="nb">vars</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">xs</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">loop</span><span class="p">(</span><span class="n">prev</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+            <span class="n">prev_h</span><span class="p">,</span> <span class="n">prev_y</span> <span class="o">=</span> <span class="n">prev</span>
+
+            <span class="c1"># Gate logic:</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_z</span><span class="p">(</span><span class="n">prev_h</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_r</span><span class="p">(</span><span class="n">prev_h</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">prev_h</span> <span class="o">+</span> <span class="n">z</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_h</span><span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">prev_h</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">h</span>
+
+            <span class="k">return</span> <span class="n">h</span><span class="p">,</span> <span class="n">y</span>
+
+        <span class="n">y0</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">B</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
+        <span class="n">h0</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h0</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">initializer</span><span class="o">=</span><span class="p">(</span><span class="n">h0</span><span class="p">,</span> <span class="n">y0</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+
+<div class="viewcode-block" id="GRU.weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.GRU.weights">[docs]</a>    <span class="k">def</span> <span class="nf">weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">B</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h0</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">f_z</span><span class="o">.</span><span class="n">weights</span><span class="p">(),</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">f_r</span><span class="o">.</span><span class="n">weights</span><span class="p">(),</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">f_h</span><span class="o">.</span><span class="n">weights</span><span class="p">()],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GRU.num_weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.GRU.num_weights">[docs]</a>    <span class="k">def</span> <span class="nf">num_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">+</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">f_z</span><span class="o">.</span><span class="n">num_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">+</span> <span class="n">input_size</span><span class="p">)</span> <span class="o">+</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">f_r</span><span class="o">.</span><span class="n">num_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">+</span> <span class="n">input_size</span><span class="p">)</span> <span class="o">+</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">f_h</span><span class="o">.</span><span class="n">num_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">+</span> <span class="n">input_size</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Elman"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Elman">[docs]</a><span class="k">class</span> <span class="nc">Elman</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nonlinearity</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">sigmoid</span> <span class="k">if</span> <span class="n">nonlinearity</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nonlinearity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_h</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nonlinearity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h0</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Elman.initialise"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Elman.initialise">[docs]</a>    <span class="k">def</span> <span class="nf">initialise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">,</span> <span class="nb">vars</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h0</span> <span class="o">=</span> <span class="nb">vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_h</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">+</span> <span class="n">input_size</span><span class="p">,</span> <span class="nb">vars</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">):</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">xs</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">loop</span><span class="p">(</span><span class="n">prev</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+            <span class="n">prev_h</span><span class="p">,</span> <span class="n">prev_y</span> <span class="o">=</span> <span class="n">prev</span>
+
+            <span class="c1"># Gate logic:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_h</span><span class="p">(</span><span class="n">prev_h</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">h</span>
+
+            <span class="k">return</span> <span class="n">h</span><span class="p">,</span> <span class="n">y</span>
+
+        <span class="n">y0</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">B</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
+        <span class="n">h0</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h0</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">initializer</span><span class="o">=</span><span class="p">(</span><span class="n">h0</span><span class="p">,</span> <span class="n">y0</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Elman.weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Elman.weights">[docs]</a>    <span class="k">def</span> <span class="nf">weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">B</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h0</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_h</span><span class="o">.</span><span class="n">weights</span><span class="p">()],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Elman.num_weights"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.Elman.num_weights">[docs]</a>    <span class="k">def</span> <span class="nf">num_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">+</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">f_h</span><span class="o">.</span><span class="n">num_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">+</span> <span class="n">input_size</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ff"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.ff">[docs]</a><span class="k">def</span> <span class="nf">ff</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">,</span> <span class="n">widths</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalise</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A standard feed-forward neural net.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_size (int): Size of input.</span>
+<span class="sd">        output_size (int): Size of output.</span>
+<span class="sd">        widths (tuple of int): Widths of the layers.</span>
+<span class="sd">        nonlinearity (function, optional): Nonlinearity to use. Defaults to</span>
+<span class="sd">            ReLUs.</span>
+<span class="sd">        normalise (bool, optional): Interleave with normalisation layers.</span>
+<span class="sd">            Defaults to `True`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nonlinearity</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">relu</span> <span class="k">if</span> <span class="n">nonlinearity</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nonlinearity</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">width</span> <span class="ow">in</span> <span class="n">widths</span><span class="p">:</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="n">nonlinearity</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">normalise</span><span class="p">:</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Normalise</span><span class="p">())</span>
+    <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Linear</span><span class="p">(</span><span class="n">output_size</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Net</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">layers</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="rnn"><a class="viewcode-back" href="../../source/wbml.net.html#wbml.net.rnn">[docs]</a><span class="k">def</span> <span class="nf">rnn</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">,</span> <span class="n">widths</span><span class="p">,</span>
+        <span class="n">nonlinearity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">normalise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">gru</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">final_dense</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A standard recurrent neural net.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_size (int): Size of input.</span>
+<span class="sd">        output_size (int): Size of output.</span>
+<span class="sd">        widths (tuple of int): Widths of the layers.</span>
+<span class="sd">        nonlinearity (function, optional): Nonlinearity to use. Defaults to</span>
+<span class="sd">            sigmoid.</span>
+<span class="sd">        normalise (bool, optional): Interleave with normalisation layers.</span>
+<span class="sd">            Defaults to `False`.</span>
+<span class="sd">        gru (bool, optional): Use GRU layers instead of Elman layers. Defaults</span>
+<span class="sd">            to `True`.</span>
+<span class="sd">        final_dense (bool, optional): Append a final dense layer. Defaults to</span>
+<span class="sd">            `False`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nonlinearity</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">sigmoid</span> <span class="k">if</span> <span class="n">nonlinearity</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nonlinearity</span>
+    <span class="n">layer_type</span> <span class="o">=</span> <span class="n">GRU</span> <span class="k">if</span> <span class="n">gru</span> <span class="k">else</span> <span class="n">Elman</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">width</span> <span class="ow">in</span> <span class="n">widths</span><span class="p">:</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer_type</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="n">nonlinearity</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">normalise</span><span class="p">:</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Normalise</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">final_dense</span><span class="p">:</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="n">output_size</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="n">nonlinearity</span><span class="p">))</span>
+    <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Linear</span><span class="p">(</span><span class="n">output_size</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Net</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">layers</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Wessel Bruinsma.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

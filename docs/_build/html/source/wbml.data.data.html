@@ -1,0 +1,628 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>wbml.data.data module &mdash; wbml 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="wbml.data.toy_sines module" href="wbml.data.toy_sines.html" />
+    <link rel="prev" title="wbml.data.climate module" href="wbml.data.climate.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> wbml
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">WBML</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Application Programming Interface</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="wbml.data.html">wbml.data package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="wbml.data.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="wbml.data.air_temp.html">wbml.data.air_temp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="wbml.data.climate.html">wbml.data.climate module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">wbml.data.data module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="wbml.data.toy_sines.html">wbml.data.toy_sines module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.air_temp.html">wbml.data.air_temp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.climate.html">wbml.data.climate module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">wbml.data.data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.toy_sines.html">wbml.data.toy_sines module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.lmm.html">wbml.lmm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.lr.html">wbml.lr module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.net.html">wbml.net module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.util.html">wbml.util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.vi.html">wbml.vi module</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">wbml</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">Application Programming Interface</a> &raquo;</li>
+        
+          <li><a href="wbml.data.html">wbml.data package</a> &raquo;</li>
+        
+      <li>wbml.data.data module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/source/wbml.data.data.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-wbml.data.data">
+<span id="wbml-data-data-module"></span><h1>wbml.data.data module<a class="headerlink" href="#module-wbml.data.data" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="wbml.data.data.Data">
+<em class="property">class </em><code class="descclassname">wbml.data.data.</code><code class="descname">Data</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.Data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">plum.resolvable.Referentiable</span></code></p>
+<p>Data set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>tensor</em>) – Inputs.</li>
+<li><strong>y</strong> (<em>tensor</em>) – Outputs.</li>
+<li><strong>names</strong> – Names of the outputs.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="wbml.data.data.Data.cast">
+<code class="descname">cast</code><span class="sig-paren">(</span><em>dtype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#Data.cast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.Data.cast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cast the data to a particular data type.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dtype</strong> (<em>dtype</em>) – Date type to cast to.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Data casted to <cite>dtype</cite>.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.data.data.Data.concat_xy">
+<code class="descname">concat_xy</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#Data.concat_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.Data.concat_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenate outputs from another data set at new inputs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> (<a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a>) – Other data set.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Concatenation.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.data.data.Data.concat_y">
+<code class="descname">concat_y</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#Data.concat_y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.Data.concat_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenate outputs from another data set at the current inputs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> (<a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a>) – Other data set.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Concatenation.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.data.data.Data.interval">
+<code class="descname">interval</code><span class="sig-paren">(</span><em>x_start</em>, <em>x_end</em>, <em>start_inclusive=True</em>, <em>end_inclusive=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#Data.interval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.Data.interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select a interval of the data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x_start</strong> – Start of the interval.</li>
+<li><strong>x_end</strong> – End of the interval.</li>
+<li><strong>start_inclusive</strong> (<em>bool</em><em>, </em><em>optional</em>) – The start value is inclusive.
+Defaults to <cite>True</cite>.</li>
+<li><strong>end_inclusive</strong> (<em>bool</em><em>, </em><em>optional</em>) – The end value is inclusive.
+Defaults to <cite>False</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>Selected interval and the entire data</dt>
+<dd><p class="first last">with the interval set to missing.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple[<a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a>]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.data.data.Data.interval_y">
+<code class="descname">interval_y</code><span class="sig-paren">(</span><em>names</em>, <em>*args</em>, <em>**kw_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#Data.interval_y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.Data.interval_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select an interval from a particular output. Further takes in
+arguments for <a class="reference internal" href="#wbml.data.data.Data.interval" title="wbml.data.data.Data.interval"><code class="xref py py-meth docutils literal notranslate"><span class="pre">data.Data.interval()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*names</strong> (<em>str</em>) – Outputs to select the interval from.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The selected interval and the remainder.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tuple[<a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wbml.data.data.Data.m">
+<code class="descname">m</code><a class="headerlink" href="#wbml.data.data.Data.m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of features.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="wbml.data.data.Data.merge">
+<em class="property">static </em><code class="descname">merge</code><span class="sig-paren">(</span><em>*ds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#Data.merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.Data.merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge a number of data sets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*ds</strong> (<a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a>) – Data sets to merge.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Merged data set.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.data.data.Data.merge_x">
+<code class="descname">merge_x</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#Data.merge_x"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.Data.merge_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Safely merge outputs for duplicate inputs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Data with duplicate inputs merged.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wbml.data.data.Data.n">
+<code class="descname">n</code><a class="headerlink" href="#wbml.data.data.Data.n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of data points.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.data.data.Data.normalise">
+<code class="descname">normalise</code><span class="sig-paren">(</span><em>ref=None</em>, <em>unnormaliser=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#Data.normalise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.Data.normalise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalise data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ref</strong> (<a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a>, optional) – Reference to normalise with
+respect to. Defaults to itself.</li>
+<li><strong>unnormaliser</strong> (<em>bool</em><em>, </em><em>optional</em>) – Also return a function to
+unnormalise data. Defaults to <cite>False</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>Normalised data. Can further return a</dt>
+<dd><p class="first last">function to unnormalise data.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wbml.data.data.Data.p">
+<code class="descname">p</code><a class="headerlink" href="#wbml.data.data.Data.p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of outputs.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.data.data.Data.select">
+<code class="descname">select</code><span class="sig-paren">(</span><em>*names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#Data.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.Data.select" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select particular outputs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*names</strong> – Outputs to select.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Selected outputs and the remainder.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tuple[<a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.data.data.Data.shuffle">
+<code class="descname">shuffle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#Data.shuffle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.Data.shuffle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shuffle the data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Shuffled data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.data.data.Data.split">
+<code class="descname">split</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#Data.split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.Data.split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split the data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> (<em>int</em><em> or </em><em>float</em>) – Point to split the data at. Can either be an
+int, representing an index, or a float, representing a
+fractional point.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">First and second part of the data.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tuple[<a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.data.data.Data.truncate">
+<code class="descname">truncate</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#Data.truncate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.Data.truncate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Truncate the data. Takes in arguments like <a class="reference internal" href="#wbml.data.data.Data.split" title="wbml.data.data.Data.split"><code class="xref py py-meth docutils literal notranslate"><span class="pre">data.Data.split()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Truncated data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#wbml.data.data.Data" title="wbml.data.data.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">data.Data</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wbml.data.data.CSVReader">
+<em class="property">class </em><code class="descclassname">wbml.data.data.</code><code class="descname">CSVReader</code><a class="reference internal" href="../_modules/wbml/data/data.html#CSVReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.CSVReader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Read and parse a CSV.</p>
+<dl class="method">
+<dt id="wbml.data.data.CSVReader.add_field">
+<code class="descname">add_field</code><span class="sig-paren">(</span><em>column_name</em>, <em>type</em>, <em>output_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#CSVReader.add_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.CSVReader.add_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>column_name</strong> (<em>str</em>) – Name of column.</li>
+<li><strong>type</strong> (<em>type</em><em> or </em><em>function</em>) – Type of column. Can also be a function
+that convert the value into the right type.</li>
+<li><strong>output_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Change the name of the column.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.data.data.CSVReader.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>file_name</em>, <em>delimiter='</em>, <em>'</em>, <em>cache=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#CSVReader.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.CSVReader.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and parse a CSV.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file_name</strong> (<em>str</em>) – File name.</li>
+<li><strong>delimiter</strong> (<em>str</em><em>, </em><em>optional</em>) – Delimiter. Defaults to a comma.</li>
+<li><strong>cache</strong> (<em>bool</em><em>, </em><em>optional</em>) – Use a cache if available. Defaults to
+<cite>False</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.data.data.CSVReader.set_field_group">
+<code class="descname">set_field_group</code><span class="sig-paren">(</span><em>name</em>, <em>matrix=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/data/data.html#CSVReader.set_field_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.data.data.CSVReader.set_field_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a group of fields.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) – Name of group.</li>
+<li><strong>matrix</strong> (<em>bool</em><em>, </em><em>optional</em>) – Output group as a matrix instead of a
+dictionary. Defaults to <cite>True</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wbml.data.data.normalise_norm">
+<code class="descclassname">wbml.data.data.</code><code class="descname">normalise_norm</code><a class="headerlink" href="#wbml.data.data.normalise_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalise objects to N(0, 1).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*xs</strong> – Objects to normalise.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Normalised objects.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wbml.data.data.normalise_01">
+<code class="descclassname">wbml.data.data.</code><code class="descname">normalise_01</code><a class="headerlink" href="#wbml.data.data.normalise_01" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalise objects to [0, 1].</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*xs</strong> – Objects to normalise.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Normalised objects.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="wbml.data.toy_sines.html" class="btn btn-neutral float-right" title="wbml.data.toy_sines module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="wbml.data.climate.html" class="btn btn-neutral" title="wbml.data.climate module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Wessel Bruinsma.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

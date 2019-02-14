@@ -1,0 +1,7 @@
+wbml.data.air\_temp module
+==========================
+
+.. automodule:: wbml.data.air_temp
+    :members:
+    :undoc-members:
+    :show-inheritance:

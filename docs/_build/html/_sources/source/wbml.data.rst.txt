@@ -1,0 +1,18 @@
+wbml.data package
+=================
+
+.. automodule:: wbml.data
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   wbml.data.air_temp
+   wbml.data.climate
+   wbml.data.data
+   wbml.data.toy_sines
+

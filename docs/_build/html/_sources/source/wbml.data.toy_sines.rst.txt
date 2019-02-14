@@ -1,0 +1,7 @@
+wbml.data.toy\_sines module
+===========================
+
+.. automodule:: wbml.data.toy_sines
+    :members:
+    :undoc-members:
+    :show-inheritance:

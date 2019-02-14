@@ -1,0 +1,520 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>wbml.lmm &mdash; wbml 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> wbml
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">WBML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Application Programming Interface</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">wbml</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>wbml.lmm</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for wbml.lmm</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">lab</span> <span class="k">import</span> <span class="n">B</span>
+<span class="kn">from</span> <span class="nn">plum</span> <span class="k">import</span> <span class="n">Dispatcher</span><span class="p">,</span> <span class="n">Referentiable</span><span class="p">,</span> <span class="n">Self</span>
+<span class="kn">from</span> <span class="nn">stheno</span> <span class="k">import</span> <span class="n">GP</span><span class="p">,</span> <span class="n">Delta</span><span class="p">,</span> <span class="n">Graph</span><span class="p">,</span> <span class="n">Normal</span><span class="p">,</span> <span class="n">Obs</span><span class="p">,</span> <span class="n">dense</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LMMPP&#39;</span><span class="p">,</span> <span class="s1">&#39;OLMM&#39;</span><span class="p">]</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="LMMPP"><a class="viewcode-back" href="../../source/wbml.lmm.html#wbml.lmm.LMMPP">[docs]</a><span class="k">class</span> <span class="nc">LMMPP</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;PP implementation of the linear mixing model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        kernels (list[:class:`stheno.Kernel`]) Kernels.</span>
+<span class="sd">        noise_obs (tensor): Observation noise. One.</span>
+<span class="sd">        noises_latent (tensor): Latent noises. One per latent processes.</span>
+<span class="sd">        H (tensor): Mixing matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kernels</span><span class="p">,</span> <span class="n">noise_obs</span><span class="p">,</span> <span class="n">noises_latent</span><span class="p">,</span> <span class="n">H</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">shape_int</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+
+        <span class="c1"># Create latent processes.</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="p">[</span><span class="n">GP</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kernels</span><span class="p">]</span>
+
+        <span class="c1"># Create latent noise.</span>
+        <span class="n">es</span> <span class="o">=</span> <span class="p">[</span><span class="n">GP</span><span class="p">(</span><span class="n">noise</span> <span class="o">*</span> <span class="n">Delta</span><span class="p">(),</span> <span class="n">graph</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+              <span class="k">for</span> <span class="n">noise</span> <span class="ow">in</span> <span class="n">noises_latent</span><span class="p">]</span>
+
+        <span class="c1"># Create noisy latent processes.</span>
+        <span class="n">xs_noisy</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">+</span> <span class="n">e</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">es</span><span class="p">)]</span>
+
+        <span class="c1"># Multiply with mixing matrix.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">xs_noisy</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">H</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+
+        <span class="c1"># Create two observed process.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ys</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="o">+</span> <span class="n">GP</span><span class="p">(</span><span class="n">noise_obs</span> <span class="o">*</span> <span class="n">Delta</span><span class="p">(),</span> <span class="n">graph</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+                   <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fs</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ys</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LMMPP.observe"><a class="viewcode-back" href="../../source/wbml.lmm.html#wbml.lmm.LMMPP.observe">[docs]</a>    <span class="k">def</span> <span class="nf">observe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Observe data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (tensor): Inputs.</span>
+<span class="sd">            y (tensor): Outputs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Make x-y tuples, handling missing data.</span>
+        <span class="n">xy_tuples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">):</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+            <span class="n">xy_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ys</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">x</span><span class="p">[</span><span class="n">mask</span><span class="p">]),</span> <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">i</span><span class="p">]))</span>
+
+        <span class="c1"># Condition all processes.</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">Obs</span><span class="p">(</span><span class="o">*</span><span class="n">xy_tuples</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="o">|</span> <span class="n">obs</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fs</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ys</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="o">|</span> <span class="n">obs</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ys</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">|</span> <span class="n">obs</span></div>
+
+<div class="viewcode-block" id="LMMPP.sample"><a class="viewcode-back" href="../../source/wbml.lmm.html#wbml.lmm.LMMPP.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sample data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (tensor): Inputs to sample at.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">y</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ys</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LMMPP.lml"><a class="viewcode-back" href="../../source/wbml.lmm.html#wbml.lmm.LMMPP.lml">[docs]</a>    <span class="k">def</span> <span class="nf">lml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute the LML.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (tensor): Inputs of data.</span>
+<span class="sd">            y (tensor): Output of data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tensor: LML of data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ys</span><span class="p">)</span>
+
+        <span class="c1"># Compute the LML using the product rule.</span>
+        <span class="n">lml</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">):</span>
+            <span class="c1"># Handle missing data.</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+
+            <span class="c1"># Compute `log p(y_i | y_{1:i - 1})`.</span>
+            <span class="n">lml</span> <span class="o">+=</span> <span class="n">ys</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">x</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+
+            <span class="c1"># Condition the remainder on the observation for `y_i`.</span>
+            <span class="n">obs</span> <span class="o">=</span> <span class="n">Obs</span><span class="p">(</span><span class="n">ys</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">x</span><span class="p">[</span><span class="n">mask</span><span class="p">]),</span> <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+            <span class="n">ys</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="o">|</span> <span class="n">obs</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ys</span><span class="p">[</span><span class="n">i</span><span class="p">:]]</span>
+
+        <span class="k">return</span> <span class="n">lml</span></div>
+
+<div class="viewcode-block" id="LMMPP.marginals"><a class="viewcode-back" href="../../source/wbml.lmm.html#wbml.lmm.LMMPP.marginals">[docs]</a>    <span class="k">def</span> <span class="nf">marginals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute marginals.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (tensor): Inputs to construct marginals at.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[tensor]: Marginals per output, spatial means per time, and</span>
+<span class="sd">                spatial variance per time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">preds</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">marginals</span><span class="p">()</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ys</span><span class="p">]</span>
+        <span class="n">means</span><span class="p">,</span> <span class="nb">vars</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">shape_int</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">means</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+            <span class="nb">vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dense</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">var</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">preds</span><span class="p">,</span> <span class="n">means</span><span class="p">,</span> <span class="nb">vars</span></div></div>
+
+
+<div class="viewcode-block" id="OLMM"><a class="viewcode-back" href="../../source/wbml.lmm.html#wbml.lmm.OLMM">[docs]</a><span class="k">class</span> <span class="nc">OLMM</span><span class="p">(</span><span class="n">Referentiable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Orthogonal linear mixing model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        kernels (list[:class:`stheno.Kernel`]) Kernels.</span>
+<span class="sd">        noise_obs (tensor): Observation noise. One.</span>
+<span class="sd">        noises_latent (tensor): Latent noises. One per latent processes.</span>
+<span class="sd">        H (tensor): Mixing matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_dispatch</span> <span class="o">=</span> <span class="n">Dispatcher</span><span class="p">(</span><span class="n">in_class</span><span class="o">=</span><span class="n">Self</span><span class="p">)</span>
+
+    <span class="nd">@_dispatch</span><span class="p">({</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">},</span>
+               <span class="n">B</span><span class="o">.</span><span class="n">Numeric</span><span class="p">,</span>
+               <span class="p">{</span><span class="n">B</span><span class="o">.</span><span class="n">Numeric</span><span class="p">,</span> <span class="nb">list</span><span class="p">},</span>
+               <span class="n">B</span><span class="o">.</span><span class="n">Numeric</span><span class="p">,</span>
+               <span class="n">B</span><span class="o">.</span><span class="n">Numeric</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kernels</span><span class="p">,</span> <span class="n">noise_obs</span><span class="p">,</span> <span class="n">noises_latent</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">S_sqrt</span><span class="p">):</span>
+        <span class="c1"># Determine number of outputs and latent processes.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
+
+        <span class="c1"># Save components of mixing matrix.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">U</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">S_sqrt</span> <span class="o">=</span> <span class="n">S_sqrt</span>
+
+        <span class="c1"># Save noises.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_obs</span> <span class="o">=</span> <span class="n">noise_obs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noises_latent</span> <span class="o">=</span> <span class="n">noises_latent</span>
+
+        <span class="c1"># Compute projected noises.</span>
+        <span class="n">noises_projected</span> <span class="o">=</span> <span class="p">[</span><span class="n">noise_obs</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">S_sqrt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">noises_latent</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)]</span>
+
+        <span class="c1"># Construct single-output models.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphs</span> <span class="o">=</span> <span class="p">[</span><span class="n">Graph</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xs</span> <span class="o">=</span> <span class="p">[</span><span class="n">GP</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">kernels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphs</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xs_noises</span> <span class="o">=</span> <span class="p">[</span><span class="n">GP</span><span class="p">(</span><span class="n">Delta</span><span class="p">()</span> <span class="o">*</span> <span class="n">n</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">g</span><span class="p">)</span>
+                          <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">noises_projected</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphs</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xs_noisy</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="o">+</span> <span class="n">n</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xs_noises</span><span class="p">)]</span>
+
+        <span class="c1"># Construct mixing matrix and projection.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_construct_H_and_P</span><span class="p">()</span>
+
+    <span class="nd">@_dispatch</span><span class="p">({</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">},</span> <span class="n">B</span><span class="o">.</span><span class="n">Numeric</span><span class="p">,</span> <span class="p">{</span><span class="n">B</span><span class="o">.</span><span class="n">Numeric</span><span class="p">,</span> <span class="nb">list</span><span class="p">},</span> <span class="n">B</span><span class="o">.</span><span class="n">Numeric</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kernels</span><span class="p">,</span> <span class="n">noise_obs</span><span class="p">,</span> <span class="n">noises_latent</span><span class="p">,</span> <span class="n">H</span><span class="p">):</span>
+        <span class="n">U</span><span class="p">,</span> <span class="n">S_sqrt</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+        <span class="n">OLMM</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kernels</span><span class="p">,</span> <span class="n">noise_obs</span><span class="p">,</span> <span class="n">noises_latent</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">S_sqrt</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_construct_H_and_P</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Compute mixing matrix.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">S_sqrt</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="c1"># Construct data projection.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">S_sqrt</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
+
+<div class="viewcode-block" id="OLMM.optimal_U"><a class="viewcode-back" href="../../source/wbml.lmm.html#wbml.lmm.OLMM.optimal_U">[docs]</a>    <span class="k">def</span> <span class="nf">optimal_U</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Approximate the optimal `U`.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This assumes no noise on the latent processes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (tensor): Inputs of data.</span>
+<span class="sd">            y (tensor): Output of data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Construct first `A`.</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Greedy approximation of optimal U.</span>
+        <span class="n">U</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">As</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">us</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="p">[</span><span class="n">U</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">1</span><span class="p">]],</span> <span class="n">U</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">):</span>
+            <span class="c1"># Construct `A` for iteration `i`.</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="n">U</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">tr_a</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">V</span><span class="p">))</span>
+            <span class="n">us</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">U</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">V</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">U</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">us</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Reconstruct mixing matrix and projection.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_construct_H_and_P</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="OLMM.observe"><a class="viewcode-back" href="../../source/wbml.lmm.html#wbml.lmm.OLMM.observe">[docs]</a>    <span class="k">def</span> <span class="nf">observe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Observe data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (tensor): Inputs.</span>
+<span class="sd">            y (tensor): Outputs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Perform projection.</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="c1"># Condition latent processes and noises.</span>
+        <span class="n">obses</span> <span class="o">=</span> <span class="p">[</span><span class="n">Obs</span><span class="p">(</span><span class="n">p</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs_noisy</span><span class="p">,</span> <span class="n">ys</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xs</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="o">|</span> <span class="n">obs</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">,</span> <span class="n">obses</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xs_noisy</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="o">|</span> <span class="n">obs</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs_noisy</span><span class="p">,</span> <span class="n">obses</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xs_noises</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="o">|</span> <span class="n">obs</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">obs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs_noises</span><span class="p">,</span> <span class="n">obses</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="OLMM.lml"><a class="viewcode-back" href="../../source/wbml.lmm.html#wbml.lmm.OLMM.lml">[docs]</a>    <span class="k">def</span> <span class="nf">lml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute the LML.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (tensor): Inputs of data.</span>
+<span class="sd">            y (tensor): Output of data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tensor: LML of data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Perform projection.</span>
+        <span class="n">ys_proj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="c1"># Add contributions of latent processes.</span>
+        <span class="n">lml</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs_noisy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xs_noises</span><span class="p">,</span> <span class="n">ys_proj</span><span class="p">):</span>
+            <span class="n">lml</span> <span class="o">+=</span> <span class="n">p</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">yi</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">yi</span><span class="p">)</span>
+
+        <span class="c1"># Add regularisation contribution.</span>
+        <span class="n">noise_latent</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">*</span> <span class="n">B</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noises_latent</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">tr_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">noise_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_obs</span> <span class="o">*</span> \
+                    <span class="n">B</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">B</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noise_obs</span><span class="p">))</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="n">noise_obs</span> <span class="o">+</span> <span class="n">noise_latent</span><span class="p">)</span>
+        <span class="n">lml</span> <span class="o">+=</span> <span class="n">B</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">lml</span></div>
+
+<div class="viewcode-block" id="OLMM.project"><a class="viewcode-back" href="../../source/wbml.lmm.html#wbml.lmm.OLMM.project">[docs]</a>    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Project observations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            y (tensor): Data to project.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tensor: Projected observations. Rows correspond to outputs and</span>
+<span class="sd">                columns to time points.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tr_b</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OLMM.marginals"><a class="viewcode-back" href="../../source/wbml.lmm.html#wbml.lmm.OLMM.marginals">[docs]</a>    <span class="k">def</span> <span class="nf">marginals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute marginals.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (tensor): Inputs to construct marginals at.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[tensor]: Marginals per output, spatial means per time, and</span>
+<span class="sd">                spatial variance per time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Extract means and variances of the latent processes.</span>
+        <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">d</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">dense</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">var</span><span class="p">)</span>
+
+        <span class="n">x_means</span><span class="p">,</span> <span class="n">x_vars</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">extract</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">])</span>
+
+        <span class="c1"># Pull means through mixing matrix and unstack.</span>
+        <span class="n">y_means</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">B</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">x_means</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">tr_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">y_means_per_output</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">y_means</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">y_means_per_time</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">B</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">y_means</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+
+        <span class="c1"># Get the diagonals: ignore temporal correlations.</span>
+        <span class="n">x_vars_per_time</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">B</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">x_vars</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Compute noise matrices.</span>
+        <span class="n">noise_latent</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">*</span> <span class="n">B</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noises_latent</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">tr_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">noise_obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_obs</span> <span class="o">*</span> \
+                    <span class="n">B</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">B</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noise_obs</span><span class="p">))</span>
+
+        <span class="c1"># Determine spatial variances.</span>
+        <span class="n">y_vars_per_time</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x_vars</span> <span class="ow">in</span> <span class="n">x_vars_per_time</span><span class="p">:</span>
+            <span class="c1"># Pull through mixing matrix.</span>
+            <span class="n">f_var</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">*</span> <span class="n">x_vars</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">,</span> <span class="n">tr_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">y_vars_per_time</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f_var</span> <span class="o">+</span> <span class="n">noise_obs</span> <span class="o">+</span> <span class="n">noise_latent</span><span class="p">)</span>
+
+        <span class="c1"># Compute variances per output.</span>
+        <span class="n">y_vars_per_output</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">B</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">y_vars_per_time</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Return marginal predictions, means per time, and variances per time.</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">mean</span><span class="p">,</span> <span class="n">mean</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">var</span> <span class="o">**</span> <span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="n">mean</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">var</span> <span class="o">**</span> <span class="o">.</span><span class="mi">5</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">mean</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">y_means_per_output</span><span class="p">,</span> <span class="n">y_vars_per_output</span><span class="p">)],</span> \
+               <span class="n">y_means_per_time</span><span class="p">,</span> <span class="n">y_vars_per_time</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Wessel Bruinsma.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

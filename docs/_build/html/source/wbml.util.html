@@ -1,0 +1,597 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>wbml.util module &mdash; wbml 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="wbml.vi module" href="wbml.vi.html" />
+    <link rel="prev" title="wbml.net module" href="wbml.net.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> wbml
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">WBML</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Application Programming Interface</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.html">wbml.data package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.air_temp.html">wbml.data.air_temp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.climate.html">wbml.data.climate module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.data.html">wbml.data.data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.toy_sines.html">wbml.data.toy_sines module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.lmm.html">wbml.lmm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.lr.html">wbml.lr module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.net.html">wbml.net module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">wbml.util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.vi.html">wbml.vi module</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">wbml</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">Application Programming Interface</a> &raquo;</li>
+        
+      <li>wbml.util module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/source/wbml.util.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-wbml.util">
+<span id="wbml-util-module"></span><h1>wbml.util module<a class="headerlink" href="#module-wbml.util" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="wbml.util.Packer">
+<em class="property">class </em><code class="descclassname">wbml.util.</code><code class="descname">Packer</code><span class="sig-paren">(</span><em>*objs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Packer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Packer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Pack objects into a vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*objs</strong> (<em>tensor</em>) – Objects to pack.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="wbml.util.Packer.pack">
+<code class="descname">pack</code><span class="sig-paren">(</span><em>*objs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Packer.pack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Packer.pack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pack objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*objs</strong> (<em>tensor</em>) – Objects to pack.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Vector representation of the objects.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.util.Packer.unpack">
+<code class="descname">unpack</code><span class="sig-paren">(</span><em>package</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Packer.unpack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Packer.unpack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpack vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>package</strong> (<em>tensor</em>) – Vector to unpack.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Original objects.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tuple[tensor]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wbml.util.Vars">
+<em class="property">class </em><code class="descclassname">wbml.util.</code><code class="descname">Vars</code><span class="sig-paren">(</span><em>dtype=&lt;class 'numpy.float32'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Vars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">plum.resolvable.Referentiable</span></code></p>
+<p>Variable storage manager.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variables. Defaults to
+<cite>np.float32</cite>.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="wbml.util.Vars.assign">
+<code class="descname">assign</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Vars.assign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Vars.assign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign a value to a variable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>hashable</em>) – Name of variable to assign value to.</li>
+<li><strong>value</strong> (<em>tensor</em>) – Value to assign.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">TensorFlow tensor that can be run to perform the assignment.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.util.Vars.bnd">
+<code class="descname">bnd</code><span class="sig-paren">(</span><em>*args</em>, <em>**kw_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Vars.bnd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Vars.bnd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for <a class="reference internal" href="#wbml.util.Vars.bounded" title="wbml.util.Vars.bounded"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.Vars.bounded()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.util.Vars.bounded">
+<code class="descname">bounded</code><span class="sig-paren">(</span><em>init=None</em>, <em>lower=0.0001</em>, <em>upper=10000.0</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Vars.bounded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Vars.bounded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a bounded variable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</li>
+<li><strong>lower</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Lower bound. Defaults to <cite>1e-4</cite>.</li>
+<li><strong>upper</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Upper bound. Defaults to <cite>1e4</cite>.</li>
+<li><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
+scalar.</li>
+<li><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
+that of the storage.</li>
+<li><strong>name</strong> (<em>hashable</em><em>, </em><em>optional</em>) – Name of the variable.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Variable.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.util.Vars.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>init=None</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Vars.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Vars.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an unbounded variable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</li>
+<li><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
+scalar.</li>
+<li><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
+that of the storage.</li>
+<li><strong>name</strong> (<em>hashable</em><em>, </em><em>optional</em>) – Name of the variable.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Variable.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.util.Vars.get_vars">
+<code class="descname">get_vars</code><span class="sig-paren">(</span><em>*names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Vars.get_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Vars.get_vars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get variables by name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*names</strong> (<em>hashable</em>) – Names of the variables.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>Variables specified by <cite>names</cite>. If no names are</dt>
+<dd>specified, all variables are returned.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list[tensor]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.util.Vars.init">
+<code class="descname">init</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Vars.init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Vars.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialise the variables.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">B.Session</span></code>) – TensorFlow session.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.util.Vars.pos">
+<code class="descname">pos</code><span class="sig-paren">(</span><em>*args</em>, <em>**kw_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Vars.pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Vars.pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for <a class="reference internal" href="#wbml.util.Vars.positive" title="wbml.util.Vars.positive"><code class="xref py py-meth docutils literal notranslate"><span class="pre">util.Vars.positive()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.util.Vars.positive">
+<code class="descname">positive</code><span class="sig-paren">(</span><em>init=None</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Vars.positive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Vars.positive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a positive variable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</li>
+<li><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
+scalar.</li>
+<li><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
+that of the storage.</li>
+<li><strong>name</strong> (<em>hashable</em><em>, </em><em>optional</em>) – Name of the variable.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Variable.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wbml.util.VarsFrom">
+<em class="property">class </em><code class="descclassname">wbml.util.</code><code class="descname">VarsFrom</code><span class="sig-paren">(</span><em>source</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#VarsFrom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.VarsFrom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="wbml.util.VarsFrom.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>shape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#VarsFrom.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.VarsFrom.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="wbml.util.inv_perm">
+<code class="descclassname">wbml.util.</code><code class="descname">inv_perm</code><span class="sig-paren">(</span><em>perm</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#inv_perm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.inv_perm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invert a permutation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>perm</strong> (<em>list</em>) – Permutation to invert.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Inverse permutation.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="wbml.util.identity">
+<code class="descclassname">wbml.util.</code><code class="descname">identity</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#identity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.identity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identity function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>object</em>) – Input.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><cite>x</cite>.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="wbml.util.map_cols">
+<code class="descclassname">wbml.util.</code><code class="descname">map_cols</code><span class="sig-paren">(</span><em>f</em>, <em>xs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#map_cols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.map_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map the columns of a matrix on a function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>f</strong> (<em>function</em>) – Function to map.</li>
+<li><strong>xs</strong> (<em>tensor</em>) – Matrix onto which to map the function.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Result.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="wbml.util.Initialiser">
+<em class="property">class </em><code class="descclassname">wbml.util.</code><code class="descname">Initialiser</code><a class="reference internal" href="../_modules/wbml/util.html#Initialiser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Initialiser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Variable initialiser.</p>
+<dl class="method">
+<dt id="wbml.util.Initialiser.assign">
+<code class="descname">assign</code><span class="sig-paren">(</span><em>name</em>, <em>values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Initialiser.assign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Initialiser.assign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign values to a particular variable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) – Name of variables.</li>
+<li><strong>values</strong> (<em>list</em><em>[</em><em>tensor</em><em>]</em>) – List of values to assign.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.util.Initialiser.generate">
+<code class="descname">generate</code><span class="sig-paren">(</span><em>vs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#Initialiser.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.Initialiser.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate initialisers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vs</strong> (<a class="reference internal" href="#wbml.util.Vars" title="wbml.util.Vars"><code class="xref py py-class docutils literal notranslate"><span class="pre">util.Vars</span></code></a>) – Variable storage.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>List of initialisers. Run a initialiser with a</dt>
+<dd>TensorFlow session to set the initialisation.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list[list[tensor]]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="wbml.util.construct_display_resolver">
+<code class="descclassname">wbml.util.</code><code class="descname">construct_display_resolver</code><span class="sig-paren">(</span><em>sess</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/util.html#construct_display_resolver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.util.construct_display_resolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a resolver displaying variables.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sess</strong> – TensorFlow session</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Resolver.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="wbml.vi.html" class="btn btn-neutral float-right" title="wbml.vi module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="wbml.net.html" class="btn btn-neutral" title="wbml.net module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Wessel Bruinsma.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,464 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>wbml.lmm module &mdash; wbml 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="wbml.lr module" href="wbml.lr.html" />
+    <link rel="prev" title="wbml.data.toy_sines module" href="wbml.data.toy_sines.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> wbml
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">WBML</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Application Programming Interface</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.html">wbml.data package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.air_temp.html">wbml.data.air_temp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.climate.html">wbml.data.climate module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.data.html">wbml.data.data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.toy_sines.html">wbml.data.toy_sines module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">wbml.lmm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.lr.html">wbml.lr module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.net.html">wbml.net module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.util.html">wbml.util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.vi.html">wbml.vi module</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">wbml</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">Application Programming Interface</a> &raquo;</li>
+        
+      <li>wbml.lmm module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/source/wbml.lmm.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-wbml.lmm">
+<span id="wbml-lmm-module"></span><h1>wbml.lmm module<a class="headerlink" href="#module-wbml.lmm" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="wbml.lmm.LMMPP">
+<em class="property">class </em><code class="descclassname">wbml.lmm.</code><code class="descname">LMMPP</code><span class="sig-paren">(</span><em>kernels</em>, <em>noise_obs</em>, <em>noises_latent</em>, <em>H</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/lmm.html#LMMPP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.lmm.LMMPP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>PP implementation of the linear mixing model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>kernels</strong> (list[<code class="xref py py-class docutils literal notranslate"><span class="pre">stheno.Kernel</span></code>]) – </li>
+<li><strong>noise_obs</strong> (<em>tensor</em>) – Observation noise. One.</li>
+<li><strong>noises_latent</strong> (<em>tensor</em>) – Latent noises. One per latent processes.</li>
+<li><strong>H</strong> (<em>tensor</em>) – Mixing matrix.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="wbml.lmm.LMMPP.lml">
+<code class="descname">lml</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/lmm.html#LMMPP.lml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.lmm.LMMPP.lml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the LML.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tensor</em>) – Inputs of data.</li>
+<li><strong>y</strong> (<em>tensor</em>) – Output of data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">LML of data.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.lmm.LMMPP.marginals">
+<code class="descname">marginals</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/lmm.html#LMMPP.marginals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.lmm.LMMPP.marginals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute marginals.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tensor</em>) – Inputs to construct marginals at.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>Marginals per output, spatial means per time, and</dt>
+<dd>spatial variance per time.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tuple[tensor]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.lmm.LMMPP.observe">
+<code class="descname">observe</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/lmm.html#LMMPP.observe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.lmm.LMMPP.observe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Observe data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>tensor</em>) – Inputs.</li>
+<li><strong>y</strong> (<em>tensor</em>) – Outputs.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.lmm.LMMPP.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/lmm.html#LMMPP.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.lmm.LMMPP.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tensor</em>) – Inputs to sample at.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wbml.lmm.OLMM">
+<em class="property">class </em><code class="descclassname">wbml.lmm.</code><code class="descname">OLMM</code><span class="sig-paren">(</span><em>kernels</em>, <em>noise_obs</em>, <em>noises_latent</em>, <em>U</em>, <em>S_sqrt</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/lmm.html#OLMM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.lmm.OLMM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">plum.resolvable.Referentiable</span></code></p>
+<p>Orthogonal linear mixing model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>kernels</strong> (list[<code class="xref py py-class docutils literal notranslate"><span class="pre">stheno.Kernel</span></code>]) – </li>
+<li><strong>noise_obs</strong> (<em>tensor</em>) – Observation noise. One.</li>
+<li><strong>noises_latent</strong> (<em>tensor</em>) – Latent noises. One per latent processes.</li>
+<li><strong>H</strong> (<em>tensor</em>) – Mixing matrix.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="wbml.lmm.OLMM.lml">
+<code class="descname">lml</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/lmm.html#OLMM.lml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.lmm.OLMM.lml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the LML.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>tensor</em>) – Inputs of data.</li>
+<li><strong>y</strong> (<em>tensor</em>) – Output of data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">LML of data.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tensor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.lmm.OLMM.marginals">
+<code class="descname">marginals</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/lmm.html#OLMM.marginals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.lmm.OLMM.marginals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute marginals.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>tensor</em>) – Inputs to construct marginals at.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>Marginals per output, spatial means per time, and</dt>
+<dd>spatial variance per time.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tuple[tensor]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.lmm.OLMM.observe">
+<code class="descname">observe</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/lmm.html#OLMM.observe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.lmm.OLMM.observe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Observe data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>tensor</em>) – Inputs.</li>
+<li><strong>y</strong> (<em>tensor</em>) – Outputs.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.lmm.OLMM.optimal_U">
+<code class="descname">optimal_U</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/lmm.html#OLMM.optimal_U"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.lmm.OLMM.optimal_U" title="Permalink to this definition">¶</a></dt>
+<dd><p>Approximate the optimal <cite>U</cite>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This assumes no noise on the latent processes.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em>tensor</em>) – Inputs of data.</li>
+<li><strong>y</strong> (<em>tensor</em>) – Output of data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="wbml.lmm.OLMM.project">
+<code class="descname">project</code><span class="sig-paren">(</span><em>y</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/lmm.html#OLMM.project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.lmm.OLMM.project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project observations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>y</strong> (<em>tensor</em>) – Data to project.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>Projected observations. Rows correspond to outputs and</dt>
+<dd>columns to time points.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="wbml.lr.html" class="btn btn-neutral float-right" title="wbml.lr module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="wbml.data.toy_sines.html" class="btn btn-neutral" title="wbml.data.toy_sines module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Wessel Bruinsma.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

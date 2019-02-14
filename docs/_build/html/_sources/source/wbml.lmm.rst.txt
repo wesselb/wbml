@@ -1,0 +1,7 @@
+wbml.lmm module
+===============
+
+.. automodule:: wbml.lmm
+    :members:
+    :undoc-members:
+    :show-inheritance:

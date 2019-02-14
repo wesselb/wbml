@@ -1,0 +1,7 @@
+wbml.data.climate module
+========================
+
+.. automodule:: wbml.data.climate
+    :members:
+    :undoc-members:
+    :show-inheritance:

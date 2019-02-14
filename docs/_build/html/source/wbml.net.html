@@ -1,0 +1,445 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>wbml.net module &mdash; wbml 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="wbml.util module" href="wbml.util.html" />
+    <link rel="prev" title="wbml.lr module" href="wbml.lr.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> wbml
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">WBML</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">Application Programming Interface</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.html">wbml.data package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.air_temp.html">wbml.data.air_temp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.climate.html">wbml.data.climate module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.data.html">wbml.data.data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.data.toy_sines.html">wbml.data.toy_sines module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.lmm.html">wbml.lmm module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.lr.html">wbml.lr module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">wbml.net module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.util.html">wbml.util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="wbml.vi.html">wbml.vi module</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">wbml</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">Application Programming Interface</a> &raquo;</li>
+        
+      <li>wbml.net module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/source/wbml.net.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-wbml.net">
+<span id="wbml-net-module"></span><h1>wbml.net module<a class="headerlink" href="#module-wbml.net" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="wbml.net.Dense">
+<em class="property">class </em><code class="descclassname">wbml.net.</code><code class="descname">Dense</code><span class="sig-paren">(</span><em>width</em>, <em>nonlinearity=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Dense"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Dense" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wbml.net.FeedForwardLayer" title="wbml.net.FeedForwardLayer"><code class="xref py py-class docutils literal notranslate"><span class="pre">wbml.net.FeedForwardLayer</span></code></a></p>
+<dl class="method">
+<dt id="wbml.net.Dense.initialise">
+<code class="descname">initialise</code><span class="sig-paren">(</span><em>input_size</em>, <em>vars</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Dense.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Dense.initialise" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.Dense.num_weights">
+<code class="descname">num_weights</code><span class="sig-paren">(</span><em>input_size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Dense.num_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Dense.num_weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.Dense.weights">
+<code class="descname">weights</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Dense.weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Dense.weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wbml.net.Elman">
+<em class="property">class </em><code class="descclassname">wbml.net.</code><code class="descname">Elman</code><span class="sig-paren">(</span><em>width</em>, <em>nonlinearity=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Elman"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Elman" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wbml.net.Layer" title="wbml.net.Layer"><code class="xref py py-class docutils literal notranslate"><span class="pre">wbml.net.Layer</span></code></a></p>
+<dl class="method">
+<dt id="wbml.net.Elman.initialise">
+<code class="descname">initialise</code><span class="sig-paren">(</span><em>input_size</em>, <em>vars</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Elman.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Elman.initialise" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.Elman.num_weights">
+<code class="descname">num_weights</code><span class="sig-paren">(</span><em>input_size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Elman.num_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Elman.num_weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.Elman.weights">
+<code class="descname">weights</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Elman.weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Elman.weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wbml.net.FeedForwardLayer">
+<em class="property">class </em><code class="descclassname">wbml.net.</code><code class="descname">FeedForwardLayer</code><a class="reference internal" href="../_modules/wbml/net.html#FeedForwardLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.FeedForwardLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wbml.net.Layer" title="wbml.net.Layer"><code class="xref py py-class docutils literal notranslate"><span class="pre">wbml.net.Layer</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wbml.net.GRU">
+<em class="property">class </em><code class="descclassname">wbml.net.</code><code class="descname">GRU</code><span class="sig-paren">(</span><em>width</em>, <em>nonlinearity=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#GRU"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.GRU" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wbml.net.Layer" title="wbml.net.Layer"><code class="xref py py-class docutils literal notranslate"><span class="pre">wbml.net.Layer</span></code></a></p>
+<dl class="method">
+<dt id="wbml.net.GRU.initialise">
+<code class="descname">initialise</code><span class="sig-paren">(</span><em>input_size</em>, <em>vars</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#GRU.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.GRU.initialise" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.GRU.num_weights">
+<code class="descname">num_weights</code><span class="sig-paren">(</span><em>input_size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#GRU.num_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.GRU.num_weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.GRU.weights">
+<code class="descname">weights</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#GRU.weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.GRU.weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wbml.net.Identity">
+<em class="property">class </em><code class="descclassname">wbml.net.</code><code class="descname">Identity</code><a class="reference internal" href="../_modules/wbml/net.html#Identity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Identity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wbml.net.Layer" title="wbml.net.Layer"><code class="xref py py-class docutils literal notranslate"><span class="pre">wbml.net.Layer</span></code></a></p>
+<dl class="method">
+<dt id="wbml.net.Identity.initialise">
+<code class="descname">initialise</code><span class="sig-paren">(</span><em>*arg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Identity.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Identity.initialise" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.Identity.num_weights">
+<code class="descname">num_weights</code><span class="sig-paren">(</span><em>input_size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Identity.num_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Identity.num_weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.Identity.weights">
+<code class="descname">weights</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Identity.weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Identity.weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wbml.net.Layer">
+<em class="property">class </em><code class="descclassname">wbml.net.</code><code class="descname">Layer</code><a class="reference internal" href="../_modules/wbml/net.html#Layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="wbml.net.Layer.initialise">
+<code class="descname">initialise</code><span class="sig-paren">(</span><em>input_size</em>, <em>vars</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Layer.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Layer.initialise" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.Layer.num_weights">
+<code class="descname">num_weights</code><span class="sig-paren">(</span><em>input_size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Layer.num_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Layer.num_weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.Layer.weights">
+<code class="descname">weights</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Layer.weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Layer.weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wbml.net.Linear">
+<em class="property">class </em><code class="descclassname">wbml.net.</code><code class="descname">Linear</code><span class="sig-paren">(</span><em>width</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Linear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Linear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wbml.net.Dense" title="wbml.net.Dense"><code class="xref py py-class docutils literal notranslate"><span class="pre">wbml.net.Dense</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="wbml.net.Net">
+<em class="property">class </em><code class="descclassname">wbml.net.</code><code class="descname">Net</code><span class="sig-paren">(</span><em>input_size</em>, <em>layers</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Net"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Net" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="wbml.net.Net.initialise">
+<code class="descname">initialise</code><span class="sig-paren">(</span><em>vars=&lt;wbml.util.Vars object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Net.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Net.initialise" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.Net.num_weights">
+<code class="descname">num_weights</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Net.num_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Net.num_weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.Net.weights">
+<code class="descname">weights</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Net.weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Net.weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wbml.net.Normalise">
+<em class="property">class </em><code class="descclassname">wbml.net.</code><code class="descname">Normalise</code><a class="reference internal" href="../_modules/wbml/net.html#Normalise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Normalise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#wbml.net.FeedForwardLayer" title="wbml.net.FeedForwardLayer"><code class="xref py py-class docutils literal notranslate"><span class="pre">wbml.net.FeedForwardLayer</span></code></a></p>
+<dl class="method">
+<dt id="wbml.net.Normalise.initialise">
+<code class="descname">initialise</code><span class="sig-paren">(</span><em>input_size</em>, <em>vars</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Normalise.initialise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Normalise.initialise" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.Normalise.num_weights">
+<code class="descname">num_weights</code><span class="sig-paren">(</span><em>input_size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Normalise.num_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Normalise.num_weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wbml.net.Normalise.weights">
+<code class="descname">weights</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#Normalise.weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.Normalise.weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="wbml.net.ff">
+<code class="descclassname">wbml.net.</code><code class="descname">ff</code><span class="sig-paren">(</span><em>input_size</em>, <em>output_size</em>, <em>widths</em>, <em>nonlinearity=None</em>, <em>normalise=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#ff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.ff" title="Permalink to this definition">¶</a></dt>
+<dd><p>A standard feed-forward neural net.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input_size</strong> (<em>int</em>) – Size of input.</li>
+<li><strong>output_size</strong> (<em>int</em>) – Size of output.</li>
+<li><strong>widths</strong> (<em>tuple of int</em>) – Widths of the layers.</li>
+<li><strong>nonlinearity</strong> (<em>function</em><em>, </em><em>optional</em>) – Nonlinearity to use. Defaults to
+ReLUs.</li>
+<li><strong>normalise</strong> (<em>bool</em><em>, </em><em>optional</em>) – Interleave with normalisation layers.
+Defaults to <cite>True</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="wbml.net.rnn">
+<code class="descclassname">wbml.net.</code><code class="descname">rnn</code><span class="sig-paren">(</span><em>input_size</em>, <em>output_size</em>, <em>widths</em>, <em>nonlinearity=None</em>, <em>normalise=False</em>, <em>gru=True</em>, <em>final_dense=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/wbml/net.html#rnn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wbml.net.rnn" title="Permalink to this definition">¶</a></dt>
+<dd><p>A standard recurrent neural net.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input_size</strong> (<em>int</em>) – Size of input.</li>
+<li><strong>output_size</strong> (<em>int</em>) – Size of output.</li>
+<li><strong>widths</strong> (<em>tuple of int</em>) – Widths of the layers.</li>
+<li><strong>nonlinearity</strong> (<em>function</em><em>, </em><em>optional</em>) – Nonlinearity to use. Defaults to
+sigmoid.</li>
+<li><strong>normalise</strong> (<em>bool</em><em>, </em><em>optional</em>) – Interleave with normalisation layers.
+Defaults to <cite>False</cite>.</li>
+<li><strong>gru</strong> (<em>bool</em><em>, </em><em>optional</em>) – Use GRU layers instead of Elman layers. Defaults
+to <cite>True</cite>.</li>
+<li><strong>final_dense</strong> (<em>bool</em><em>, </em><em>optional</em>) – Append a final dense layer. Defaults to
+<cite>False</cite>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="wbml.util.html" class="btn btn-neutral float-right" title="wbml.util module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="wbml.lr.html" class="btn btn-neutral" title="wbml.lr module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Wessel Bruinsma.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

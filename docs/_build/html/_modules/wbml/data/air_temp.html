@@ -1,0 +1,286 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>wbml.data.air_temp &mdash; wbml 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> wbml
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">WBML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Application Programming Interface</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">wbml</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>wbml.data.air_temp</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for wbml.data.air_temp</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.data</span> <span class="k">import</span> <span class="n">CSVReader</span><span class="p">,</span> <span class="n">Data</span><span class="p">,</span> <span class="n">float_converter</span><span class="p">,</span> <span class="n">time_converter</span><span class="p">,</span> <span class="n">data_path</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;load&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="load"><a class="viewcode-back" href="../../../source/wbml.data.air_temp.html#wbml.data.air_temp.load">[docs]</a><span class="k">def</span> <span class="nf">load</span><span class="p">():</span>
+    <span class="n">sites</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Bra&#39;</span><span class="p">,</span> <span class="s1">&#39;Cam&#39;</span><span class="p">,</span> <span class="s1">&#39;Chi&#39;</span><span class="p">,</span> <span class="s1">&#39;Sot&#39;</span><span class="p">]</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;DEPTH&#39;</span><span class="p">,</span> <span class="s1">&#39;height&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;WSPD&#39;</span><span class="p">,</span> <span class="s1">&#39;speed&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;ATMP&#39;</span><span class="p">,</span> <span class="s1">&#39;temp&#39;</span><span class="p">)]</span>
+
+    <span class="n">days</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">31</span><span class="p">))</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{site:s}{day:02d}</span><span class="s1">Jul2013.csv&#39;</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">CSVReader</span><span class="p">()</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">set_field_group</span><span class="p">(</span><span class="s1">&#39;input&#39;</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">time_converter</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">set_field_group</span><span class="p">(</span><span class="s1">&#39;output&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">output_name</span> <span class="ow">in</span> <span class="n">features</span><span class="p">:</span>
+        <span class="n">r</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">float_converter</span><span class="p">,</span> <span class="n">output_name</span><span class="p">)</span>
+
+    <span class="n">x_all</span><span class="p">,</span> <span class="n">ys_all</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">:</span>
+        <span class="n">xs_site</span><span class="p">,</span> <span class="n">ys_site</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">day</span> <span class="ow">in</span> <span class="n">days</span><span class="p">:</span>
+            <span class="n">mins</span><span class="p">,</span> <span class="n">y_incomplete</span> <span class="o">=</span> \
+                <span class="n">r</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;air_temp&#39;</span><span class="p">,</span> <span class="n">fn</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="n">day</span><span class="p">)))</span>
+
+            <span class="c1"># Fill in missing data.</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">day</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">5</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">12</span> <span class="o">*</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="n">y</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+            <span class="c1"># Input is at multiples of five minutes.</span>
+            <span class="n">y</span><span class="p">[(</span><span class="n">mins</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">y_incomplete</span>
+
+            <span class="n">xs_site</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">ys_site</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="n">x_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">xs_site</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">ys_all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">ys_site</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x_all</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">ys_all</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Clear invalid sensor readings.</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+        <span class="n">y</span><span class="p">[</span><span class="n">y</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1000</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="c1"># Construct data and reorder outputs.</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">Data</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
+             <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">site</span><span class="p">,</span> <span class="n">feature</span><span class="p">)</span>
+              <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">sites</span>
+              <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">features</span><span class="p">])</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;Bra/height&#39;</span><span class="p">,</span> <span class="s1">&#39;Sot/height&#39;</span><span class="p">,</span> <span class="s1">&#39;Cam/height&#39;</span><span class="p">,</span> <span class="s1">&#39;Chi/height&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;Bra/speed&#39;</span><span class="p">,</span> <span class="s1">&#39;Sot/speed&#39;</span><span class="p">,</span> <span class="s1">&#39;Cam/speed&#39;</span><span class="p">,</span> <span class="s1">&#39;Chi/speed&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;Bra/temp&#39;</span><span class="p">,</span> <span class="s1">&#39;Sot/temp&#39;</span><span class="p">,</span> <span class="s1">&#39;Cam/temp&#39;</span><span class="p">,</span> <span class="s1">&#39;Chi/temp&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Construct data sets of various sizes.</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">all_interval</span> <span class="ow">in</span> <span class="p">[(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">23</span><span class="p">),</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="n">d_all</span> <span class="o">=</span> <span class="n">d</span> <span class="k">if</span> <span class="n">all_interval</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">d</span><span class="o">.</span><span class="n">interval</span><span class="p">(</span><span class="o">*</span><span class="n">all_interval</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Select test sets.</span>
+        <span class="n">test1</span><span class="p">,</span> <span class="n">d_train</span> <span class="o">=</span> <span class="n">d_all</span><span class="o">.</span><span class="n">interval_y</span><span class="p">(</span><span class="s1">&#39;Cam/temp&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="n">test2</span><span class="p">,</span> <span class="n">d_train</span> <span class="o">=</span> <span class="n">d_train</span><span class="o">.</span><span class="n">interval_y</span><span class="p">(</span><span class="s1">&#39;Chi/temp&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">18</span><span class="p">)</span>
+
+        <span class="c1"># Surround the test sets a bit for nice predictions.</span>
+        <span class="n">test1_ext</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">interval_y</span><span class="p">(</span><span class="s1">&#39;Cam/temp&#39;</span><span class="p">,</span> <span class="mf">11.5</span><span class="p">,</span> <span class="mf">16.5</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">test2_ext</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">interval_y</span><span class="p">(</span><span class="s1">&#39;Chi/temp&#39;</span><span class="p">,</span> <span class="mf">13.5</span><span class="p">,</span> <span class="mf">18.5</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">ds</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">d_all</span><span class="p">,</span> <span class="n">d_train</span><span class="p">,</span> <span class="p">[</span><span class="n">test1</span><span class="p">,</span> <span class="n">test2</span><span class="p">,</span> <span class="n">test1_ext</span><span class="p">,</span> <span class="n">test2_ext</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">ds</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Wessel Bruinsma.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,736 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>wbml.data.data &mdash; wbml 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> wbml
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">WBML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">Application Programming Interface</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">wbml</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>wbml.data.data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for wbml.data.data</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">lab</span> <span class="k">import</span> <span class="n">B</span>
+<span class="kn">from</span> <span class="nn">plum</span> <span class="k">import</span> <span class="n">Dispatcher</span><span class="p">,</span> <span class="n">Referentiable</span><span class="p">,</span> <span class="n">Self</span>
+<span class="kn">from</span> <span class="nn">dateutil.parser</span> <span class="k">import</span> <span class="n">parse</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span> <span class="s1">&#39;CSVReader&#39;</span><span class="p">,</span> <span class="s1">&#39;normalise_norm&#39;</span><span class="p">,</span> <span class="s1">&#39;normalise_01&#39;</span><span class="p">]</span>
+
+<span class="n">dispatch</span> <span class="o">=</span> <span class="n">Dispatcher</span><span class="p">()</span>
+
+
+<span class="nd">@dispatch</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">ensure_numeric</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Ensure that an object is numeric.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (object): Object to make numeric.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tensor: Input as tensor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+
+<span class="nd">@dispatch</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">Numeric</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">ensure_numeric</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span>
+
+
+<div class="viewcode-block" id="Data"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.Data">[docs]</a><span class="k">class</span> <span class="nc">Data</span><span class="p">(</span><span class="n">Referentiable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data set.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (tensor): Inputs.</span>
+<span class="sd">        y (tensor): Outputs.</span>
+<span class="sd">        names: Names of the outputs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_dispatch</span> <span class="o">=</span> <span class="n">Dispatcher</span><span class="p">(</span><span class="n">in_class</span><span class="o">=</span><span class="n">Self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">ensure_numeric</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">ensure_numeric</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="c1"># Ensure that `x` and `y` are at least two dimensional.</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="k">if</span> <span class="n">B</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">x</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="k">if</span> <span class="n">B</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">y</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="n">names</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of data points.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of features.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of outputs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">item</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">item</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Data.select"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.Data.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Select particular outputs.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *names: Outputs to select.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[:class:`.data.Data`]: Selected outputs and the remainder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sel_inds</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+        <span class="n">rem_inds</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)))</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">sel_inds</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[:,</span> <span class="n">sel_inds</span><span class="p">],</span>
+                    <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">sel_inds</span><span class="p">))),</span> \
+               <span class="n">Data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[:,</span> <span class="n">rem_inds</span><span class="p">],</span>
+                    <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">rem_inds</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="Data.shuffle"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.Data.shuffle">[docs]</a>    <span class="k">def</span> <span class="nf">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Shuffle the data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`.data.Data`: Shuffled data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)]</span></div>
+
+    <span class="nd">@_dispatch</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Split the data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            point (int or float): Point to split the data at. Can either be an</span>
+<span class="sd">                int, representing an index, or a float, representing a</span>
+<span class="sd">                fractional point.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[:class:`.data.Data`]: First and second part of the data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">*</span> <span class="n">f</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="Data.split"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.Data.split">[docs]</a>    <span class="nd">@_dispatch</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[:</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">),</span> \
+               <span class="n">Data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Data.truncate"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.Data.truncate">[docs]</a>    <span class="k">def</span> <span class="nf">truncate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Truncate the data. Takes in arguments like :meth:`.data.Data.split`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`.data.Data`: Truncated data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Data.interval"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.Data.interval">[docs]</a>    <span class="k">def</span> <span class="nf">interval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">x_start</span><span class="p">,</span>
+                 <span class="n">x_end</span><span class="p">,</span>
+                 <span class="n">start_inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">end_inclusive</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Select a interval of the data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x_start: Start of the interval.</span>
+<span class="sd">            x_end: End of the interval.</span>
+<span class="sd">            start_inclusive (bool, optional): The start value is inclusive.</span>
+<span class="sd">                Defaults to `True`.</span>
+<span class="sd">            end_inclusive (bool, optional): The end value is inclusive.</span>
+<span class="sd">                Defaults to `False`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[:class:`.data.Data`]: Selected interval and the entire data</span>
+<span class="sd">                with the interval set to missing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_start</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="k">if</span> <span class="n">start_inclusive</span> <span class="k">else</span> <span class="n">x_start</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">&amp;</span> \
+               <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">x_end</span> <span class="k">if</span> <span class="n">end_inclusive</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">x_end</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">y_no_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">y_no_interval</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">Data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y_no_interval</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Data.concat_y"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.Data.concat_y">[docs]</a>    <span class="k">def</span> <span class="nf">concat_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Concatenate outputs from another data set at the current inputs.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other (:class:`.data.Data`): Other data set.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`.data.Data`: Concatenation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">conflicting_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">conflicting_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Conflicting names: </span><span class="si">{}</span><span class="s1">.&#39;</span>
+                               <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">conflicting_names</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">Data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">names</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Data.concat_xy"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.Data.concat_xy">[docs]</a>    <span class="k">def</span> <span class="nf">concat_xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Concatenate outputs from another data set at new inputs.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other (:class:`.data.Data`): Other data set.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`.data.Data`: Concatenation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">other</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">))</span>
+        <span class="n">nans</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">self_ext</span> <span class="o">=</span> <span class="n">Data</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">nans</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+
+        <span class="n">nans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">p</span><span class="p">))</span>
+        <span class="n">nans</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">other_ext</span> <span class="o">=</span> <span class="n">Data</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                         <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">nans</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                         <span class="n">other</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">self_ext</span><span class="o">.</span><span class="n">concat_y</span><span class="p">(</span><span class="n">other_ext</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Data.merge_x"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.Data.merge_x">[docs]</a>    <span class="k">def</span> <span class="nf">merge_x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Safely merge outputs for duplicate inputs.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`.data.Data`: Data with duplicate inputs merged.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">y_i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x_i</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y_i</span><span class="p">):</span>
+                    <span class="n">z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x_i</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y_i</span><span class="p">):</span>
+                    <span class="n">z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_i</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x_i</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y_i</span><span class="p">):</span>
+                    <span class="n">z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_i</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Merge conflict.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+        <span class="c1"># Skip these indices because they already have been merged.</span>
+        <span class="n">skip_is</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">merged_x</span><span class="p">,</span> <span class="n">merged_y</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+            <span class="c1"># Skip already merged points.</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">skip_is</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Merge duplicate further values and append to merged result.</span>
+            <span class="n">x_i</span><span class="p">,</span> <span class="n">y_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">x_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]):</span>
+                    <span class="n">y_i</span> <span class="o">=</span> <span class="n">merge</span><span class="p">(</span><span class="n">y_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                    <span class="n">skip_is</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+            <span class="n">merged_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_i</span><span class="p">)</span>
+            <span class="n">merged_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_i</span><span class="p">)</span>
+
+        <span class="c1"># Construct result and return.</span>
+        <span class="k">return</span> <span class="n">Data</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">merged_x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">merged_y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span></div>
+
+    <span class="nd">@_dispatch</span><span class="p">({</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">},</span> <span class="p">[</span><span class="nb">object</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">interval_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Select an interval from a particular output. Further takes in</span>
+<span class="sd">        arguments for :meth:`.data.Data.interval`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *names (str): Outputs to select the interval from.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[:class:`.data.Data`]: The selected interval and the remainder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span><span class="p">,</span> <span class="n">other_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">interval</span><span class="p">,</span> <span class="n">remainder</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">interval</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">)</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="n">other_outputs</span><span class="o">.</span><span class="n">concat_y</span><span class="p">(</span><span class="n">remainder</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">interval</span><span class="p">,</span> <span class="n">merged</span>
+
+<div class="viewcode-block" id="Data.interval_y"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.Data.interval_y">[docs]</a>    <span class="nd">@_dispatch</span><span class="p">([</span><span class="nb">object</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">interval_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval_y</span><span class="p">([</span><span class="n">name</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Data.normalise"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.Data.normalise">[docs]</a>    <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unnormaliser</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Normalise data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ref (:class:`.data.Data`, optional): Reference to normalise with</span>
+<span class="sd">                respect to. Defaults to itself.</span>
+<span class="sd">            unnormaliser (bool, optional): Also return a function to</span>
+<span class="sd">                unnormalise data. Defaults to `False`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`.data.Data`: Normalised data. Can further return a</span>
+<span class="sd">                function to unnormalise data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">ref</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ref</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">ref</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">y_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanstd</span><span class="p">(</span><span class="n">ref</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">y_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">y_std</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+
+        <span class="c1"># Also return function to unnormalise data if asked for.</span>
+        <span class="k">if</span> <span class="n">unnormaliser</span><span class="p">:</span>
+            <span class="n">dispatch</span> <span class="o">=</span> <span class="n">Dispatcher</span><span class="p">()</span>
+
+            <span class="nd">@dispatch</span><span class="p">(</span><span class="n">Data</span><span class="p">)</span>
+            <span class="k">def</span> <span class="nf">unnormalise</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+                <span class="c1"># Get the right scales and offsets.</span>
+                <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">names</span><span class="p">]</span>
+                <span class="n">offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">y_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">])</span>
+                <span class="n">scales</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">y_std</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">])</span>
+                <span class="k">return</span> <span class="n">Data</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">*</span> <span class="n">scales</span> <span class="o">+</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+
+            <span class="nd">@dispatch</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+            <span class="k">def</span> <span class="nf">unnormalise</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y_std</span> <span class="o">+</span> <span class="n">y_mean</span>
+
+            <span class="nd">@dispatch</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span>
+            <span class="k">def</span> <span class="nf">unnormalise</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y_std</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">y_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+
+            <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">unnormalise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="Data.cast"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.Data.cast">[docs]</a>    <span class="k">def</span> <span class="nf">cast</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Cast the data to a particular data type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dtype (dtype): Date type to cast to.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`.data.Data`: Data casted to `dtype`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Data</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="n">B</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Data.merge"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.Data.merge">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="o">*</span><span class="n">ds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Merge a number of data sets.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *ds (:class:`.data.Data`): Data sets to merge.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`.data.Data`: Merged data set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">ds</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">concat_xy</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">merged</span><span class="o">.</span><span class="n">merge_x</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="CSVReader"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.CSVReader">[docs]</a><span class="k">class</span> <span class="nc">CSVReader</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Read and parse a CSV.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_groups</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="CSVReader.set_field_group"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.CSVReader.set_field_group">[docs]</a>    <span class="k">def</span> <span class="nf">set_field_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">matrix</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a group of fields.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of group.</span>
+<span class="sd">            matrix (bool, optional): Output group as a matrix instead of a</span>
+<span class="sd">                dictionary. Defaults to `True`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_groups</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                                 <span class="s1">&#39;matrix&#39;</span><span class="p">:</span> <span class="n">matrix</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span> <span class="o">=</span> <span class="n">name</span></div>
+
+<div class="viewcode-block" id="CSVReader.add_field"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.CSVReader.add_field">[docs]</a>    <span class="k">def</span> <span class="nf">add_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">output_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a field.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            column_name (str): Name of column.</span>
+<span class="sd">            type (type or function): Type of column. Can also be a function</span>
+<span class="sd">                that convert the value into the right type.</span>
+<span class="sd">            output_name (str, optional): Change the name of the column.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># If there is no field group yet, make one called zero.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_groups</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_field_group</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">matrix</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Default output name to column name.</span>
+        <span class="n">output_name</span> <span class="o">=</span> <span class="n">column_name</span> <span class="k">if</span> <span class="n">output_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">output_name</span>
+
+        <span class="c1"># A list for `type` represents possible discrete values.</span>
+        <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+            <span class="n">converter</span> <span class="o">=</span> <span class="nb">type</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">list_of_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">]</span>
+            <span class="n">converter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">list_of_values</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;unknown field type &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;column_name&#39;</span><span class="p">:</span> <span class="n">column_name</span><span class="p">,</span>
+                             <span class="s1">&#39;output_name&#39;</span><span class="p">:</span> <span class="n">output_name</span><span class="p">,</span>
+                             <span class="s1">&#39;converter&#39;</span><span class="p">:</span> <span class="n">converter</span><span class="p">,</span>
+                             <span class="s1">&#39;group&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_group</span><span class="p">})</span></div>
+
+<div class="viewcode-block" id="CSVReader.read"><a class="viewcode-back" href="../../../source/wbml.data.data.html#wbml.data.data.CSVReader.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read and parse a CSV.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            file_name (str): File name.</span>
+<span class="sd">            delimiter (str, optional): Delimiter. Defaults to a comma.</span>
+<span class="sd">            cache (bool, optional): Use a cache if available. Defaults to</span>
+<span class="sd">                `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cache_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.cache&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+
+        <span class="c1"># Check for cached data.</span>
+        <span class="k">if</span> <span class="n">cache</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cache_name</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_name</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Delete cache if it exists.</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cache_name</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">cache_name</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">delimiter</span><span class="p">)</span>
+
+                <span class="c1"># Read data.</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;output_name&#39;</span><span class="p">]:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">}</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">:</span>
+                        <span class="n">out</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;output_name&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">field</span><span class="p">[</span><span class="s1">&#39;converter&#39;</span><span class="p">](</span><span class="n">row</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;column_name&#39;</span><span class="p">]])</span>
+                        <span class="p">)</span>
+
+                <span class="c1"># Save data in cache.</span>
+                <span class="k">if</span> <span class="n">cache</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cache_f</span><span class="p">:</span>
+                        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">cache_f</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_organise_output</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_organise_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>
+        <span class="n">outs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups</span><span class="p">:</span>
+            <span class="c1"># Collect the group&#39;s fields.</span>
+            <span class="n">group_field_names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]:</span>
+                    <span class="n">group_field_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s1">&#39;output_name&#39;</span><span class="p">])</span>
+
+            <span class="c1"># Turn into a matrix or a dictionary.</span>
+            <span class="k">if</span> <span class="n">group</span><span class="p">[</span><span class="s1">&#39;matrix&#39;</span><span class="p">]:</span>
+                <span class="n">outs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">out</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span>
+                                      <span class="n">group_field_names</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">outs</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">name</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">group_field_names</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">outs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">outs</span></div>
+
+
+<span class="nd">@dispatch</span><span class="p">([</span><span class="nb">object</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">normalise_01</span><span class="p">(</span><span class="o">*</span><span class="n">xs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Normalise objects to [0, 1].</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *xs: Objects to normalise.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: Normalised objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">normalise_01</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">]</span>
+
+
+<span class="nd">@dispatch</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">normalise_01</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">axes</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+    <span class="n">axes</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">B</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+    <span class="nb">min</span> <span class="o">=</span> <span class="n">apply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+    <span class="nb">max</span> <span class="o">=</span> <span class="n">apply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="nb">min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">max</span> <span class="o">-</span> <span class="nb">min</span><span class="p">)</span>
+
+
+<span class="nd">@dispatch</span><span class="p">([</span><span class="nb">object</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">normalise_norm</span><span class="p">(</span><span class="o">*</span><span class="n">xs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Normalise objects to N(0, 1).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *xs: Objects to normalise.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: Normalised objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">normalise_norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">]</span>
+
+
+<span class="nd">@dispatch</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">normalise_norm</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">axes</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">B</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">std</span> <span class="o">+</span> <span class="n">B</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">time_converter</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a time to number of minutes since the start of the day.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (str): Time.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: Minutes since the start of the day.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">second</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Input must not specify nonzero seconds.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">60</span> <span class="o">*</span> <span class="n">d</span><span class="o">.</span><span class="n">hour</span> <span class="o">+</span> <span class="n">d</span><span class="o">.</span><span class="n">minute</span>
+
+
+<span class="k">def</span> <span class="nf">float_converter</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a value to a float.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (str): Value in string format.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;n/a&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">data_path</span><span class="p">(</span><span class="o">*</span><span class="n">xs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the path of a data file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *xs (str): Parts of the path.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Absolute path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span>
+                                        <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span>
+                                        <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span>
+                                        <span class="s1">&#39;data&#39;</span><span class="p">,</span>
+                                        <span class="o">*</span><span class="n">xs</span><span class="p">))</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Wessel Bruinsma.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
