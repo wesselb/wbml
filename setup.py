@@ -16,7 +16,7 @@ setup(
     description='Machine learning stuff',
     long_description=readme,
     author='Wessel Bruinsma',
-    author_email='skeleton_author_email',
+    author_email='wessel.p.bruinsma@gmail.com',
     url='https://github.com/wesselb/wbml',
     license=license,
     packages=find_packages(exclude=('tests', 'docs'))
