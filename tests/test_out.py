@@ -10,7 +10,7 @@ import wbml.out as out
 from . import eq, neq, lt, le, ge, gt, raises, ok
 
 
-class MyStream(object):
+class RecordingStream(object):
     """A stream that records its writes."""
 
     def __init__(self):
@@ -30,7 +30,7 @@ class Mock(object):
     """Mock the stream that `wbml.out` uses."""
 
     def __enter__(self):
-        self.stream = MyStream()
+        self.stream = RecordingStream()
         out.stream = self.stream  # Mock stream.
         return self
 
@@ -125,6 +125,8 @@ def test_kv():
     yield eq, mock[3], '1.000e+03:  1.000e+03\n'
     yield eq, mock[4], '1000:       1000\n'
 
+    # Test giving a dictionary.
+
     with Mock() as mock:
         out.kv({'level1': {'level2': {1: 1}}})
 
@@ -132,6 +134,8 @@ def test_kv():
     yield eq, mock[0], 'level1:\n'
     yield eq, mock[1], '    level2:\n'
     yield eq, mock[2], '        1:          1\n'
+
+    # Test giving a key and a dictionary.
 
     with Mock() as mock:
         out.kv('dict', {1: 1})
