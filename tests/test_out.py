@@ -188,6 +188,7 @@ def test_format():
 
 def test_counter():
     def yield_counts(mock_):
+        yield eq, len(mock_), 8
         yield eq, mock_[1], '[flush]'
         yield eq, mock_[2], ' 1'
         yield eq, mock_[3], '[flush]'
@@ -203,7 +204,6 @@ def test_counter():
             counter.count()
             counter.count()
 
-    yield eq, len(mock), 8
     yield eq, mock[0], 'Counting:'
     for x in yield_counts(mock):
         yield x
@@ -213,7 +213,6 @@ def test_counter():
             counter.count()
             counter.count()
 
-    yield eq, len(mock), 8
     yield eq, mock[0], 'name (total: 3):'
     for x in yield_counts(mock):
         yield x
@@ -224,7 +223,6 @@ def test_counter():
         res = out.Counter.map(lambda x: x ** 2, [2, 3])
 
     yield eq, res, [4, 9]
-    yield eq, len(mock), 8
     yield eq, mock[0], 'Mapping (total: 2):'
     for x in yield_counts(mock):
         yield x
@@ -233,7 +231,6 @@ def test_counter():
         res = out.Counter.map(lambda x: x ** 2, [2, 3], name='name')
 
     yield eq, res, [4, 9]
-    yield eq, len(mock), 8
     yield eq, mock[0], 'name (total: 2):'
     for x in yield_counts(mock):
         yield x
