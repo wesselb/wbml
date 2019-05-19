@@ -9,16 +9,14 @@ from stheno import EQ
 from wbml import OLMM, LMMPP
 
 # noinspection PyUnresolvedReferences
-from . import eq, neq, lt, le, ge, gt, raises, call, ok, lam, eprint
+from . import eq, neq, lt, le, ge, gt, raises, ok
 
 
 def test_lmm_missing_data():
-    B.backend_to_np()
-
     # Setup model.
     kernels = [EQ(), 2 * EQ().stretch(1.5)]
     noise_obs = .1
-    noises_latent = [.1, .2]
+    noises_latent = np.array([.1, .2])
     H = np.random.randn(3, 2)
 
     # Construct model.
@@ -50,17 +48,13 @@ def test_lmm_missing_data():
           lmm.lml(x[[0, 2, 3, 4]], y[[0, 2, 3, 4]]), \
           lmm.lml(x, y2)
 
-    B.backend_to_tf()
-
 
 def test_olmm():
-    B.backend_to_np()
-
     # Setup models.
     kernels = [EQ(), 2 * EQ().stretch(1.5)]
     noise_obs = .1
-    noises_latent = [.1, .2]
-    U, S, _ = B.svd(np.random.randn(3, 2))
+    noises_latent = np.array([.1, .2])
+    U, S, _ = B.svd(B.randn(3, 2))
     H = np.dot(U, np.diag(S) ** .5)
 
     # Construct models.
@@ -98,5 +92,3 @@ def test_olmm():
         yield assert_allclose, preds_pp[i][0], preds[i][0]
         yield assert_allclose, preds_pp[i][1], preds[i][1]
         yield assert_allclose, preds_pp[i][2], preds[i][2]
-        
-    B.backend_to_tf()

@@ -7,7 +7,6 @@ import logging
 from lab import B
 from plum import Dispatcher, Referentiable, Self
 from stheno import GP, Delta, Graph, Normal, Obs, dense
-import numpy as np
 
 __all__ = ['LMMPP', 'OLMM']
 
@@ -26,7 +25,7 @@ class LMMPP(object):
 
     def __init__(self, kernels, noise_obs, noises_latent, H):
         self.graph = Graph()
-        self.p, self.m = B.shape_int(H)
+        self.p, self.m = B.shape(H)
 
         # Create latent processes.
         xs = [GP(k, graph=self.graph) for k in kernels]
@@ -59,7 +58,7 @@ class LMMPP(object):
         # Make x-y tuples, handling missing data.
         xy_tuples = []
         for i in range(self.p):
-            mask = ~np.isnan(y[:, i])
+            mask = ~B.isnan(y[:, i])
             xy_tuples.append((self.ys[i](x[mask]), y[mask, i]))
 
         # Condition all processes.
@@ -75,7 +74,7 @@ class LMMPP(object):
             x (tensor): Inputs to sample at.
         """
         samples = self.graph.sample(*(y(x) for y in self.ys))
-        return B.concat(samples, axis=1)
+        return B.concat(*samples, axis=1)
 
     def lml(self, x, y):
         """Compute the LML.
@@ -93,13 +92,17 @@ class LMMPP(object):
         lml = 0
         for i in range(self.p):
             # Handle missing data.
-            mask = ~np.isnan(y[:, i])
+            mask = ~B.isnan(y[:, i])
+
+            # Apply masks.
+            x_masked = x[mask]
+            y_masked = y[mask, i]
 
             # Compute `log p(y_i | y_{1:i - 1})`.
-            lml += ys[i](x[mask]).logpdf(y[mask, i])
+            lml += ys[i](x_masked).logpdf(y_masked)
 
             # Condition the remainder on the observation for `y_i`.
-            obs = Obs(ys[i](x[mask]), y[mask, i])
+            obs = Obs(ys[i](x_masked), y_masked)
             ys[i:] = [p | obs for p in ys[i:]]
 
         return lml
@@ -116,7 +119,7 @@ class LMMPP(object):
         """
         preds = [y(x).marginals() for y in self.ys]
         means, vars = [], []
-        for i in range(B.shape_int(x)[0]):
+        for i in range(B.shape(x)[0]):
             d = self.y(x[i])
             means.append(d.mean)
             vars.append(dense(d.var))
@@ -202,7 +205,7 @@ class OLMM(Referentiable):
             U, _, _ = B.svd(B.matmul(B.matmul(V, A, tr_a=True), V))
             us.append(B.matmul(V, U[:, :1]))
             V = B.matmul(V, U[:, 1:])
-        self.U = B.concat(us, axis=1)
+        self.U = B.concat(*us, axis=1)
 
         # Reconstruct mixing matrix and projection.
         self._construct_H_and_P()
@@ -242,10 +245,9 @@ class OLMM(Referentiable):
             lml += p(x).logpdf(yi) - n(x).logpdf(yi)
 
         # Add regularisation contribution.
-        noise_latent = B.matmul(self.H * B.array(self.noises_latent)[None, :],
+        noise_latent = B.matmul(self.H * self.noises_latent[None, :],
                                 self.H, tr_b=True)
-        noise_obs = self.noise_obs * \
-                    B.eye(self.p, dtype=B.dtype(self.noise_obs))
+        noise_obs = self.noise_obs * B.eye(B.dtype(self.noise_obs), self.p)
         d = Normal(noise_obs + noise_latent)
         lml += B.sum(d.logpdf(B.transpose(y)))
 
@@ -258,8 +260,7 @@ class OLMM(Referentiable):
             y (tensor): Data to project.
 
         Returns:
-            tensor: Projected observations. Rows correspond to outputs and
-                columns to time points.
+            list[tensor]: Projected observations per output.
         """
         return B.unstack(B.matmul(self.P, y, tr_b=True), axis=0)
 
@@ -275,26 +276,21 @@ class OLMM(Referentiable):
         """
 
         # Extract means and variances of the latent processes.
-        def extract(p):
-            d = p(x)
-            return d.mean, dense(d.var)
-
-        x_means, x_vars = zip(*[extract(p) for p in self.xs])
+        x_means, x_vars = zip(*[(p(x).mean, dense(p(x).var)) for p in self.xs])
 
         # Pull means through mixing matrix and unstack.
-        y_means = B.matmul(self.H, B.concat(x_means, axis=1), tr_b=True)
+        y_means = B.matmul(self.H, B.concat(*x_means, axis=1), tr_b=True)
         y_means_per_output = B.unstack(y_means, axis=0)
         y_means_per_time = [x[:, None] for x in B.unstack(y_means, axis=1)]
 
         # Get the diagonals: ignore temporal correlations.
-        x_vars_per_time = B.unstack(B.stack(
-            [B.diag(var) for var in x_vars], axis=1), axis=0)
+        diags = [B.diag(var) for var in x_vars]
+        x_vars_per_time = B.unstack(B.stack(*diags, axis=1), axis=0)
 
         # Compute noise matrices.
-        noise_latent = B.matmul(self.H * B.array(self.noises_latent)[None, :],
+        noise_latent = B.matmul(self.H * self.noises_latent[None, :],
                                 self.H, tr_b=True)
-        noise_obs = self.noise_obs * \
-                    B.eye(self.p, dtype=B.dtype(self.noise_obs))
+        noise_obs = self.noise_obs * B.eye(B.dtype(self.noise_obs), self.p)
 
         # Determine spatial variances.
         y_vars_per_time = []
@@ -304,8 +300,8 @@ class OLMM(Referentiable):
             y_vars_per_time.append(f_var + noise_obs + noise_latent)
 
         # Compute variances per output.
-        y_vars_per_output = B.unstack(B.stack(
-            [B.diag(var) for var in y_vars_per_time], axis=1), axis=0)
+        diags = [B.diag(var) for var in y_vars_per_time]
+        y_vars_per_output = B.unstack(B.stack(*diags, axis=1), axis=0)
 
         # Return marginal predictions, means per time, and variances per time.
         return [(mean, mean - 2 * var ** .5, mean + 2 * var ** .5)
