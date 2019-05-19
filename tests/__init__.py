@@ -7,6 +7,11 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                 '..')))
+# Load LAB extensions.
+# noinspection PyUnresolvedReferences
+import lab.tensorflow
+# noinspection PyUnresolvedReferences
+import lab.torch
 
 # noinspection PyUnresolvedReferences
 from wbml import *
