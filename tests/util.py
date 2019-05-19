@@ -7,8 +7,6 @@ from nose.tools import assert_raises, assert_equal, assert_less, \
     assert_greater_equal, ok_
 from numpy.testing import assert_allclose
 
-import sys
-
 le = assert_less_equal
 lt = assert_less
 eq = assert_equal
@@ -18,15 +16,3 @@ gt = assert_greater
 raises = assert_raises
 ok = ok_
 allclose = assert_allclose
-
-
-def call(f, method, args=(), res=True):
-    assert_equal(getattr(f, method)(*args), res)
-
-
-def lam(f, args=()):
-    ok_(f(*args))
-
-
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
