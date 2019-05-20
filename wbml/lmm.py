@@ -13,7 +13,32 @@ __all__ = ['LMMPP', 'OLMM']
 log = logging.getLogger(__name__)
 
 
-class LMMPP(object):
+def _to_tuples(x, y):
+    """Extract tuples with the input locations, output index,
+    and observations from a matrix of observations.
+
+    Args:
+        x (tensor): Input locations.
+        y (tensor): Outputs.
+
+    Returns:
+        list[tuple]: List of tuples with the input locations, output index,
+            and observations.
+    """
+    xys = []
+    for i in range(B.shape(y)[1]):
+        mask = ~B.isnan(y[:, i])
+        if B.any(mask):
+            xys.append((x[mask], i, y[mask, i]))
+
+    # Ensure that any data was extracted.
+    if len(xys) == 0:
+        raise ValueError('No data was extracted.')
+
+    return xys
+
+
+class LMMPP(Referentiable):
     """PP implementation of the linear mixing model.
 
     Args:
@@ -22,6 +47,7 @@ class LMMPP(object):
         noises_latent (tensor): Latent noises. One per latent processes.
         H (tensor): Mixing matrix.
     """
+    _dispatch = Dispatcher(in_class=Self)
 
     def __init__(self, kernels, noise_obs, noises_latent, H):
         self.graph = Graph()
@@ -48,64 +74,52 @@ class LMMPP(object):
                    for f in self.fs]
         self.y = self.graph.cross(*self.ys)
 
-    def observe(self, x, y):
+    @_dispatch(tuple, [tuple])
+    def observe(self, *xys):
         """Observe data.
 
         Args:
-            x (tensor): Inputs.
-            y (tensor): Outputs.
+            x (tensor): Input locations.
+            y (tensor): Observed values.
         """
-        # Make x-y tuples, handling missing data.
-        xy_tuples = []
-        for i in range(self.p):
-            mask = ~B.isnan(y[:, i])
-            xy_tuples.append((self.ys[i](x[mask]), y[mask, i]))
-
-        # Condition all processes.
-        obs = Obs(*xy_tuples)
+        # Condition all processes on all evidence.
+        obs = Obs(*[(self.ys[i](x), y) for x, i, y in xys])
         self.fs = [p | obs for p in self.fs]
         self.ys = [p | obs for p in self.ys]
         self.y = self.y | obs
 
-    def sample(self, x):
-        """Sample data.
+    @_dispatch(object, B.Numeric)
+    def observe(self, x, y):
+        self.observe(*_to_tuples(x, y))
+
+    @_dispatch(tuple, [tuple])
+    def logpdf(self, *xys):
+        """Compute the logpdf of data.
 
         Args:
-            x (tensor): Inputs to sample at.
-        """
-        samples = self.graph.sample(*(y(x) for y in self.ys))
-        return B.concat(*samples, axis=1)
-
-    def lml(self, x, y):
-        """Compute the LML.
-
-        Args:
-            x (tensor): Inputs of data.
-            y (tensor): Output of data.
+            x (tensor): Input locations.
+            y (tensor): Observed values.
 
         Returns:
-            tensor: LML of data.
+            tensor: Logpdf of data.
         """
-        ys = list(self.ys)
+        ys = list(self.ys)  # Make a copy so that we can modify it.
 
         # Compute the LML using the product rule.
-        lml = 0
-        for i in range(self.p):
-            # Handle missing data.
-            mask = ~B.isnan(y[:, i])
-
-            # Apply masks.
-            x_masked = x[mask]
-            y_masked = y[mask, i]
-
+        logpdf = 0
+        for x, i, y in xys:
             # Compute `log p(y_i | y_{1:i - 1})`.
-            lml += ys[i](x_masked).logpdf(y_masked)
+            logpdf += ys[i](x).logpdf(y)
 
             # Condition the remainder on the observation for `y_i`.
-            obs = Obs(ys[i](x_masked), y_masked)
-            ys[i:] = [p | obs for p in ys[i:]]
+            obs = Obs(ys[i](x), y)
+            ys = [p | obs for p in ys]
 
-        return lml
+        return logpdf
+
+    @_dispatch(object, B.Numeric)
+    def logpdf(self, x, y):
+        return self.logpdf(*_to_tuples(x, y))
 
     def marginals(self, x):
         """Compute marginals.
@@ -124,6 +138,18 @@ class LMMPP(object):
             means.append(d.mean)
             vars.append(dense(d.var))
         return preds, means, vars
+
+    def sample(self, x, latent=True):
+        """Sample data.
+
+        Args:
+            x (tensor): Inputs to sample at.
+            latent (bool, optional): Sample latent processes instead of the
+                observed values. Defaults to `True`.
+        """
+        ps = self.fs if latent else self.ys
+        samples = self.graph.sample(*[p(x) for p in ps])
+        return B.concat(*samples, axis=1)
 
 
 class OLMM(Referentiable):
@@ -174,21 +200,16 @@ class OLMM(Referentiable):
         OLMM.__init__(self, kernels, noise_obs, noises_latent, U, S_sqrt)
 
     def _construct_H_and_P(self):
-        # Compute mixing matrix.
+        """Construct mixing matrix and projection."""
         self.H = self.U * self.S_sqrt[None, :]
-
-        # Construct data projection.
         self.P = B.transpose(self.H) / self.S_sqrt[:, None] ** 2
 
-    def optimal_U(self, x, y):
+    def optimal_U(self, x, y):  # pragma: no cover
         """Approximate the optimal `U`.
 
-        Note:
-            This assumes no noise on the latent processes.
-
         Args:
-            x (tensor): Inputs of data.
-            y (tensor): Output of data.
+            x (tensor): Input locations.
+            y (tensor): Observed values.
         """
         # Construct first `A`.
         raise NotImplementedError()
@@ -226,15 +247,15 @@ class OLMM(Referentiable):
         self.xs_noisy = [p | obs for p, obs in zip(self.xs_noisy, obses)]
         self.xs_noises = [p | obs for p, obs in zip(self.xs_noises, obses)]
 
-    def lml(self, x, y):
-        """Compute the LML.
+    def logpdf(self, x, y):
+        """Compute the logpdf.
 
         Args:
             x (tensor): Inputs of data.
             y (tensor): Output of data.
 
         Returns:
-            tensor: LML of data.
+            tensor: Logpdf of data.
         """
         # Perform projection.
         ys_proj = self.project(y)
@@ -245,13 +266,30 @@ class OLMM(Referentiable):
             lml += p(x).logpdf(yi) - n(x).logpdf(yi)
 
         # Add regularisation contribution.
-        noise_latent = B.matmul(self.H * self.noises_latent[None, :],
-                                self.H, tr_b=True)
-        noise_obs = self.noise_obs * B.eye(B.dtype(self.noise_obs), self.p)
-        d = Normal(noise_obs + noise_latent)
-        lml += B.sum(d.logpdf(B.transpose(y)))
+        lml += self.likelihood(y)
 
         return lml
+
+    @property
+    def likelihood_covariance(self):
+        """Covariance of the likelihood."""
+        noise_latent = \
+            B.matmul(self.H * self.noises_latent[None, :], self.H, tr_b=True)
+        noise_obs = self.noise_obs * B.eye(B.dtype(self.noise_obs), self.p)
+        return noise_latent + noise_obs
+
+    def likelihood(self, y, mean=0):
+        """Compute the likelihood of data for a given mean.
+
+        Args:
+            y (tensor): Data to evaluate likelihood at.
+            mean (tensor): Mean of likelihood. Defaults to zero.
+
+        Returns:
+            tensor: Likelihood of `y` given `mean`.
+        """
+        d = Normal(self.likelihood_covariance)
+        return B.sum(d.logpdf(B.transpose(y - mean)))
 
     def project(self, y):
         """Project observations.
@@ -276,7 +314,8 @@ class OLMM(Referentiable):
         """
 
         # Extract means and variances of the latent processes.
-        x_means, x_vars = zip(*[(p(x).mean, dense(p(x).var)) for p in self.xs])
+        x_means, x_vars = \
+            zip(*[(p.mean(x), p.kernel.elwise(x)[:, 0]) for p in self.xs])
 
         # Pull means through mixing matrix and unstack.
         y_means = B.matmul(self.H, B.concat(*x_means, axis=1), tr_b=True)
@@ -284,20 +323,15 @@ class OLMM(Referentiable):
         y_means_per_time = [x[:, None] for x in B.unstack(y_means, axis=1)]
 
         # Get the diagonals: ignore temporal correlations.
-        diags = [B.diag(var) for var in x_vars]
-        x_vars_per_time = B.unstack(B.stack(*diags, axis=1), axis=0)
-
-        # Compute noise matrices.
-        noise_latent = B.matmul(self.H * self.noises_latent[None, :],
-                                self.H, tr_b=True)
-        noise_obs = self.noise_obs * B.eye(B.dtype(self.noise_obs), self.p)
+        x_vars_per_time = B.unstack(B.stack(*x_vars, axis=1), axis=0)
 
         # Determine spatial variances.
         y_vars_per_time = []
+        lik_cov = self.likelihood_covariance
         for x_vars in x_vars_per_time:
             # Pull through mixing matrix.
             f_var = B.matmul(self.H * x_vars[None, :], self.H, tr_b=True)
-            y_vars_per_time.append(f_var + noise_obs + noise_latent)
+            y_vars_per_time.append(f_var + lik_cov)
 
         # Compute variances per output.
         diags = [B.diag(var) for var in y_vars_per_time]
@@ -308,15 +342,18 @@ class OLMM(Referentiable):
                 for mean, var in zip(y_means_per_output, y_vars_per_output)], \
                y_means_per_time, y_vars_per_time
 
-    def sample(self, x):
+    def sample(self, x, latent=True):
         """Sample model.
 
         Args:
             x (tensor): Points to sample at.
+            latent (bool): Sample latent processes instead of observed values.
+                Defaults to `True`.
 
         Returns:
             tensor: Sample.
         """
-        x_samples = B.concat(*[xi(x).sample() for xi in self.xs_noisy], axis=1)
-        f_samples = B.matmul(x_samples, self.H, tr_b=True)
-        return f_samples + self.noise_obs ** .5 * B.randn(f_samples)
+        ps = self.xs if latent else self.xs_noisy
+        x_samples = B.concat(*[p(x).sample() for p in ps], axis=1)
+        samples = B.matmul(x_samples, self.H, tr_b=True)
+        return samples
