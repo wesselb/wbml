@@ -2,11 +2,20 @@
 
 from __future__ import absolute_import, division, print_function
 
-from abc import abstractmethod, ABCMeta
+from abc import ABCMeta, abstractmethod
 
-import lab.tensorflow as B
+import lab as B
 import six
-import tensorflow as tf
+
+__all__ = ['Normalise',
+           'Linear',
+           'Activation',
+           'Net',
+           'Recurrent',
+           'GRU',
+           'Elman',
+           'ff',
+           'rnn']
 
 
 class Layer(six.with_metaclass(ABCMeta, object)):
@@ -22,7 +31,7 @@ class Layer(six.with_metaclass(ABCMeta, object)):
         """
 
     @abstractmethod
-    def __call__(self, x):
+    def __call__(self, x):  # pragma: no cover
         pass
 
     @abstractmethod
@@ -36,15 +45,16 @@ class Layer(six.with_metaclass(ABCMeta, object)):
             int: Number of weights.
         """
 
+    @property
+    @abstractmethod
+    def width(self):
+        """Width of the layer."""
+
 
 class AutoBatchLayer(six.with_metaclass(ABCMeta, Layer)):
     """A layer that automatically handles batched calls."""
 
     def __call__(self, x):
-        # Handle the rank one case.
-        if B.rank(x) == 1:
-            x = B.expand_dims(x, 1)
-
         if B.rank(x) == 2:
             return self._apply(x)
         elif B.rank(x) == 3:
@@ -56,33 +66,43 @@ class AutoBatchLayer(six.with_metaclass(ABCMeta, Layer)):
             x = self._apply(x)
 
             # Shape back and return.
-            return B.reshape(x, batch_size, n, m)
+            return B.reshape(x, batch_size, n, -1)
         else:
-            raise ValueError('I do not know how to handle inputs of rank {}.'
+            raise ValueError('Cannot handle inputs of rank {}.'
                              ''.format(B.rank(x)))
 
     @abstractmethod
-    def _apply(self, x):
+    def _apply(self, x):  # pragma: no cover
         pass
 
 
 class Normalise(AutoBatchLayer):
-    """Batch-norm layer."""
+    """Batch-norm layer.
 
-    def __init__(self):
-        self.width = None
+    Args:
+        epsilon (scalar): Small value to add to the standard deviation before
+            dividing. Defaults to `B.epsilon`.
+    """
+
+    def __init__(self, epsilon=B.epsilon):
+        self._width = None
+        self.epsilon = B.epsilon
 
     def initialise(self, input_size, vs):
-        self.width = input_size
+        self._width = input_size
 
     def _apply(self, x):
-        mean = B.mean(x, axis=0)[None, :]
-        std = B.std(x, axis=0)[None, :]
-        return (x - mean) / (std + B.epsilon)
+        mean = B.mean(x, axis=1)[:, None]
+        std = B.std(x, axis=1)[:, None]
+        return (x - mean) / (std + self.epsilon)
 
     def num_weights(self, input_size):
-        self.width = input_size
+        self._width = input_size
         return 0
+
+    @property
+    def width(self):
+        return self._width
 
 
 class Linear(AutoBatchLayer):
@@ -93,7 +113,7 @@ class Linear(AutoBatchLayer):
     """
 
     def __init__(self, width):
-        self.width = width
+        self._width = width
         self.A = None
         self.b = None
 
@@ -107,6 +127,10 @@ class Linear(AutoBatchLayer):
     def num_weights(self, input_size):
         return input_size * self.width + self.width
 
+    @property
+    def width(self):
+        return self._width
+
 
 class Activation(AutoBatchLayer):
     """Activation layer.
@@ -116,18 +140,22 @@ class Activation(AutoBatchLayer):
     """
 
     def __init__(self, nonlinearity=B.relu):
-        self.width = None
+        self._width = None
         self.nonlinearity = nonlinearity
 
     def initialise(self, input_size, vs):
-        self.width = input_size
+        self._width = input_size
 
     def _apply(self, x):
         return self.nonlinearity(x)
 
     def num_weights(self, input_size):
-        self.width = input_size
+        self._width = input_size
         return 0
+
+    @property
+    def width(self):
+        return self._width
 
 
 class Net(Layer):
@@ -159,6 +187,10 @@ class Net(Layer):
             input_size = layer.width
         return num_weights
 
+    @property
+    def width(self):
+        return self.layers[-1].width
+
 
 class Recurrent(Layer):
     """An recurrent layer.
@@ -180,11 +212,10 @@ class Recurrent(Layer):
 
     def __call__(self, x):
         # Put the batch dimension second.
-        if B.rank(x) == 1:
-            x = x[:, None, None]
-        elif B.rank(x) == 2:
+        x_rank = B.rank(x)
+        if x_rank == 2:
             x = x[:, None, :]
-        elif B.rank(x) == 3:
+        elif x_rank == 3:
             x = B.transpose(x, perm=(1, 0, 2))
         else:
             raise ValueError('Cannot handle inputs of rank {}.'
@@ -193,14 +224,24 @@ class Recurrent(Layer):
         # Recurrently apply the cell.
         n, batch_size, m = B.shape(x)
         y0 = B.zeros(B.dtype(x), batch_size, self.cell.width)
-        h0 = tf.tile(self.h0, [batch_size, 1])
-        res = tf.scan(self.cell, x, initializer=(h0, y0))[1]
+        h0 = B.tile(self.h0, batch_size, 1)
+        res = B.scan(self.cell, x, h0, y0)[1]
 
         # Put the batch dimension first again.
-        return B.transpose(res, perm=(1, 0, 2))
+        res = B.transpose(res, perm=(1, 0, 2))
+
+        # Remove the batch dimension, if that didn't exist before.
+        if x_rank == 2:
+            res = res[0, :, :]
+
+        return res
 
     def num_weights(self, input_size):
         return self.cell.width + self.cell.num_weights(input_size)
+
+    @property
+    def width(self):
+        return self.cell.width
 
 
 class Cell(six.with_metaclass(ABCMeta, object)):
@@ -216,7 +257,7 @@ class Cell(six.with_metaclass(ABCMeta, object)):
         """
 
     @abstractmethod
-    def __call__(self, prev, x):
+    def __call__(self, prev, x):  # pragma: no cover
         pass
 
     @abstractmethod
@@ -230,6 +271,11 @@ class Cell(six.with_metaclass(ABCMeta, object)):
             int: Number of weights.
         """
 
+    @property
+    @abstractmethod
+    def width(self):
+        """Width of the layer"""
+
 
 class GRU(Cell):
     """A gated recurrent unit.
@@ -241,15 +287,15 @@ class GRU(Cell):
     """
 
     def __init__(self, width, nonlinearity=B.tanh):
-        self.width = width
-        self.f_z = Net(Linear(self.width), Activation(B.sigmoid))
-        self.f_r = Net(Linear(self.width), Activation(B.sigmoid))
-        self.f_h = Net(Linear(self.width), Activation(nonlinearity))
+        self._width = width
+        self.f_z = Net(Linear(width), Activation(B.sigmoid))
+        self.f_r = Net(Linear(width), Activation(B.sigmoid))
+        self.f_h = Net(Linear(width), Activation(nonlinearity))
 
     def initialise(self, input_size, vs):
-        self.f_z.initialise(self.width + input_size, vs)
-        self.f_r.initialise(self.width + input_size, vs)
-        self.f_h.initialise(self.width + input_size, vs)
+        self.f_z.initialise(self._width + input_size, vs)
+        self.f_r.initialise(self._width + input_size, vs)
+        self.f_h.initialise(self._width + input_size, vs)
 
     def __call__(self, prev, x):
         prev_h, _ = prev
@@ -263,9 +309,13 @@ class GRU(Cell):
         return h, y
 
     def num_weights(self, input_size):
-        return self.f_z.num_weights(self.width + input_size) + \
-               self.f_r.num_weights(self.width + input_size) + \
-               self.f_h.num_weights(self.width + input_size)
+        return self.f_z.num_weights(self._width + input_size) + \
+               self.f_r.num_weights(self._width + input_size) + \
+               self.f_h.num_weights(self._width + input_size)
+
+    @property
+    def width(self):
+        return self._width
 
 
 class Elman(Cell):
@@ -278,11 +328,11 @@ class Elman(Cell):
     """
 
     def __init__(self, width, nonlinearity=B.tanh):
-        self.width = width
-        self.f_h = Net(Linear(self.width), Activation(nonlinearity))
+        self._width = width
+        self.f_h = Net(Linear(width), Activation(nonlinearity))
 
     def initialise(self, input_size, vs):
-        self.f_h.initialise(self.width + input_size, vs)
+        self.f_h.initialise(self._width + input_size, vs)
 
     def __call__(self, prev, x):
         prev_h, prev_y = prev
@@ -294,7 +344,11 @@ class Elman(Cell):
         return h, y
 
     def num_weights(self, input_size):
-        return self.f_h.num_weights(self.width + input_size)
+        return self.f_h.num_weights(self._width + input_size)
+
+    @property
+    def width(self):
+        return self._width
 
 
 def ff(output_size, widths, nonlinearity=B.relu, normalise=True):
@@ -367,4 +421,4 @@ def rnn(output_size,
 
     # Add a final linear layer to scale outputs.
     layers.append(Linear(output_size))
-    return Net(layers)
+    return Net(*layers)
