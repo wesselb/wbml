@@ -139,7 +139,7 @@ class OLMM(Referentiable):
 
     @_dispatch({list, tuple},
                B.Numeric,
-               {B.Numeric, list},
+               B.Numeric,
                B.Numeric,
                B.Numeric)
     def __init__(self, kernels, noise_obs, noises_latent, U, S_sqrt):
@@ -307,3 +307,16 @@ class OLMM(Referentiable):
         return [(mean, mean - 2 * var ** .5, mean + 2 * var ** .5)
                 for mean, var in zip(y_means_per_output, y_vars_per_output)], \
                y_means_per_time, y_vars_per_time
+
+    def sample(self, x):
+        """Sample model.
+
+        Args:
+            x (tensor): Points to sample at.
+
+        Returns:
+            tensor: Sample.
+        """
+        x_samples = B.concat(*[xi(x).sample() for xi in self.xs_noisy], axis=1)
+        f_samples = B.matmul(x_samples, self.H, tr_b=True)
+        return f_samples + self.noise_obs ** .5 * B.randn(f_samples)

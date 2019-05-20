@@ -61,11 +61,11 @@ def test_olmm():
     lmm_pp = LMMPP(kernels, noise_obs, noises_latent, H)
     olmm = OLMM(kernels, noise_obs, noises_latent, H)
 
-    # Construct data.
+    # Construct data by sampling the models.
     x = np.linspace(0, 3, 5)
     y = lmm_pp.sample(x)
     x2 = np.linspace(4, 7, 5)
-    y2 = lmm_pp.sample(x2)
+    y2 = olmm.sample(x2)
 
     # Check LML before conditioning.
     yield assert_allclose, lmm_pp.lml(x, y), olmm.lml(x, y)
