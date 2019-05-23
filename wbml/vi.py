@@ -2,23 +2,22 @@
 
 from __future__ import absolute_import, division, print_function
 
-from lab import B
+import lab as B
 from plum import Dispatcher
 from stheno import Normal
-
-from .util import map_cols
 
 dispatch = Dispatcher()
 
 __all__ = ['elbo']
 
 
-@dispatch(object, object, object, [object])
+@dispatch(object, object, object)
 def elbo(lik, p, q, num_samples=1):
     """Construct the ELBO.
 
     Args:
-        lik (distribution): Likelihood.
+        lik (function): Likelihood that takes is one or more samples from the
+            approximation posterior.
         p (distribution): Prior.
         q (distribution): Approximate posterior.
         num_samples (int, optional): Number of samples. Defaults to `1`.
@@ -27,12 +26,12 @@ def elbo(lik, p, q, num_samples=1):
         tensor: ELBO.
     """
     samples = q.sample(num_samples)
-    log_lik = B.mean(map_cols(lik, samples))
+    log_lik = B.mean(lik(samples))
     log_prior = B.mean(p.logpdf(samples))
     log_q = B.mean(q.logpdf(samples))
     return log_lik - log_prior + log_q
 
 
-@dispatch(object, Normal, Normal, [object])
+@dispatch(object, Normal, Normal)
 def elbo(lik, p, q, num_samples=1):
-    return B.mean(map_cols(lik, q.sample(num_samples))) - q.kl(p)
+    return B.mean(lik(q.sample(num_samples))) - q.kl(p)
