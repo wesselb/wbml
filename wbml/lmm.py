@@ -8,7 +8,9 @@ from lab import B
 from plum import Dispatcher, Referentiable, Self
 from stheno import GP, Delta, Graph, Normal, Obs, dense
 
-__all__ = ['LMMPP', 'OLMM']
+from .util import normal1d_logpdf, BatchVars
+
+__all__ = ['LMMPP', 'OLMM', 'VaryingNet', 'VOLMM']
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +46,7 @@ class LMMPP(Referentiable):
     Args:
         kernels (list[:class:`stheno.Kernel`]) Kernels.
         noise_obs (tensor): Observation noise. One.
-        noises_latent (tensor): Latent noises. One per latent processes.
+        noises_latent (tensor): Latent noises. One per latent process.
         H (tensor): Mixing matrix.
     """
     _dispatch = Dispatcher(in_class=Self)
@@ -357,3 +359,143 @@ class OLMM(Referentiable):
         x_samples = B.concat(*[p(x).sample() for p in ps], axis=1)
         samples = B.matmul(x_samples, self.H, tr_b=True)
         return samples
+
+
+class VaryingNet(object):
+    """A :class:`.net.Net` with weights that vary per observation.
+
+    Args:
+        net (:class:`.net.Net`): Net whose weights to vary.
+    """
+
+    def __init__(self, net):
+        self.net = net
+        self.output_size = net.layers[-1].width
+
+    def num_weights(self, input_size):
+        """Calculate the number of weights given an input size.
+
+        Args:
+            input_size (int): Size of the inputs.
+        """
+        return self.net.num_weights(input_size)
+
+    def __call__(self, x, weights):
+        x = B.uprank(x)
+        m = B.shape(x)[1]
+
+        # Construct the function from the given weights.
+        vs = BatchVars(source=weights)
+        self.net.initialise(m, vs)
+
+        # Perform call.
+        x = x[:, None, :]  # Insert input axis.
+        y = self.net(x)
+        y = y[:, 0, :]  # Remove input axis.
+
+        return y
+
+
+class VOLMM(Referentiable):
+    """Variational OLMM.
+
+    Args:
+        p_kernels (list[:class:`stheno.Kernel`]) Kernels of the prior.
+        p_H (tensor): Mixing matrix of the prior.
+        p_transform (function): Transform of the inputs and weights to the
+            observed values without noise.
+        p_noises_obs (tensor): Observation noises of the prior. One per output.
+        q_noise_obs (tensor): Observation noise of the variational
+            approximation. One.
+        q_noises_latent (tensor): Latent noises of the variational
+            approximation. One per latent process.
+        q_x (tensor): Locations of the pseudo-observations of the variational
+            approximation.
+        q_y (tensor): Pseudo-observations of the variational approximation.
+    """
+    _dispatch = Dispatcher(in_class=Self)
+
+    def __init__(self,
+                 p_kernels,
+                 p_H,
+                 p_transform,
+                 p_noises_obs,
+                 q_noise_obs,
+                 q_noises_latent,
+                 q_x,
+                 q_y):
+        self.p_kernels = p_kernels
+        self.p_H = p_H
+        self.p_transform = p_transform
+        self.p_noises_obs = p_noises_obs
+        self.q_noise_obs = q_noise_obs
+        self.q_noises_latent = q_noises_latent
+        self.q_x = q_x
+        self.q_y = q_y
+
+    @_dispatch(B.Numeric)
+    def sample(self, x, latent=True):
+        """Sample from the model.
+
+        Args:
+            x (tensor): Locations to sample at.
+            latent (bool): Sample from the latent function instead of the
+                observed values.
+
+        Returns:
+            matrix: Sample.
+        """
+        q = OLMM(self.p_kernels,
+                 self.q_noise_obs,
+                 self.q_noises_latent,
+                 self.p_H)
+        q.observe(self.q_x, self.q_y)
+        w_sample = q.sample(x, latent=True)
+        sample = self.p_transform(x, w_sample)
+
+        # Add noise if an observed sample should be returned.
+        if not latent:
+            sample = sample + self.p_noises_obs ** .5 * B.randn(sample)
+
+        return w_sample, sample
+
+    @_dispatch(B.Numeric, [tuple])
+    def elbo(self, x, *ind_ys):
+        """Compute the ELBO.
+
+        Args:
+            x (tensor): Locations of the observations.
+            *ind_ys (tuple): Tuples per output containing indices of where
+                the observations are and the observed values.
+
+        Returns:
+            scalar: ELBO.
+        """
+        q = OLMM(self.p_kernels,
+                 self.q_noise_obs,
+                 self.q_noises_latent,
+                 self.p_H)
+
+        # Compute pseudo-evidence.
+        pseudo_evidence = q.logpdf(self.q_x, self.q_y)
+
+        # Generate samples for likelihood correction.
+        q.observe(self.q_x, self.q_y)
+        w_sample = q.sample(self.q_x, latent=True)
+        f_sample = self.p_transform(self.q_x, w_sample)
+
+        # Compute likelihood correction.
+        lik_corr = -q.likelihood(self.q_y, mean=w_sample)
+        for i, (inds, y) in enumerate(ind_ys):
+            diff = y - B.take(f_sample[:, i], inds)
+            lik_corr += B.sum(normal1d_logpdf(diff, self.p_noises_obs[i]))
+
+        # Add together and divide by total number of observations.
+        elbo = pseudo_evidence + lik_corr
+        elbo /= sum([len(inds) for inds, _ in ind_ys])
+
+        return elbo
+
+    @_dispatch(B.Numeric, B.Numeric)
+    def elbo(self, x, y):
+        raise NotImplementedError()
