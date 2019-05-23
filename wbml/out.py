@@ -4,12 +4,14 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 import sys
+import time
+from collections import defaultdict
 
 import lab as B
 import numpy as np
-from plum import Dispatcher
+from plum import Dispatcher, Referentiable, Self
 
-__all__ = ['Section', 'out', 'kv', 'format', 'Counter']
+__all__ = ['Section', 'out', 'kv', 'format', 'Counter', 'Progress']
 
 log = logging.getLogger(__name__)
 
@@ -164,9 +166,18 @@ def format(xs):
     return '{{{}}}'.format(', '.join([format(x) for x in xs]))
 
 
-@_dispatch(np.ndarray)
+@_dispatch(B.NPNumeric)
 def format(x):
-    return np.array_str(x, precision=3)
+    # Represent as an array.
+    x_str = np.array_str(x, precision=3)
+
+    # If the array is displayed on multiple lines, also show its shape and
+    # data type.
+    if '\n' in x_str:
+        x_str = '({} array of data type {})\n' \
+                ''.format('x'.join([str(d) for d in x.shape]), x.dtype) + x_str
+
+    return x_str
 
 
 @_dispatch(B.TorchNumeric)
@@ -188,23 +199,26 @@ class Counter(object):
     """A counter.
 
     Args:
-        name (str, optional): Name of the counter. Defaults to no name.
+        name (str, optional): Name of the counter. Defaults to "Counting".
         total (int, optional): Total number of counts. Defaults to no total.
     """
 
-    def __init__(self, name=None, total=None):
-        self.iteration = 0
+    def __init__(self, name='Counting', total=None):
         self.name = name
         self.total = total
 
     def __enter__(self):
-        # Print the name, if one is given.
-        title = self.name if self.name else 'Counting'
+        # Reset the counter.
+        self.iteration = 0
+
+        # Print the name.
+        title = self.name
 
         # Print the total, if one is given.
         if self.total:
             title += ' (total: {})'.format(self.total)
 
+        # Perform printing.
         _print(title + ':', line_end='')
         stream.flush()  # Flush, because there is no newline.
 
@@ -221,26 +235,175 @@ class Counter(object):
         stream.flush()
 
     @staticmethod
-    def map(f, xs, name=None):
+    def map(f, xs, name='Mapping'):
         """Perform a mapping operation that is counted.
 
         Args:
             f (function): Function to apply.
             xs (iterable): Arguments to apply.
             name (str, optional): Name of the mapping operation. Defaults to
-                "mapping".
+                "Mapping".
 
         Returns:
             list: Result.
         """
-        # Set default name.
-        if name is None:
-            name = 'Mapping'
-
         # Perform mapping operation.
         results = []
         with Counter(name=name, total=len(xs)) as counter:
             for x in xs:
                 counter.count()
+                results.append(f(x))
+        return results
+
+
+def _compute_alpha(cutoff_lag):
+    """Compute the coefficient `a` of the one-pole filter
+    `y[n] = a x[n] + (1 - a) x[n - 1]`.
+
+    Args:
+        cutoff_lag (int): Cut-off frequency, in number of lags.
+
+    Returns:
+        float: Coefficient `a`.
+    """
+    if cutoff_lag is None:
+        return 1
+    else:
+        a = np.cos(2 * np.pi / cutoff_lag)
+        return a - 1 + np.sqrt(a ** 2 - 4 * a + 3)
+
+
+class Progress(Referentiable):
+    """Display progress.
+
+    Args:
+        name (str): Name of operation. Defaults to "Progress".
+        total (int): Total number of iterations. Defaults to no total.
+        filter (dict): A dictionary mapping names of recorded values to the
+            cut-off frequency of a one-pole filter, in number of lags.
+        interval (int or float): Interval at which to print a report in
+            either number of seconds (float) or number of iterations (int).
+            Defaults to one second.
+        filter_global (int): Cut-off frequency of a one-filter of the default
+            smoother, in number of lags.
+
+    """
+    _dispatch = Dispatcher(in_class=Self)
+
+    def __init__(self,
+                 name='Progress',
+                 total=None,
+                 filter=None,
+                 interval=1.0,
+                 filter_global=5):
+        self.name = name
+        self.total = total
+        self.interval = interval
+        self.section = Section(name)
+
+        global_alpha = _compute_alpha(filter_global)
+        self.alpha = defaultdict(lambda: global_alpha)
+        if filter:
+            for name, cutoff in filter.items():
+                self.alpha[name] = _compute_alpha(cutoff)
+
+        self.cur_time = None
+        self.iteration = None
+        self.last_report = None
+        self.values = dict()
+
+    def __enter__(self):
+        self.last_time = time.time()
+        self.last_report = -np.inf
+        self.iteration = 0
+        self.values.clear()
+        self.section.__enter__()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        out('Done!')
+        self.section.__exit__(exc_type, exc_val, exc_tb)
+
+    @_dispatch()
+    def __call__(self, **updates):
+        return self(updates)
+
+    @_dispatch(dict)
+    def __call__(self, updates):
+        now = time.time()
+
+        # Increase iteration counter.
+        self.iteration += 1
+
+        # Record time per iteration.
+        updates['_time_per_it'] = now - self.last_time
+        self.last_time = now
+
+        # Update tracked values.
+        for name, value in updates.items():
+
+            # Perform smoothing if `value` is numeric.
+            if name in self.values and isinstance(value, B.Numeric):
+                alpha = self.alpha[name]
+                value = alpha * value + (1 - alpha) * self.values[name]
+
+            self.values[name] = value
+
+        # See if a progress report should be displayed.
+        if (
+                # If `self.interval` is a float, it specifies the number of
+                # seconds between reports.
+                (isinstance(self.interval, float) and
+                 now - self.last_report > self.interval) or
+
+                # If `self.interval` is an int, it specifies the number of
+                # iterations between reports.
+                (isinstance(self.interval, int) and
+                 self.iteration % self.interval == 0) or
+
+                # Always show a report on the first and last iteration.
+                self.iteration == 1 or self.iteration == self.total
+        ):
+            self.report()
+            self.last_report = now
+
+    def report(self):
+        """Show a report."""
+        # Construct title.
+        title = 'Iteration {}'.format(self.iteration)
+        if self.total:
+            title += '/' + str(self.total)
+
+        with Section(title):
+            if self.total:
+                # Estimate time left.
+                time_left = max(self.total + 1 - self.iteration, 0) * \
+                            self.values['_time_per_it']
+                kv('Time left', '{:.1f} s'.format(time_left))
+
+            # Print all updates.
+            for name in sorted(self.values.keys()):
+                if name == '_time_per_it':
+                    continue
+                kv(name, self.values[name])
+
+    @staticmethod
+    def map(f, xs, name='Mapping'):
+        """Perform a mapping operation whose progress is shown.
+
+        Args:
+            f (function): Function to apply.
+            xs (iterable): Arguments to apply.
+            name (str, optional): Name of the mapping operation. Defaults to
+                "Mapping".
+
+        Returns:
+            list: Result.
+        """
+        # Perform mapping operation.
+        results = []
+        with Progress(name=name, total=len(xs)) as progress:
+            for x in xs:
+                progress()
                 results.append(f(x))
         return results
