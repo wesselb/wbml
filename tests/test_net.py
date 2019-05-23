@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 import lab as B
-from . import Normalise, Linear, Activation, Recurrent, GRU, Elman, ff, rnn
+from . import Normalise, Linear, Activation, Recurrent, GRU, Elman, ff, rnn, Net
 
 # noinspection PyUnresolvedReferences
 from . import eq, neq, lt, le, ge, gt, raises, ok, approx, allclose
@@ -16,11 +16,9 @@ def check_batch_consistency(layer, xs):
     for x in xs:
         outs.append(layer(x))
 
-    # Test consistency.
+    # Test consistency. This tests that rank 2 and 3 tensors are of the correct
+    # shape.
     allclose(layer(xs), B.stack(*outs, axis=0))
-
-    # Test exceptions.
-    raises(ValueError, lambda: layer(B.ones(5)))
 
 
 def test_normalise():
@@ -34,9 +32,6 @@ def test_normalise():
     # Check initialisation and width.
     layer.initialise(3, None)
     yield eq, layer.width, 3
-
-    # Check batch consistency.
-    yield check_batch_consistency, layer, x
 
     # Check correctness
     out = layer(x)
@@ -77,9 +72,6 @@ def test_activation():
     layer.initialise(3, None)
     yield eq, layer.width, 3
 
-    # Check batch consistency.
-    yield check_batch_consistency, layer, x
-
     # Check correctness
     yield allclose, layer(x), B.relu(x)
 
@@ -98,7 +90,7 @@ def test_recurrent():
     yield ok, layer.h0 is not None
 
     # Check batch consistency.
-    yield check_batch_consistency, B.randn(30, 20, 5)
+    yield check_batch_consistency, layer, B.randn(30, 20, 5)
 
     # Test preservation of rank upon calls.
     yield eq, B.shape(layer(B.randn(20, 5))), (20, 10)
@@ -114,7 +106,7 @@ def test_ff():
 
     # Check number of weights and width.
     yield eq, B.length(vs.get_vector()), nn.num_weights(5)
-    yield eq, nn.width(10)
+    yield eq, nn.width, 10
 
     # Test batch consistency.
     yield check_batch_consistency, nn, x
@@ -136,6 +128,11 @@ def test_ff():
     yield eq, nn.layers[5].width, 30
     yield eq, type(nn.layers[6]), Linear
     yield eq, nn.layers[6].width, 10
+
+    # Check that one-dimensional calls are okay.
+    vs = Vars(np.float32)
+    nn.initialise(1, vs)
+    yield allclose, nn(B.linspace(0, 1, 10)), nn(B.linspace(0, 1, 10)[:, None])
 
     # Check normalisation layers disappear.
     yield eq, len(ff(10, (20, 30), normalise=False).layers), 5
@@ -185,7 +182,7 @@ def test_rnn():
             yield eq, type(nn.layers[6]), Linear
             yield eq, nn.layers[6].width, 10
 
-    # Check normalisation layers disappear.
+    # Check that normalisation layers disappear.
     yield eq, len(rnn(10, (20, 30),
                       normalise=False,
                       gru=True,

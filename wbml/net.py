@@ -51,33 +51,8 @@ class Layer(six.with_metaclass(ABCMeta, object)):
         """Width of the layer."""
 
 
-class AutoBatchLayer(six.with_metaclass(ABCMeta, Layer)):
-    """A layer that automatically handles batched calls."""
-
-    def __call__(self, x):
-        if B.rank(x) == 2:
-            return self._apply(x)
-        elif B.rank(x) == 3:
-            # Shape into one big matrix for efficient application.
-            batch_size, n, m = B.shape(x)
-            x = B.reshape(x, batch_size * n, m)
-
-            # Apply.
-            x = self._apply(x)
-
-            # Shape back and return.
-            return B.reshape(x, batch_size, n, -1)
-        else:
-            raise ValueError('Cannot handle inputs of rank {}.'
-                             ''.format(B.rank(x)))
-
-    @abstractmethod
-    def _apply(self, x):  # pragma: no cover
-        pass
-
-
-class Normalise(AutoBatchLayer):
-    """Batch-norm layer.
+class Normalise(Layer):
+    """Normalisation layer.
 
     Args:
         epsilon (scalar): Small value to add to the standard deviation before
@@ -86,14 +61,14 @@ class Normalise(AutoBatchLayer):
 
     def __init__(self, epsilon=B.epsilon):
         self._width = None
-        self.epsilon = B.epsilon
+        self.epsilon = epsilon
 
     def initialise(self, input_size, vs):
         self._width = input_size
 
-    def _apply(self, x):
-        mean = B.mean(x, axis=1)[:, None]
-        std = B.std(x, axis=1)[:, None]
+    def __call__(self, x):
+        mean = B.mean(x, axis=2)[:, :, None]
+        std = B.std(x, axis=2)[:, :, None]
         return (x - mean) / (std + self.epsilon)
 
     def num_weights(self, input_size):
@@ -105,7 +80,7 @@ class Normalise(AutoBatchLayer):
         return self._width
 
 
-class Linear(AutoBatchLayer):
+class Linear(Layer):
     """Linear layer.
 
     Args:
@@ -121,7 +96,7 @@ class Linear(AutoBatchLayer):
         self.A = vs.get(shape=[input_size, self.width])
         self.b = vs.get(shape=[1, self.width])
 
-    def _apply(self, x):
+    def __call__(self, x):
         return B.matmul(x, self.A) + self.b
 
     def num_weights(self, input_size):
@@ -132,7 +107,7 @@ class Linear(AutoBatchLayer):
         return self._width
 
 
-class Activation(AutoBatchLayer):
+class Activation(Layer):
     """Activation layer.
 
     Args:
@@ -146,7 +121,7 @@ class Activation(AutoBatchLayer):
     def initialise(self, input_size, vs):
         self._width = input_size
 
-    def _apply(self, x):
+    def __call__(self, x):
         return self.nonlinearity(x)
 
     def num_weights(self, input_size):
@@ -175,9 +150,24 @@ class Net(Layer):
             input_size = layer.width
 
     def __call__(self, x):
+        x_rank = B.rank(x)
+        if x_rank == 1:
+            x = x[None, :, None]
+        elif x_rank == 2:
+            x = x[None, :, :]
+        elif x_rank == 3:
+            pass
+        else:
+            raise ValueError('Cannot handle inputs of rank {}.'.format(x_rank))
+
         # Apply layers one by one.
         for layer in self.layers:
             x = layer(x)
+
+        # Remove batch dimension, if that wasn't specified initially.
+        if x_rank != 3:
+            x = x[0, :, :]
+
         return x
 
     def num_weights(self, input_size):
@@ -193,7 +183,7 @@ class Net(Layer):
 
 
 class Recurrent(Layer):
-    """An recurrent layer.
+    """A recurrent layer.
 
     Args:
         cell (:class:`.net.Cell`): Cell of the recurrent layer.
@@ -319,7 +309,7 @@ class GRU(Cell):
 
 
 class Elman(Cell):
-    """An recurrent layer of the Elman type.
+    """Elman cell.
 
     Args:
         width (int): Width of the layer.
@@ -371,7 +361,7 @@ def ff(output_size, widths, nonlinearity=B.relu, normalise=True):
         layers.append(Linear(width))
         layers.append(Activation(nonlinearity))
 
-        # Add a batch-norm layer, if asked for.
+        # Add a normalisation layer, if asked for.
         if normalise:
             layers.append(Normalise())
 
@@ -410,7 +400,7 @@ def rnn(output_size,
         layers.append(Recurrent(layer_type(width)))
         layers.append(Activation(nonlinearity))
 
-        # Add a batch-norm layer, if asked for.
+        # Add a normalisation layer, if asked for.
         if normalise:
             layers.append(Normalise())
 
