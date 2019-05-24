@@ -2,18 +2,17 @@
 
 from __future__ import absolute_import, division, print_function
 
+import lab as B
 import numpy as np
 from stheno import Normal
-import lab as B
+from wbml.util import inv_perm, normal1d_logpdf, BatchVars
 
-# noinspection PyUnresolvedReferences
-from . import eq, neq, lt, le, ge, gt, raises, ok, allclose
-from . import inv_perm, normal1d_logpdf, BatchVars
+from .util import allclose
 
 
 def test_inv_perm():
     perm = np.random.permutation(10)
-    yield allclose, perm[inv_perm(perm)], B.range(10)
+    allclose(perm[inv_perm(perm)], B.range(10))
 
 
 def test_normal1d_logpdf():
@@ -24,11 +23,11 @@ def test_normal1d_logpdf():
     for i in range(3):
         for j in range(3):
             dist = Normal(covs[i:i + 1, j:j + 1], means[i:i + 1, j:j + 1])
-            yield allclose, logpdfs[i, j], dist.logpdf(x[i, j])
+            allclose(logpdfs[i, j], dist.logpdf(x[i, j]))
 
 
 def test_batchvars():
     source = B.randn(5, 2 + 3 * 4)
     vs = BatchVars(source=source)
-    yield allclose, vs.get(shape=(1, 2)), B.reshape(source[:, :2], 5, 1, 2)
-    yield allclose, vs.get(shape=(3, 4)), B.reshape(source[:, 2:], 5, 3, 4)
+    allclose(vs.get(shape=(1, 2)), B.reshape(source[:, :2], 5, 1, 2))
+    allclose(vs.get(shape=(3, 4)), B.reshape(source[:, 2:], 5, 3, 4))

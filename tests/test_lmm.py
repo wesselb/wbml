@@ -3,14 +3,12 @@
 from __future__ import absolute_import, division, print_function
 
 import numpy as np
+import pytest
 from lab import B
-from numpy.testing import assert_allclose
 from stheno import EQ
-from . import OLMM, LMMPP
-from wbml.lmm import _to_tuples
+from wbml.lmm import _to_tuples, OLMM, LMMPP
 
-# noinspection PyUnresolvedReferences
-from . import eq, neq, lt, le, ge, gt, raises, ok, allclose, isinstance
+from .util import allclose
 
 
 def test_to_tuples():
@@ -21,17 +19,18 @@ def test_to_tuples():
 
     # Check correctness.
     (x1, i1, y1), (x2, i2, y2) = _to_tuples(x, y)
-    yield allclose, x1, x[[1, 2]]
-    yield eq, i1, 0
-    yield allclose, y1, y[[1, 2], 0]
-    yield allclose, x2, x[[0, 2]]
-    yield eq, i2, 1
-    yield allclose, y2, y[[0, 2], 1]
+    allclose(x1, x[[1, 2]])
+    assert i1 == 0
+    allclose(y1, y[[1, 2], 0])
+    allclose(x2, x[[0, 2]])
+    assert i2 == 1
+    allclose(y2, y[[0, 2], 1])
 
     # Test check that any data is extracted.
     y_nan = y.copy()
     y_nan[:] = np.nan
-    yield raises, ValueError, lambda: _to_tuples(x, y_nan)
+    with pytest.raises(ValueError):
+        _to_tuples(x, y_nan)
 
 
 def test_lmm_missing_data():
@@ -53,20 +52,18 @@ def test_lmm_missing_data():
     y2[0, 0] = np.nan
     y2[2, 2] = np.nan
     y2[4, 1] = np.nan
-    yield ok, not np.isnan(lmm.logpdf(x, y2))
+    assert not np.isnan(lmm.logpdf(x, y2))
 
     # Throw away an entire time point and check correctness.
     y2 = y.copy()
     y2[1, :] = np.nan
-    yield assert_allclose, \
-          lmm.logpdf(x[[0, 2, 3, 4]], y[[0, 2, 3, 4]]), \
-          lmm.logpdf(x, y2)
+    allclose(lmm.logpdf(x[[0, 2, 3, 4]], y[[0, 2, 3, 4]]),
+             lmm.logpdf(x, y2))
 
     # Check LML after conditioning.
     lmm.observe(x, y2)
-    yield assert_allclose, \
-          lmm.logpdf(x[[0, 2, 3, 4]], y[[0, 2, 3, 4]]), \
-          lmm.logpdf(x, y2)
+    allclose(lmm.logpdf(x[[0, 2, 3, 4]], y[[0, 2, 3, 4]]),
+             lmm.logpdf(x, y2))
 
 
 def test_compare_lmm_olmm():
@@ -88,16 +85,16 @@ def test_compare_lmm_olmm():
     y2 = lmm.sample(x2, latent=False)
 
     # Check LML before conditioning.
-    yield assert_allclose, lmm.logpdf(x, y), olmm.logpdf(x, y)
-    yield assert_allclose, lmm.logpdf(x2, y2), olmm.logpdf(x2, y2)
+    allclose(lmm.logpdf(x, y), olmm.logpdf(x, y))
+    allclose(lmm.logpdf(x2, y2), olmm.logpdf(x2, y2))
 
     # Check LML after conditioning.
     lmm.observe(x, y)
     olmm.observe(x, y)
     # Note: `lmm_pp.lml(x, y)` will not equal `olmm.lml(x, y)` due to
     # assumptions in the OLMM, so the follow is not tested.
-    # yield assert_allclose, lmm.logpdf(x, y), olmm.logpdf(x, y)
-    yield assert_allclose, lmm.logpdf(x2, y2), olmm.logpdf(x2, y2)
+    # allclose(lmm.logpdf(x, y), olmm.logpdf(x, y))
+    allclose(lmm.logpdf(x2, y2), olmm.logpdf(x2, y2))
 
     # Predict.
     preds_pp, means_pp, vars_pp = lmm.marginals(x2)
@@ -105,14 +102,14 @@ def test_compare_lmm_olmm():
 
     # Check predictions per time point.
     for i in range(5):
-        yield assert_allclose, means_pp[i], means[i]
-        yield assert_allclose, vars_pp[i], vars[i]
+        allclose(means_pp[i], means[i])
+        allclose(vars_pp[i], vars[i])
 
     # Check predictions per output.
     for i in range(3):
-        yield assert_allclose, preds_pp[i][0], preds[i][0]
-        yield assert_allclose, preds_pp[i][1], preds[i][1]
-        yield assert_allclose, preds_pp[i][2], preds[i][2]
+        allclose(preds_pp[i][0], preds[i][0])
+        allclose(preds_pp[i][1], preds[i][1])
+        allclose(preds_pp[i][2], preds[i][2])
 
 
 class TrackedIterator(object):
@@ -161,24 +158,22 @@ def test_lmm_olmm_sample():
 
     # Test latent samples.
 
-    x = np.linspace(0, 1, 3)
 
-    yield isinstance, lmm.sample(x, latent=True), B.NPNumeric
-    yield ok, lmm.fs.used, 'fs used'
-    yield ok, not lmm.ys.used, 'ys not used'
+    assert isinstance(lmm.sample(x, latent=True), B.NPNumeric)
+    assert lmm.fs.used, 'fs used'
+    assert not lmm.ys.used, 'ys not used'
 
-    yield isinstance, olmm.sample(x, latent=True), B.NPNumeric
-    yield ok, olmm.xs.used, 'xs used'
-    yield ok, not olmm.xs_noisy.used, 'xs_noisy not used'
+    assert isinstance(olmm.sample(x, latent=True), B.NPNumeric)
+    assert olmm.xs.used, 'xs used'
+    assert not olmm.xs_noisy.used, 'xs_noisy not used'
 
     # Test observed samples.
-
     TrackedIterator.reset()
 
-    yield isinstance, lmm.sample(x, latent=False), B.NPNumeric
-    yield ok, not lmm.fs.used, 'fs not used'
-    yield ok, lmm.ys.used, 'ys used'
+    assert isinstance(lmm.sample(x, latent=False), B.NPNumeric)
+    assert not lmm.fs.used, 'fs not used'
+    assert lmm.ys.used, 'ys used'
 
-    yield isinstance, olmm.sample(x, latent=False), B.NPNumeric
-    yield ok, not olmm.xs.used, 'xs not used'
-    yield ok, olmm.xs_noisy.used, 'xs_noisy used'
+    assert isinstance(olmm.sample(x, latent=False), B.NPNumeric)
+    assert not olmm.xs.used, 'xs not used'
+    assert olmm.xs_noisy.used, 'xs_noisy used'
