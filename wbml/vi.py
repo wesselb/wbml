@@ -27,9 +27,9 @@ def elbo(lik, p, q, num_samples=1):
     """
     samples = q.sample(num_samples)
     log_lik = B.mean(lik(samples))
-    log_prior = B.mean(p.logpdf(samples))
+    log_p = B.mean(p.logpdf(samples))
     log_q = B.mean(q.logpdf(samples))
-    return log_lik - log_prior + log_q
+    return log_lik + log_p - log_q
 
 
 @dispatch(object, Normal, Normal)
