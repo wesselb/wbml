@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+import pytest
 import lab as B
 import numpy as np
 from varz import Vars
@@ -140,6 +141,10 @@ def test_ff():
     nn.initialise(1, vs)
     allclose(nn(B.linspace(0, 1, 10)), nn(B.linspace(0, 1, 10)[:, None]))
 
+    # Check that zero-dimensional calls fail.
+    with pytest.raises(ValueError):
+        nn(0)
+
     # Check normalisation layers disappear.
     assert len(ff(10, (20, 30), normalise=False).layers) == 5
 
@@ -188,6 +193,10 @@ def test_rnn():
         else:
             assert type(nn.layers[6]) == Linear
             assert nn.layers[6].width == 10
+
+        # Check that zero-dimensional calls fail.
+        with pytest.raises(ValueError):
+            nn(0)
 
     # Check that normalisation layers disappear.
     assert len(rnn(10, (20, 30),
