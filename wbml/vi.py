@@ -16,8 +16,8 @@ def elbo(lik, p, q, num_samples=1):
     """Construct the ELBO.
 
     Args:
-        lik (function): Likelihood that takes is one or more samples from the
-            approximation posterior.
+        lik (function): Likelihood that taken in one or more samples from the
+            approximate posterior.
         p (distribution): Prior.
         q (distribution): Approximate posterior.
         num_samples (int, optional): Number of samples. Defaults to `1`.
