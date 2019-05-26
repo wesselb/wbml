@@ -157,8 +157,7 @@ def test_lmm_olmm_sample():
     olmm.xs_noisy = TrackedIterator(olmm.xs_noisy)
 
     # Test latent samples.
-
-
+    x = B.randn(10)
     assert isinstance(lmm.sample(x, latent=True), B.NPNumeric)
     assert lmm.fs.used, 'fs used'
     assert not lmm.ys.used, 'ys not used'
