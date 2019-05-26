@@ -159,20 +159,20 @@ def test_lmm_olmm_sample():
     # Test latent samples.
     x = B.randn(10)
     assert isinstance(lmm.sample(x, latent=True), B.NPNumeric)
-    assert lmm.fs.used, 'fs used'
-    assert not lmm.ys.used, 'ys not used'
+    assert lmm.fs.used, 'lmm.fs was not used.'
+    assert not lmm.ys.used, 'lmm.ys was used.'
 
     assert isinstance(olmm.sample(x, latent=True), B.NPNumeric)
-    assert olmm.xs.used, 'xs used'
-    assert not olmm.xs_noisy.used, 'xs_noisy not used'
+    assert olmm.xs.used, 'olmm.xs was not used.'
+    assert not olmm.xs_noisy.used, 'olmm.xs_noisy was used.'
 
     # Test observed samples.
     TrackedIterator.reset()
 
     assert isinstance(lmm.sample(x, latent=False), B.NPNumeric)
-    assert not lmm.fs.used, 'fs not used'
-    assert lmm.ys.used, 'ys used'
+    assert not lmm.fs.used, 'lmm.fs was used.'
+    assert lmm.ys.used, 'lmm.ys was not used'
 
     assert isinstance(olmm.sample(x, latent=False), B.NPNumeric)
-    assert not olmm.xs.used, 'xs not used'
-    assert olmm.xs_noisy.used, 'xs_noisy used'
+    assert not olmm.xs.used, 'olmm.xs was used'
+    assert olmm.xs_noisy.used, 'olmm.xs_noisy was not used.'
