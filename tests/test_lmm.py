@@ -61,7 +61,7 @@ def test_lmm_missing_data():
              lmm.logpdf(x, y2))
 
     # Check LML after conditioning.
-    lmm.observe(x, y2)
+    lmm = lmm.condition(x, y2)
     allclose(lmm.logpdf(x[[0, 2, 3, 4]], y[[0, 2, 3, 4]]),
              lmm.logpdf(x, y2))
 
@@ -89,8 +89,8 @@ def test_compare_lmm_olmm():
     allclose(lmm.logpdf(x2, y2), olmm.logpdf(x2, y2))
 
     # Check LML after conditioning.
-    lmm.observe(x, y)
-    olmm.observe(x, y)
+    lmm = lmm.condition(x, y)
+    olmm = olmm.condition(x, y)
     # Note: `lmm_pp.lml(x, y)` will not equal `olmm.lml(x, y)` due to
     # assumptions in the OLMM, so the follow is not tested.
     # allclose(lmm.logpdf(x, y), olmm.logpdf(x, y))
