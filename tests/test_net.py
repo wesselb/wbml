@@ -2,9 +2,9 @@
 
 from __future__ import absolute_import, division, print_function
 
-import pytest
 import lab as B
 import numpy as np
+import pytest
 from varz import Vars
 from wbml.net import (
     Normalise,
@@ -103,6 +103,10 @@ def test_recurrent():
     assert B.shape(layer(B.randn(20, 5))) == (20, 10)
     assert B.shape(layer(B.randn(30, 20, 5))) == (30, 20, 10)
 
+    # Check that zero-dimensional calls fail.
+    with pytest.raises(ValueError):
+        layer(0)
+
 
 def test_ff():
     vs = Vars(np.float32)
@@ -193,10 +197,6 @@ def test_rnn():
         else:
             assert type(nn.layers[6]) == Linear
             assert nn.layers[6].width == 10
-
-        # Check that zero-dimensional calls fail.
-        with pytest.raises(ValueError):
-            nn(0)
 
     # Check that normalisation layers disappear.
     assert len(rnn(10, (20, 30),
