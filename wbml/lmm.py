@@ -5,8 +5,17 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 from lab import B
-from plum import Dispatcher, Referentiable, Self
-from stheno import GP, Delta, Graph, Normal, Obs, dense
+from plum import Dispatcher, Referentiable, Self, Tuple
+from stheno import (
+    GP,
+    Delta,
+    FixedDelta,
+    Graph,
+    Normal,
+    Obs,
+    dense,
+    AbstractObservations
+)
 
 from .util import normal1d_logpdf, BatchVars
 
@@ -51,9 +60,10 @@ class LMMPP(Referentiable):
     """
     _dispatch = Dispatcher(in_class=Self)
 
+    @_dispatch(list, B.Numeric, B.Numeric, B.Numeric)
     def __init__(self, kernels, noise_obs, noises_latent, H):
         self.graph = Graph()
-        self.p, self.m = B.shape(H)
+        p, m = B.shape(H)
 
         # Create latent processes.
         xs = [GP(k, graph=self.graph) for k in kernels]
@@ -66,9 +76,9 @@ class LMMPP(Referentiable):
         xs_noisy = [x + e for x, e in zip(xs, es)]
 
         # Multiply with mixing matrix.
-        self.fs = [0 for _ in range(self.p)]
-        for i in range(self.p):
-            for j in range(self.m):
+        self.fs = [0 for _ in range(p)]
+        for i in range(p):
+            for j in range(m):
                 self.fs[i] += xs_noisy[j] * H[i, j]
 
         # Create two observed process.
@@ -76,26 +86,29 @@ class LMMPP(Referentiable):
                    for f in self.fs]
         self.y = self.graph.cross(*self.ys)
 
-    @_dispatch(tuple, [tuple])
-    def observe(self, *xys):
-        """Observe data.
+    @_dispatch(Graph, list, list, GP)
+    def __init__(self, graph, fs, ys, y):
+        self.graph = graph
+        self.fs = fs
+        self.ys = ys
+        self.y = y
+
+    def condition(self, x, y):
+        """Condition on data.
 
         Args:
             x (tensor): Input locations.
             y (tensor): Observed values.
         """
-        # Condition all processes on all evidence.
-        obs = Obs(*[(self.ys[i](x), y) for x, i, y in xys])
-        self.fs = [p | obs for p in self.fs]
-        self.ys = [p | obs for p in self.ys]
-        self.y = self.y | obs
+        # Construct evidence that conditions all processes.
+        obs = Obs(*[(self.ys[i](x), y) for x, i, y in _to_tuples(x, y)])
 
-    @_dispatch(object, B.Numeric)
-    def observe(self, x, y):
-        self.observe(*_to_tuples(x, y))
+        return LMMPP(self.graph,
+                     [p | obs for p in self.fs],
+                     [p | obs for p in self.ys],
+                     self.y | obs)
 
-    @_dispatch(tuple, [tuple])
-    def logpdf(self, *xys):
+    def logpdf(self, x, y):
         """Compute the logpdf of data.
 
         Args:
@@ -109,7 +122,7 @@ class LMMPP(Referentiable):
 
         # Compute the LML using the product rule.
         logpdf = 0
-        for x, i, y in xys:
+        for x, i, y in _to_tuples(x, y):
             # Compute `log p(y_i | y_{1:i - 1})`.
             logpdf += ys[i](x).logpdf(y)
 
@@ -118,10 +131,6 @@ class LMMPP(Referentiable):
             ys = [p | obs for p in ys]
 
         return logpdf
-
-    @_dispatch(object, B.Numeric)
-    def logpdf(self, x, y):
-        return self.logpdf(*_to_tuples(x, y))
 
     def marginals(self, x):
         """Compute marginals.
@@ -165,11 +174,7 @@ class OLMM(Referentiable):
     """
     _dispatch = Dispatcher(in_class=Self)
 
-    @_dispatch({list, tuple},
-               B.Numeric,
-               B.Numeric,
-               B.Numeric,
-               B.Numeric)
+    @_dispatch(list, B.Numeric, B.Numeric, B.Numeric, B.Numeric)
     def __init__(self, kernels, noise_obs, noises_latent, U, S_sqrt):
         # Determine number of outputs and latent processes.
         self.p, self.m = B.shape(U)
@@ -196,10 +201,44 @@ class OLMM(Referentiable):
         # Construct mixing matrix and projection.
         self._construct_H_and_P()
 
-    @_dispatch({list, tuple}, B.Numeric, {B.Numeric, list}, B.Numeric)
+    @_dispatch(list, B.Numeric, B.Numeric, B.Numeric)
     def __init__(self, kernels, noise_obs, noises_latent, H):
         U, S_sqrt, _ = B.svd(H)
         OLMM.__init__(self, kernels, noise_obs, noises_latent, U, S_sqrt)
+
+    @_dispatch(list,
+               list,
+               list,
+               list,
+               B.Numeric,
+               B.Numeric,
+               B.Numeric,
+               B.Numeric)
+    def __init__(self,
+                 graphs,
+                 xs,
+                 xs_noises,
+                 xs_noisy,
+                 noise_obs,
+                 noises_latent,
+                 U,
+                 S_sqrt):
+        # Save GPs.
+        self.graphs = graphs
+        self.xs = xs
+        self.xs_noises = xs_noises
+        self.xs_noisy = xs_noisy
+
+        # Save noises.
+        self.noise_obs = noise_obs
+        self.noises_latent = noises_latent
+
+        # Save components related to the mixing matrix.
+        self.p, self.m = B.shape(U)
+        self.U = U
+        self.S_sqrt = S_sqrt
+
+        self._construct_H_and_P()
 
     def _construct_H_and_P(self):
         """Construct mixing matrix and projection."""
@@ -233,21 +272,60 @@ class OLMM(Referentiable):
         # Reconstruct mixing matrix and projection.
         self._construct_H_and_P()
 
-    def observe(self, x, y):
-        """Observe data.
+    def project(self, y):
+        """Project observations.
+
+        Args:
+            y (tensor): Data to project.
+
+        Returns:
+            list[tensor]: Projected observations per output.
+        """
+        return B.unstack(B.matmul(self.P, y, tr_b=True), axis=0)
+
+    @property
+    def lik_var(self):
+        """Variance of the likelihood."""
+        noise_latent = \
+            B.matmul(self.H * self.noises_latent[None, :], self.H, tr_b=True)
+        noise_obs = self.noise_obs * B.eye(B.dtype(self.noise_obs), self.p)
+        return noise_latent + noise_obs
+
+    def lik(self, y, mean=0):
+        """Compute the likelihood of data for a given mean.
+
+        Args:
+            y (tensor): Data to evaluate likelihood at.
+            mean (tensor): Mean of likelihood. Defaults to zero.
+
+        Returns:
+            tensor: Likelihood of `y` given `mean`.
+        """
+        return B.sum(Normal(self.lik_var).logpdf(B.transpose(y - mean)))
+
+    @_dispatch(B.Numeric, B.Numeric)
+    def condition(self, x, y):
+        """Condition on data.
 
         Args:
             x (tensor): Inputs.
             y (tensor): Outputs.
         """
-        # Perform projection.
         ys = self.project(y)
+        return self.condition(*[Obs(p(x), y)
+                                for p, y in zip(self.xs_noisy, ys)])
 
+    @_dispatch([AbstractObservations])
+    def condition(self, *obses):
         # Condition latent processes and noises.
-        obses = [Obs(p(x), y) for p, y in zip(self.xs_noisy, ys)]
-        self.xs = [p | obs for p, obs in zip(self.xs, obses)]
-        self.xs_noisy = [p | obs for p, obs in zip(self.xs_noisy, obses)]
-        self.xs_noises = [p | obs for p, obs in zip(self.xs_noises, obses)]
+        return OLMM(self.graphs,
+                    [p | obs for p, obs in zip(self.xs, obses)],
+                    [p | obs for p, obs in zip(self.xs_noises, obses)],
+                    [p | obs for p, obs in zip(self.xs_noisy, obses)],
+                    self.noise_obs,
+                    self.noises_latent,
+                    self.U,
+                    self.S_sqrt)
 
     def logpdf(self, x, y):
         """Compute the logpdf.
@@ -268,41 +346,9 @@ class OLMM(Referentiable):
             lml += p(x).logpdf(yi) - n(x).logpdf(yi)
 
         # Add regularisation contribution.
-        lml += self.likelihood(y)
+        lml += self.lik(y)
 
         return lml
-
-    @property
-    def likelihood_covariance(self):
-        """Covariance of the likelihood."""
-        noise_latent = \
-            B.matmul(self.H * self.noises_latent[None, :], self.H, tr_b=True)
-        noise_obs = self.noise_obs * B.eye(B.dtype(self.noise_obs), self.p)
-        return noise_latent + noise_obs
-
-    def likelihood(self, y, mean=0):
-        """Compute the likelihood of data for a given mean.
-
-        Args:
-            y (tensor): Data to evaluate likelihood at.
-            mean (tensor): Mean of likelihood. Defaults to zero.
-
-        Returns:
-            tensor: Likelihood of `y` given `mean`.
-        """
-        d = Normal(self.likelihood_covariance)
-        return B.sum(d.logpdf(B.transpose(y - mean)))
-
-    def project(self, y):
-        """Project observations.
-
-        Args:
-            y (tensor): Data to project.
-
-        Returns:
-            list[tensor]: Projected observations per output.
-        """
-        return B.unstack(B.matmul(self.P, y, tr_b=True), axis=0)
 
     def marginals(self, x):
         """Compute marginals.
@@ -329,7 +375,7 @@ class OLMM(Referentiable):
 
         # Determine spatial variances.
         y_vars_per_time = []
-        lik_cov = self.likelihood_covariance
+        lik_cov = self.lik_var
         for x_vars in x_vars_per_time:
             # Pull through mixing matrix.
             f_var = B.matmul(self.H * x_vars[None, :], self.H, tr_b=True)
@@ -357,8 +403,7 @@ class OLMM(Referentiable):
         """
         ps = self.xs if latent else self.xs_noisy
         x_samples = B.concat(*[p(x).sample() for p in ps], axis=1)
-        samples = B.matmul(x_samples, self.H, tr_b=True)
-        return samples
+        return B.matmul(x_samples, self.H, tr_b=True)
 
 
 class VaryingNet(object):
