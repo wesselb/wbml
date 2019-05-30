@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 from lab import B
-from plum import Dispatcher, Referentiable, Self, Tuple
+from plum import Dispatcher, Referentiable, Self
 from stheno import (
     GP,
     Delta,
@@ -450,9 +450,9 @@ class VOLMM(Referentiable):
         p_transform (function): Transform of the inputs and weights to the
             observed values without noise.
         p_noises_obs (tensor): Observation noises of the prior. One per output.
-        q_noise_obs (tensor): Observation noise of the variational
+        p_olmm_noise_obs (tensor): Observation noise of the variational
             approximation. One.
-        q_noises_latent (tensor): Latent noises of the variational
+        p_olmm_noises_latent (tensor): Latent noises of the variational
             approximation. One per latent process.
         q_x (tensor): Locations of the pseudo-observations of the variational
             approximation.
@@ -465,18 +465,43 @@ class VOLMM(Referentiable):
                  p_H,
                  p_transform,
                  p_noises_obs,
-                 q_noise_obs,
-                 q_noises_latent,
+                 p_olmm_noise_obs,
+                 p_olmm_noises_latent,
                  q_x,
-                 q_y):
-        self.p_kernels = p_kernels
-        self.p_H = p_H
+                 q_y,
+                 q_y_noises):
+        # Construct OLMM prior.
+        self.p_olmm = OLMM(p_kernels,
+                           p_olmm_noise_obs,
+                           p_olmm_noises_latent,
+                           p_H)
+
+        # Likelihood parameters:
         self.p_transform = p_transform
         self.p_noises_obs = p_noises_obs
-        self.q_noise_obs = q_noise_obs
-        self.q_noises_latent = q_noises_latent
+
+        # Variational parameters:
         self.q_x = q_x
         self.q_y = q_y
+        self.q_y_noises = q_y_noises
+
+    def _olmm_condition(self, olmm):
+        obses = []
+        for p, n, y in zip(olmm.xs,
+                           B.unstack(self.q_y_noises, axis=1),
+                           B.unstack(self.q_y, axis=1)):
+            e = GP(FixedDelta(n), graph=p.graph)
+            obses.append(Obs((p + e)(self.q_x), y))
+        return olmm.condition(*obses)
+
+    def _olmm_logpdf(self, olmm):
+        logpdf = 0
+        for p, n, y in zip(olmm.xs,
+                           B.unstack(self.q_y_noises, axis=1),
+                           B.unstack(self.q_y, axis=1)):
+            e = GP(FixedDelta(n), graph=p.graph)
+            logpdf += (p + e)(self.q_x).logpdf(y)
+        return logpdf
 
     @_dispatch(B.Numeric)
     def sample(self, x, latent=True):
@@ -490,12 +515,9 @@ class VOLMM(Referentiable):
         Returns:
             matrix: Sample.
         """
-        q = OLMM(self.p_kernels,
-                 self.q_noise_obs,
-                 self.q_noises_latent,
-                 self.p_H)
-        q.observe(self.q_x, self.q_y)
-        w_sample = q.sample(x, latent=True)
+        # Sample weights and transform.
+        q = self._olmm_condition(self.p_olmm)  # Approximate posterior.
+        w_sample = q.sample(x, latent=False)
         sample = self.p_transform(x, w_sample)
 
         # Add noise if an observed sample should be returned.
@@ -504,43 +526,35 @@ class VOLMM(Referentiable):
 
         return w_sample, sample
 
-    @_dispatch(B.Numeric, [tuple])
-    def elbo(self, x, *ind_ys):
+    @_dispatch(B.Numeric, B.Numeric)
+    def elbo(self, x, y):
         """Compute the ELBO.
 
         Args:
             x (tensor): Locations of the observations.
-            *ind_ys (tuple): Tuples per output containing indices of where
-                the observations are and the observed values.
-
+            y (tensor): Observations.
         Returns:
             scalar: ELBO.
         """
-        q = OLMM(self.p_kernels,
-                 self.q_noise_obs,
-                 self.q_noises_latent,
-                 self.p_H)
-
         # Compute pseudo-evidence.
-        pseudo_evidence = q.logpdf(self.q_x, self.q_y)
+        pseudo_evidence = self._olmm_logpdf(self.p_olmm)
 
-        # Generate samples for likelihood correction.
-        q.observe(self.q_x, self.q_y)
-        w_sample = q.sample(self.q_x, latent=True)
-        f_sample = self.p_transform(self.q_x, w_sample)
+        # Likelihood correction: add real likelihood.
+        q = self._olmm_condition(self.p_olmm)  # Approximate posterior.
+        w_sample = q.sample(x, latent=False)
+        f_sample = self.p_transform(x, w_sample)
+        logpdfs = normal1d_logpdf(y - f_sample, self.p_noises_obs)
+        available = ~B.isnan(logpdfs)
+        lik_corr = B.sum(B.take(logpdfs, available))
 
-        # Compute likelihood correction.
-        lik_corr = -q.likelihood(self.q_y, mean=w_sample)
-        for i, (inds, y) in enumerate(ind_ys):
-            diff = y - B.take(f_sample[:, i], inds)
-            lik_corr += B.sum(normal1d_logpdf(diff, self.p_noises_obs[i]))
+        # Likelihood correction: subtract pseudo-likelihood.
+        # TODO: Compute this analytically!
+        w_sample = q.sample(self.q_x, latent=False)
+        olmm = self.p_olmm.condition(self.q_x, w_sample)
+        lik_corr -= self._olmm_logpdf(olmm)
 
         # Add together and divide by total number of observations.
         elbo = pseudo_evidence + lik_corr
-        elbo /= sum([len(inds) for inds, _ in ind_ys])
+        elbo /= B.sum(B.cast(B.dtype(elbo), available))
 
         return elbo
-
-    @_dispatch(B.Numeric, B.Numeric)
-    def elbo(self, x, y):
-        raise NotImplementedError()
