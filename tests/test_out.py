@@ -37,14 +37,18 @@ class Mock(object):
 
     def __enter__(self):
         self.stream = RecordingStream()
-        out.stream = self.stream  # Mock stream.
+        self.saved_streams = list(out.streams)
+        out.streams = [self.stream]  # Mock stream.
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        out.stream = sys.stdout  # Unmock stream.
+        out.streams = self.saved_streams  # Unmock stream.
 
     def __str__(self):
         return str(self.stream)
+
+    def __repr__(self):
+        return '<Mock: recorded=' + str(self.stream) + '>'
 
     def __len__(self):
         return len(self.stream)
@@ -178,11 +182,7 @@ def test_format():
 
     # Test formatting of TensorFlow objects.
     ones = B.ones(tf.int32, 3)
-    assert out.format(ones) == str(ones)
-    out.tf_session = tf.Session()
     assert out.format(ones) == '[1 1 1]'
-    out.tf_session.close()
-    out.tf_session = None
 
 
 def test_counter():
@@ -255,11 +255,12 @@ def test_progress():
         with out.Progress() as progress:
             progress(a=1)
 
-    assert len(mock) == 4
+    assert len(mock) == 5
     assert mock[0] == 'Progress:\n'
     assert mock[1] == '    Iteration 1:\n'
-    assert mock[2] == '        a:          1\n'
-    assert mock[3] == '    Done!\n'
+    assert 'Time elapsed' in mock[2]
+    assert mock[3] == '        a:          1\n'
+    assert mock[4] == '    Done!\n'
 
     # Test setting the total number of iterations and report interval as int.
     with Mock() as mock:
@@ -272,21 +273,24 @@ def test_progress():
             progress.values['_time_per_it'] = 1
             progress(a='d')
 
-    assert len(mock) == 11
+    assert len(mock) == 14
     assert mock[0] == 'name:\n'
     # First is always shown.
     assert mock[1] == '    Iteration 1/4:\n'
-    assert 'Time left' in mock[2]
-    assert mock[3] == '        a:          a\n'
-    assert mock[4] == '    Iteration 3/4:\n'
-    assert 'Time left' in mock[5]
-    assert mock[6] == '        a:          c\n'
+    assert 'Time elapsed' in mock[2]
+    assert 'Time left' in mock[3]
+    assert mock[4] == '        a:          a\n'
+    assert mock[5] == '    Iteration 3/4:\n'
+    assert 'Time elapsed' in mock[6]
+    assert 'Time left' in mock[7]
+    assert mock[8] == '        a:          c\n'
     # Last is also always shown.
-    assert mock[7] == '    Iteration 4/4:\n'
-    assert 'Time left' in mock[8]
-    assert '0.0 s' not in mock[8]
-    assert mock[9] == '        a:          d\n'
-    assert mock[10] == '    Done!\n'
+    assert mock[9] == '    Iteration 4/4:\n'
+    assert 'Time elapsed' in mock[10]
+    assert 'Time left' in mock[11]
+    assert '0.0 s' not in mock[11]
+    assert mock[12] == '        a:          d\n'
+    assert mock[13] == '    Done!\n'
 
     # Test filters, report interval as float, and giving a dictionary.
     with Mock() as mock:
@@ -297,29 +301,31 @@ def test_progress():
             progress({'a': 1, 'b': 1})
             progress({'a': 2, 'b': 2})
 
-    assert len(mock) == 8
+    assert len(mock) == 10
     assert mock[0] == 'name:\n'
     assert mock[1] == '    Iteration 1:\n'
-    assert mock[2] == '        a:          1\n'
-    assert mock[3] == '        b:          1\n'
-    assert mock[4] == '    Iteration 2:\n'
+    assert 'Time elapsed' in mock[2]
+    assert mock[3] == '        a:          1\n'
+    assert mock[4] == '        b:          1\n'
+    assert mock[5] == '    Iteration 2:\n'
+    assert 'Time elapsed' in mock[6]
     # Filter should be off.
-    assert mock[5] == '        a:          2\n'
+    assert mock[7] == '        a:          2\n'
     # Filter should be maximal.
-    assert mock[6] == '        b:          1.0\n'
-    assert mock[7] == '    Done!\n'
+    assert mock[8] == '        b:          1.0\n'
+    assert mock[9] == '    Done!\n'
 
     # Test mapping.
     with Mock() as mock:
         res = out.Progress.map(lambda x: x ** 2, [2, 3])
 
     assert res == [4, 9]
-    assert len(mock) == 6
+    assert len(mock) == 8
     assert mock[0] == 'Mapping:\n'
 
     with Mock() as mock:
         res = out.Progress.map(lambda x: x ** 2, [2, 3], name='name')
 
     assert res == [4, 9]
-    assert len(mock) == 6
+    assert len(mock) == 8
     assert mock[0] == 'name:\n'

@@ -21,31 +21,37 @@ indent_level = 0  #: Indentation level.
 indent_width = 4  #: Number of indentation characters per level.
 indent_char = ' '  #: Indentation character.
 key_width = 10  #: Minimum width for printing keys, for alignment.
-stream = sys.stdout  #: Output stream.
-tf_session = None  #: TensorFlow session to run tensors, for formatting.
+streams = [sys.stdout]  #: Output streams.
+digits = 3  #: Number of digits to show.
 
 
-def _print(msg, line_end='\n'):
+def _print(msg, line_end='\n', indent=True, flush=False):
     """Print a line with proper indentation.
 
     Args:
         msg (str): Message to print.
         line_end (str, optional): String to print at the end of the line.
             Defaults to "\n".
+        indent (bool, optional): Insert indentation. Defaults to `True`.
+        flush (bool, optional): Flush after writing. Defaults to `False`.
     """
     global indent_level
     global indent_width
     global indent_char
-    global stream
 
-    # Construct total indentation.
-    indent = indent_char * indent_width * indent_level
+    if indent:
+        # Construct total indentation.
+        indent = indent_char * indent_width * indent_level
 
-    # Indent the message and all newlines therein.
-    msg = indent + msg.replace('\n', '\n' + indent)
+        # Indent the message and all newlines therein.
+        msg = indent + msg.replace('\n', '\n' + indent)
 
     # Write the message plus line end.
-    stream.write(msg + line_end)
+    for stream in streams:
+        stream.write(msg + line_end)
+
+        if flush:
+            stream.flush()
 
 
 class Section(object):
@@ -137,10 +143,12 @@ def format(x):
 
 @_dispatch(B.Number)
 def format(x):
-    out = '{:.3e}'.format(x)
+    global digits
+
+    out = '{{:.{}e}}'.format(digits).format(x)
 
     # If `x` is not too large, print it as a float instead.
-    if 1e-3 < B.abs(x) < 1e3:
+    if 10 ** -digits < B.abs(x) < 10 ** digits:
         return str(float(out))
 
     return out
@@ -169,7 +177,7 @@ def format(xs):
 @_dispatch(B.NPNumeric)
 def format(x):
     # Represent as an array.
-    x_str = np.array_str(x, precision=3)
+    x_str = np.array_str(x, precision=digits)
 
     # If the array is displayed on multiple lines, also show its shape and
     # data type.
@@ -187,12 +195,7 @@ def format(x):
 
 @_dispatch(B.TFNumeric)
 def format(x):
-    global tf_session
-
-    if tf_session:
-        return format(tf_session.run(x))
-    else:
-        return str(x)
+    return format(x.numpy())
 
 
 class Counter(object):
@@ -218,21 +221,19 @@ class Counter(object):
         if self.total:
             title += ' (total: {})'.format(self.total)
 
-        # Perform printing.
-        _print(title + ':', line_end='')
-        stream.flush()  # Flush, because there is no newline.
+        # Perform printing and flush, because there is no newline.
+        _print(title + ':', line_end='', flush=True)
 
         return self
 
     def count(self):
         """Count once."""
         self.iteration += 1
-        stream.write(' {}'.format(self.iteration))
-        stream.flush()
+        _print(' {}'.format(self.iteration),
+               line_end='', indent=False, flush=True)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        stream.write('\n')
-        stream.flush()
+        _print('\n', line_end='', indent=False, flush=True)
 
     @staticmethod
     def map(f, xs, name='Mapping'):
@@ -284,8 +285,8 @@ class Progress(Referentiable):
         interval (int or float): Interval at which to print a report in
             either number of seconds (float) or number of iterations (int).
             Defaults to one second.
-        filter_global (int): Cut-off frequency of a one-filter of the default
-            smoother, in number of lags.
+        filter_global (int): Cut-off frequency of a one-pole filter of the
+            default smoother, in number of lags.
 
     """
     _dispatch = Dispatcher(in_class=Self)
@@ -310,17 +311,22 @@ class Progress(Referentiable):
         self.cur_time = None
         self.iteration = None
         self.last_report = None
+        self.report_was_just_shown = False
         self.values = dict()
 
     def __enter__(self):
+        self.start_time = time.time()
         self.last_time = time.time()
         self.last_report = -np.inf
+        self.report_was_just_shown = False
         self.iteration = 0
         self.values.clear()
         self.section.__enter__()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if not self.report_was_just_shown:
+            self.report()
         out('Done!')
         self.section.__exit__(exc_type, exc_val, exc_tb)
 
@@ -361,20 +367,27 @@ class Progress(Referentiable):
                 (isinstance(self.interval, int) and
                  self.iteration % self.interval == 0) or
 
-                # Always show a report on the first and last iteration.
-                self.iteration == 1 or self.iteration == self.total
+                # Always show a report on the first iteration.
+                self.iteration == 1
         ):
             self.report()
-            self.last_report = now
+        else:
+            self.report_was_just_shown = False
 
     def report(self):
         """Show a report."""
+        self.report_was_just_shown = True
+
         # Construct title.
         title = 'Iteration {}'.format(self.iteration)
         if self.total:
             title += '/' + str(self.total)
 
         with Section(title):
+            # Show how much time has elapsed.
+            kv('Time elapsed',
+               '{:.1f} s'.format(self.last_time - self.start_time))
+
             if self.total:
                 # Estimate time left.
                 time_left = max(self.total + 1 - self.iteration, 0) * \
@@ -386,6 +399,9 @@ class Progress(Referentiable):
                 if name == '_time_per_it':
                     continue
                 kv(name, self.values[name])
+
+        # Record time of report.
+        self.last_report = time.time()
 
     @staticmethod
     def map(f, xs, name='Mapping'):
