@@ -6,6 +6,7 @@ from setuptools import find_packages, setup
 
 requirements = ['six',
                 'numpy>=1.16',
+                'pandas',
 
                 'plum-dispatch',
                 'backends>=0.3.1',
