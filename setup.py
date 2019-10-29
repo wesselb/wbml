@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 requirements = ['six',
                 'numpy>=1.16',
 
-                'plum',
+                'plum-dispatch',
                 'backends>=0.3.0',
                 'stheno',
                 'varz']
