@@ -14,7 +14,9 @@ from stheno import (
     Normal,
     Obs,
     dense,
-    AbstractObservations
+    AbstractObservations,
+    Diagonal,
+    LowRank
 )
 
 from .util import normal1d_logpdf, BatchVars
@@ -252,25 +254,7 @@ class OLMM(Referentiable):
             x (tensor): Input locations.
             y (tensor): Observed values.
         """
-        # Construct first `A`.
         raise NotImplementedError()
-        A = None
-
-        # Greedy approximation of optimal U.
-        U, _, _ = B.svd(As[0])
-        us, V = [U[:, :1]], U[:, 1:]
-        for i in range(1, self.m):
-            # Construct `A` for iteration `i`.
-            raise NotImplementedError()
-            A = None
-
-            U, _, _ = B.svd(B.matmul(B.matmul(V, A, tr_a=True), V))
-            us.append(B.matmul(V, U[:, :1]))
-            V = B.matmul(V, U[:, 1:])
-        self.U = B.concat(*us, axis=1)
-
-        # Reconstruct mixing matrix and projection.
-        self._construct_H_and_P()
 
     def project(self, y):
         """Project observations.
@@ -286,9 +270,9 @@ class OLMM(Referentiable):
     @property
     def lik_var(self):
         """Variance of the likelihood."""
-        noise_latent = \
-            B.matmul(self.H * self.noises_latent[None, :], self.H, tr_b=True)
-        noise_obs = self.noise_obs * B.eye(B.dtype(self.noise_obs), self.p)
+        noise_latent = LowRank(self.H * self.noises_latent[None, :] ** .5)
+        noise_obs = \
+            Diagonal(self.noise_obs * B.ones(B.dtype(self.noise_obs), self.p))
         return noise_latent + noise_obs
 
     def lik(self, y, mean=0):
@@ -363,32 +347,31 @@ class OLMM(Referentiable):
 
         # Extract means and variances of the latent processes.
         x_means, x_vars = \
-            zip(*[(p.mean(x), p.kernel.elwise(x)[:, 0]) for p in self.xs])
+            zip(*[(p.mean(x)[:, 0], p.kernel.elwise(x)[:, 0]) for p in self.xs])
 
-        # Pull means through mixing matrix and unstack.
-        y_means = B.matmul(self.H, B.concat(*x_means, axis=1), tr_b=True)
-        y_means_per_output = B.unstack(y_means, axis=0)
-        y_means_per_time = [x[:, None] for x in B.unstack(y_means, axis=1)]
+        # Pull means through mixing matrix and scale back.
+        x_means = B.stack(*x_means, axis=0)
+        y_means = B.matmul(self.H, x_means)
 
-        # Get the diagonals: ignore temporal correlations.
-        x_vars_per_time = B.unstack(B.stack(*x_vars, axis=1), axis=0)
+        # Pull variances through mixing matrix and scale back.
+        x_vars = B.stack(*x_vars, axis=0)
+        y_vars = B.matmul(self.H ** 2, x_vars + self.noises_latent[:, None]) + \
+                 self.noise_obs
 
-        # Determine spatial variances.
-        y_vars_per_time = []
-        lik_cov = self.lik_var
-        for x_vars in x_vars_per_time:
-            # Pull through mixing matrix.
-            f_var = B.matmul(self.H * x_vars[None, :], self.H, tr_b=True)
-            y_vars_per_time.append(f_var + lik_cov)
+        # Compose predictions.
+        y_preds = [(mean, mean - 2 * var ** .5, mean + 2 * var ** .5)
+                   for mean, var in zip(y_means, y_vars)]
 
-        # Compute variances per output.
-        diags = [B.diag(var) for var in y_vars_per_time]
-        y_vars_per_output = B.unstack(B.stack(*diags, axis=1), axis=0)
+        # Unstack to get spatial means.
+        y_means_spatial = [mean[:, None] for mean in B.unstack(y_means, axis=1)]
 
-        # Return marginal predictions, means per time, and variances per time.
-        return [(mean, mean - 2 * var ** .5, mean + 2 * var ** .5)
-                for mean, var in zip(y_means_per_output, y_vars_per_output)], \
-               y_means_per_time, y_vars_per_time
+        # Unstack to get spatial variances.
+        obs_noise = B.eye(B.dtype(self.noise_obs), self.p) * self.noise_obs
+        y_vars_spatial = [B.matmul(self.H * (var + self.noises_latent)[None, :],
+                                   self.H, tr_b=True) + obs_noise
+                          for var in B.unstack(x_vars, axis=1)]
+
+        return y_preds, y_means_spatial, y_vars_spatial
 
     def sample(self, x, latent=True):
         """Sample model.
@@ -543,9 +526,16 @@ class VOLMM(Referentiable):
         q = self._olmm_condition(self.p_olmm)  # Approximate posterior.
         w_sample = q.sample(x, latent=False)
         f_sample = self.p_transform(x, w_sample)
-        logpdfs = normal1d_logpdf(y - f_sample, self.p_noises_obs)
-        available = ~B.isnan(logpdfs)
-        lik_corr = B.sum(B.take(logpdfs, available))
+        # TODO: Fix the below.
+        # TensorFlow's gradient computation does not play well with NaNs, so
+        # we make a copy and set the NaNs to zero before computing the logpdfs.
+        y_copy = y.copy()
+        y_copy[B.isnan(y)] = 0
+        logpdfs = B.flatten(normal1d_logpdf(y_copy - f_sample,
+                                            self.p_noises_obs))
+        available = ~B.isnan(B.flatten(y))
+        taken = B.take(logpdfs, available)
+        lik_corr = B.sum(taken)
 
         # Likelihood correction: subtract pseudo-likelihood.
         # TODO: Compute this analytically!
