@@ -5,3 +5,18 @@
 [![Latest Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://wesselb.github.io/wbml)
 
 Machine learning stuff
+
+_Note:_ LAB requires Python 3.5+ and TensorFlow 2 if TensorFlow is used.
+
+## Installation
+Before installing the package, please ensure that `gcc` and `gfortran` are 
+available.
+On OS X, these are both installed with `brew install gcc`;
+users of Anaconda may want to instead consider `conda install gcc`.
+On Linux, `gcc` is most likely already available, and `gfortran` can be 
+installed with `apt-get install gfortran`.
+Then simply
+
+```
+pip install wbml
+```
