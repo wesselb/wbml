@@ -1,13 +1,98 @@
 Features:
-    ☐ Temporal conv layer.
+    ☐ Move to TF2 @critical
 
-OLMM:
-    ☐ Optimal U further iterations: maxima of heterogeneous QFs paper.
-    ☐ Optimal U nonzero D.
+    Examples:
+        ☐ bnn_quadratic @high
+        ☐ brnn_sin @high
+        ☐ nn_quadratic @high
+        ☐ rnn_sin @high
+
+    Out:
+        ☐ Option to show time
+        ☐ Unit in kv
+        ✓ Number of digits @done (19-10-29 19:59)
+    Plot:
+        ☐ Twinx with zorder switch
+    Metrics:
+        ☐ Score ranking + significance table
+        ☐ Summarisation
+    Experimentation Tools:
+        ☐ Data sets
+        ☐ Plotting conveniences.
+            ☐ Standardised colours for types
+            ☐ Move to seaborn
+                ☐ Extend plt
+            ☐ Perform config automatically
+            ☐ Scatter + regression
+            ☐ Bucketing
+            ☐ Premade plots:
+                ☐ y vs yhat
+                ☐ (many) predictions in time
+        ☐ Remove data class and CSVReader in favour of pandas.
+        ☐ Metrics.
+            ☐ R2
+            ☐ SMSE
+            ☐ RMSE
+        ☐ Yaml config structure. (CNP!)
+            ☐ Docdict
+            ☐ Parameters with default values.
+            ☐ Random seed!
+            ☐ Store basic info:
+                ☐ Python version
+                ☐ Git commit
+                ☐ Time/wd
+            ☐ Working directory.
+                ☐ Copy call.
+                ☐ Log out.
+                ☐ Copy calling script.
+                ☐ Folder context.
+        ☐ Load/save Varz
+        ☐ kfold + Tracker
+
+    VOLMM:
+        ☐ Test.
+        ☐ Compute term analytically for variance reduction.
+
+Bugs:
+    ☐ Fix optimal U. @high
+        ☐ Test gradients equal to zero.
 
 Other:
-    ☐ Write docstrings.
+    ☐ Compare performance of NNs with TF's implementation.
+    ☐ Refactor tests to use PyTest: remove raises, fixtures, and parametrisation. @high
+
+Features:
+    Net:
+        ☐ Xavier initialisation.
+    Models:
+        ☐ Basic conditional models.
+    Inference:
+        ☐ SVGD.
+        ☐ IWAE and RWS objectives.
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✓ Multiple streams @done (19-10-29 19:59) @project(Features / Out)
+ ✓ VOLMM: pseudoobservations for latent processes @started @done (19-05-30 17:42) @project(Features / TODO)
+ ✓ VOLMM: decouple xs + @started @done (19-05-30 17:42) @project(Features / TODO)
+ ✓ ELBO: x and ys and x y + nans spec @started @done (19-05-30 17:42) @project(Features / TODO)
+ ✓ ELBO: non-noisy weight observations: reduce params @done (19-05-30 17:42) @project(Features / TODO)
+ ✓ non-modifying OLMM and LMM @done (19-05-30 11:52) @project(Features / TODO)
+ ✓ Stheno: FixedDelta @done (19-05-26 15:14) @project(Features / TODO)
+ x LAB: nansum, nanmean, etc @cancelled (19-05-26 12:26) @project(Features / TODO)
+ ✓ LAB: mask(a, bools, axis=0) @done (19-05-26 12:22) @project(Features / TODO)
+ ✓ Test VI. @done (19-05-26 11:51) @project(Features / TODO)
+ ✓ Fix VI. @done (19-05-23 19:13) @project(Features / TODO)
+ ✓ Docstrings OLMM @done (19-05-23 19:00) @project(Features / TODO)
+ ✓ BatchVars to util @done (19-05-23 16:31) @project(Features / TODO)
+ ✓ Fixup net @done (19-05-23 16:21) @project(Features / TODO)
+ ✓ Plan: map @done (19-05-23 14:31) @project(Features / TODO)
+ ✓ Plan: integration in varz @done (19-05-23 14:31) @project(Features / TODO)
+ ✓ Out: progress @done (19-05-23 14:31) @project(Features / TODO)
+ ✓ Shape in np array show @done (19-05-23 14:13) @project(Features / TODO)
+ ✓ Activation functions as layers. @done (19-05-20 01:15) @project(Features / Net)
+ ✓ Numpy formatting. @done (19-05-19 19:32) @project(Features / Experimentation Tools)
+ ✓ Fixed-width number formatting. @done (19-05-19 19:32) @project(Features / Experimentation Tools)
+ ✓ TensorFlow and PyTorch formatters. @done (19-05-19 19:31) @project(Features / Experimentation Tools)
+ ✓ Structed output and progress. @started @done (19-05-17 23:54) @project(Features / Experimentation Tools)
  ✓ Get number of weights of a NN. @done (18-06-06 15:32) @project(Features)
