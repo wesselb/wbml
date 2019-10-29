@@ -8,7 +8,7 @@ requirements = ['six',
                 'numpy>=1.16',
 
                 'plum-dispatch',
-                'backends>=0.3.0',
+                'backends>=0.3.1',
                 'stheno',
                 'varz']
 
