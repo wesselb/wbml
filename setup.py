@@ -11,7 +11,7 @@ requirements = ['six',
                 'plum-dispatch',
                 'backends>=0.3.1',
                 'stheno',
-                'varz']
+                'varz>=0.3.0']
 
 setup(packages=find_packages(exclude=['docs']),
       python_requires='>=3.5',
