@@ -2,8 +2,6 @@
 
 from __future__ import absolute_import, division, print_function
 
-import sys
-
 import lab as B
 import numpy as np
 import tensorflow as tf
@@ -151,7 +149,7 @@ def test_format():
     # Test formatting of floats.
     assert out.format(0.000012) == '1.200e-05'
     assert out.format(0.00012) == '1.200e-04'
-    assert out.format(0.0012) == '0.0012'
+    assert out.format(0.0012) == '1.200e-03'
     assert out.format(0.012) == '0.012'
     assert out.format(0.12) == '0.12'
     assert out.format(1.2) == '1.2'
@@ -173,6 +171,7 @@ def test_format():
     assert out.format({1000.0}) == '{1.000e+03}'
 
     # Test formatting of NumPy objects.
+    assert out.format(np.array(0.000012)) == '1.200e-05'
     assert out.format(B.ones(int, 3)) == '[1 1 1]'
     assert out.format(B.ones(int, 3, 3)) == \
            '(3x3 array of data type int64)\n[[1 1 1]\n [1 1 1]\n [1 1 1]]'

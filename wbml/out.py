@@ -145,10 +145,11 @@ def format(x):
 def format(x):
     global digits
 
+    # Format number in scientific notation.
     out = '{{:.{}e}}'.format(digits).format(x)
 
-    # If `x` is not too large, print it as a float instead.
-    if 10 ** -digits < B.abs(x) < 10 ** digits:
+    # If exponent is in [-2, 2], format as float instead.
+    if -2 <= int(out.split('e')[1]) <= 2:
         return str(float(out))
 
     return out
@@ -176,6 +177,10 @@ def format(xs):
 
 @_dispatch(B.NPNumeric)
 def format(x):
+    # A NumPy array can be a scalar.
+    if x.shape == ():
+        return format.invoke(B.Number)(x)
+
     # Represent as an array.
     x_str = np.array_str(x, precision=digits)
 
