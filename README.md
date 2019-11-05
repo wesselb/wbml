@@ -6,7 +6,8 @@
 
 Machine learning stuff
 
-_Note:_ LAB requires Python 3.5+ and TensorFlow 2 if TensorFlow is used.
+_Note:_ LAB requires Python 3.6 or higher and TensorFlow 2 if TensorFlow is 
+used.
 
 ## Installation
 Before installing the package, please ensure that `gcc` and `gfortran` are 

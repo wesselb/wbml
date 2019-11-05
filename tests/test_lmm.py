@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 import numpy as np
 import pytest
 from lab import B
 from stheno import EQ
-from wbml.lmm import _to_tuples, OLMM, LMMPP
 
+from wbml.lmm import _to_tuples, OLMM, LMMPP
 from .util import allclose
 
 
@@ -112,7 +108,7 @@ def test_compare_lmm_olmm():
         allclose(preds_pp[i][2], preds[i][2])
 
 
-class TrackedIterator(object):
+class TrackedIterator:
     """An iterator that keeps track of whether it has been used.
 
     Attributes:

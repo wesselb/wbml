@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 import lab as B
 import numpy as np
 import pytest
 from varz import Vars
+
 from wbml.net import (
     Normalise,
     Linear,
@@ -16,7 +13,6 @@ from wbml.net import (
     ff,
     rnn
 )
-
 from .util import allclose, approx
 
 

@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 from numpy.testing import assert_allclose, assert_array_almost_equal
-from stheno.matrix import Dense, dense
 from plum import Dispatcher
+from stheno.matrix import Dense, dense
 
 __all__ = ['allclose', 'approx']
 

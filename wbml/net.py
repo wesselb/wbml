@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 from abc import ABCMeta, abstractmethod
 
 import lab as B
-import six
 
 __all__ = ['Normalise',
            'Linear',
@@ -18,7 +13,7 @@ __all__ = ['Normalise',
            'rnn']
 
 
-class Layer(six.with_metaclass(ABCMeta, object)):
+class Layer(metaclass=ABCMeta):
     """A layer."""
 
     @abstractmethod
@@ -234,7 +229,7 @@ class Recurrent(Layer):
         return self.cell.width
 
 
-class Cell(six.with_metaclass(ABCMeta, object)):
+class Cell(metaclass=ABCMeta):
     """An abstract cell of a recurrent layer."""
 
     @abstractmethod

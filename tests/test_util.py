@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
 
 import lab as B
 import numpy as np
 from stheno import Normal
-from wbml.util import inv_perm, normal1d_logpdf, BatchVars
 
+from wbml.util import inv_perm, normal1d_logpdf, BatchVars
 from .util import allclose
 
 

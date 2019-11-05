@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 import os
 
 import pandas as pd
@@ -46,7 +42,8 @@ def split_df(df, index_range, columns):
                               set(df.columns) - set(columns)]).T
 
     # Fix order of columns.
-    selected = selected.reindex(df.columns, axis=1)
+    selected_cols = [c for c in df.columns if c in columns]
+    selected = selected.reindex(selected_cols, axis=1)
     remainder = remainder.reindex(df.columns, axis=1)
 
     return selected, remainder

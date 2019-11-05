@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 import datetime
 
 import numpy as np
@@ -49,7 +45,23 @@ def load():
                                for name_from, name_to in features},
                               index=index)
             dfs.append(df)
-    df_all = pd.concat(dfs).unstack('site')
+
+    # Concat and fix order to match the paper.
+    df_all = pd.concat(dfs).unstack('site').reindex(
+        [('height', 'Bra'),
+         ('height', 'Sot'),
+         ('height', 'Cam'),
+         ('height', 'Chi'),
+         ('speed', 'Bra'),
+         ('speed', 'Sot'),
+         ('speed', 'Cam'),
+         ('speed', 'Chi'),
+         ('temp', 'Bra'),
+         ('temp', 'Sot'),
+         ('temp', 'Cam'),
+         ('temp', 'Chi')],
+        axis=1
+    )
 
     # Clear invalid sensor readings.
     df_all[df_all < -1000] = np.nan

@@ -1,17 +1,13 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 import lab as B
 import numpy as np
 import tensorflow as tf
 import torch
-import wbml.out as out
 
+import wbml.out as out
 from .util import approx
 
 
-class RecordingStream(object):
+class RecordingStream:
     """A stream that records its writes."""
 
     def __init__(self):
@@ -30,7 +26,7 @@ class RecordingStream(object):
         return len(self.writes)
 
 
-class Mock(object):
+class Mock:
     """Mock the stream that `wbml.out` uses."""
 
     def __enter__(self):
@@ -140,7 +136,7 @@ def test_kv():
 
 
 def test_format():
-    class A(object):
+    class A:
         def __str__(self):
             return 'FormattedA()'
 

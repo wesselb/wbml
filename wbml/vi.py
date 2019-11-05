@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 import lab as B
 from plum import Dispatcher
 from stheno import Normal

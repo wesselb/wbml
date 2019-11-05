@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 from functools import reduce
 from operator import mul
+
 import lab as B
 
 __all__ = ['inv_perm', 'normal1d_logpdf', 'BatchVars']
@@ -38,7 +35,7 @@ def normal1d_logpdf(x, var, mean=0):
     return -(B.log_2_pi + B.log(var) + (x - mean) ** 2 / var) / 2
 
 
-class BatchVars(object):
+class BatchVars:
     """Extract variables from a source with a batch axis as the first axis.
 
     Args:

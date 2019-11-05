@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 import logging
 import sys
 import time
@@ -54,7 +50,7 @@ def _print(msg, line_end='\n', indent=True, flush=False):
             stream.flush()
 
 
-class Section(object):
+class Section:
     """Create a section in which output is indented.
 
     Args:
@@ -203,7 +199,7 @@ def format(x):
     return format(x.numpy())
 
 
-class Counter(object):
+class Counter:
     """A counter.
 
     Args:
@@ -279,7 +275,7 @@ def _compute_alpha(cutoff_lag):
         return a - 1 + np.sqrt(a ** 2 - 4 * a + 3)
 
 
-class Progress(Referentiable):
+class Progress(metaclass=Referentiable):
     """Display progress.
 
     Args:

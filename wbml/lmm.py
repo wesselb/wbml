@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 import logging
 
 from lab import B
@@ -51,7 +47,7 @@ def _to_tuples(x, y):
     return xys
 
 
-class LMMPP(Referentiable):
+class LMMPP(metaclass=Referentiable):
     """PP implementation of the linear mixing model.
 
     Args:
@@ -165,7 +161,7 @@ class LMMPP(Referentiable):
         return B.concat(*samples, axis=1)
 
 
-class OLMM(Referentiable):
+class OLMM(metaclass=Referentiable):
     """Orthogonal linear mixing model.
 
     Args:
@@ -389,7 +385,7 @@ class OLMM(Referentiable):
         return B.matmul(x_samples, self.H, tr_b=True)
 
 
-class VaryingNet(object):
+class VaryingNet:
     """A :class:`.net.Net` with weights that vary per observation.
 
     Args:
@@ -424,7 +420,7 @@ class VaryingNet(object):
         return y
 
 
-class VOLMM(Referentiable):
+class VOLMM(metaclass=Referentiable):
     """Variational OLMM.
 
     Args:
