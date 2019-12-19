@@ -172,6 +172,10 @@ def test_format():
     assert out.format(B.ones(int, 3, 3)) == \
            '(3x3 array of data type int64)\n[[1 1 1]\n [1 1 1]\n [1 1 1]]'
 
+    # Test the `info` flag.
+    assert out.format(B.ones(int, 3, 3), False) == \
+           '[[1 1 1]\n [1 1 1]\n [1 1 1]]'
+
     # Test formatting of PyTorch objects.
     assert out.format(B.ones(torch.int, 3)) == '[1 1 1]'
 

@@ -124,12 +124,14 @@ def kv(key, dict_):
             kv(k, v)
 
 
-@_dispatch(object)
-def format(x):
+@_dispatch(object, bool)
+def format(x, info):
     """Format an object.
 
     Args:
         x (object): Object to format.
+        info (bool, optional): Print additional info, such as the shape of an
+            object, where appropriate. Defaults to `True`.
 
     Returns:
         str: `x` as a string.
@@ -137,8 +139,16 @@ def format(x):
     return str(x)
 
 
-@_dispatch(B.Number)
-def format(x):
+# If `info` is given as a keyword argument, the following method converts it to
+# a position argument. We handle it as a position argument to not rely on
+# default values in multiple places.
+@_dispatch(object)
+def format(x, info=True):
+    return format(x, info)
+
+
+@_dispatch(B.Number, bool)
+def format(x, info):
     global digits
 
     # Format number in scientific notation.
@@ -151,52 +161,52 @@ def format(x):
     return out
 
 
-@_dispatch(B.Int)
-def format(x):
+@_dispatch(B.Int, bool)
+def format(x, info):
     return str(x)
 
 
-@_dispatch(list)
-def format(xs):
-    return '[{}]'.format(', '.join([format(x) for x in xs]))
+@_dispatch(list, bool)
+def format(xs, info=True):
+    return '[{}]'.format(', '.join([format(x, info) for x in xs]))
 
 
-@_dispatch(tuple)
-def format(xs):
-    return '({})'.format(', '.join([format(x) for x in xs]))
+@_dispatch(tuple, bool)
+def format(xs, info=True):
+    return '({})'.format(', '.join([format(x, info) for x in xs]))
 
 
-@_dispatch(set)
-def format(xs):
-    return '{{{}}}'.format(', '.join([format(x) for x in xs]))
+@_dispatch(set, bool)
+def format(xs, info=True):
+    return '{{{}}}'.format(', '.join([format(x, info) for x in xs]))
 
 
-@_dispatch(B.NPNumeric)
-def format(x):
+@_dispatch(B.NPNumeric, bool)
+def format(x, info=True):
     # A NumPy array can be a scalar.
     if x.shape == ():
-        return format.invoke(B.Number)(x)
+        return format.invoke(B.Number, bool)(x, info)
 
     # Represent as an array.
     x_str = np.array_str(x, precision=digits)
 
-    # If the array is displayed on multiple lines, also show its shape and
-    # data type.
-    if '\n' in x_str:
+    # If additional information is requested and the array is displayed on
+    # multiple lines, also show its shape and data type.
+    if info and '\n' in x_str:
         x_str = '({} array of data type {})\n' \
                 ''.format('x'.join([str(d) for d in x.shape]), x.dtype) + x_str
 
     return x_str
 
 
-@_dispatch(B.TorchNumeric)
-def format(x):
-    return format(x.detach().numpy())
+@_dispatch(B.TorchNumeric, bool)
+def format(x, info):
+    return format(x.detach().numpy(), info)
 
 
-@_dispatch(B.TFNumeric)
-def format(x):
-    return format(x.numpy())
+@_dispatch(B.TFNumeric, bool)
+def format(x, info):
+    return format(x.numpy(), info)
 
 
 class Counter:
