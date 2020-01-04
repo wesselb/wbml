@@ -157,7 +157,7 @@ def test_format():
     # Test formatting of special values.
     assert out.format(np.nan) == 'nan'
     assert out.format(np.inf) == 'inf'
-    assert out.format(np.inf) == '-inf'
+    assert out.format(-np.inf) == '-inf'
 
     # Test formatting of integers.
     assert out.format(1) == '1'
