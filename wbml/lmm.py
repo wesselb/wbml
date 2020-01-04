@@ -1,6 +1,7 @@
 import logging
 
 from lab import B
+from matrix import Diagonal, LowRank
 from plum import Dispatcher, Referentiable, Self
 from stheno import (
     GP,
@@ -9,10 +10,7 @@ from stheno import (
     Graph,
     Normal,
     Obs,
-    dense,
-    AbstractObservations,
-    Diagonal,
-    LowRank
+    AbstractObservations
 )
 
 from .util import normal1d_logpdf, BatchVars
@@ -145,7 +143,7 @@ class LMMPP(metaclass=Referentiable):
         for i in range(B.shape(x)[0]):
             d = self.y(x[i])
             means.append(d.mean)
-            vars.append(dense(d.var))
+            vars.append(d.var)
         return preds, means, vars
 
     def sample(self, x, latent=True):
