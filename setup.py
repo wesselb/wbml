@@ -10,6 +10,7 @@ requirements = ['six',
 
                 'plum-dispatch',
                 'backends>=0.3.1',
+                'backends-matrix',
                 'stheno',
                 'varz>=0.3.0']
 
