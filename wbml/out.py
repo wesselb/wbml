@@ -155,7 +155,7 @@ def format(x, info):
     out = '{{:.{}e}}'.format(digits).format(x)
 
     # If exponent is in [-2, 2], format as float instead.
-    if -2 <= int(out.split('e')[1]) <= 2:
+    if 'e' in out and -2 <= int(out.split('e')[1]) <= 2:
         return str(float(out))
 
     return out
