@@ -399,7 +399,7 @@ class Progress(metaclass=Referentiable):
             kv('Time elapsed',
                '{:.1f} s'.format(self.last_time - self.start_time))
 
-            if self.total:
+            if self.total and '_time_per_it' in self.values:
                 # Estimate time left.
                 time_left = max(self.total + 1 - self.iteration, 0) * \
                             self.values['_time_per_it']
