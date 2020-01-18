@@ -1,14 +1,62 @@
-import logging
+from functools import wraps
 
+import lab as B
 import matplotlib.pyplot as plt
+from plum import Dispatcher
 
-__all__ = ['tex', 'tweak']
+__all__ = ['patch', 'tex', 'tweak']
 
-log = logging.getLogger(__name__)
+_dispatch = Dispatcher()
 
 plt.rcParams['font.size'] = 12
 plt.rcParams['mathtext.fontset'] = 'cm'  # Use CM for math font.
 plt.rcParams['figure.autolayout'] = True  # Use tight layouts.
+
+
+@_dispatch(object)
+def _convert(x):
+    return x
+
+
+@_dispatch(B.Numeric)
+def _convert(x):
+    return B.squeeze(B.to_numpy(x))
+
+
+@_dispatch(tuple)
+def _convert(xs):
+    return tuple(_convert(x) for x in xs)
+
+
+@_dispatch(list)
+def _convert(xs):
+    return [_convert(x) for x in xs]
+
+
+@_dispatch(dict)
+def _convert(d):
+    return {k: _convert(v) for k, v in d.items()}
+
+
+def patch(f):
+    """Decorator to patch a function to automatically convert arguments that
+    are of a framework type, like PyTorch, to NumPy.
+    """
+
+    @wraps(f)
+    def patched_f(*args, **kw_args):
+        return f(*_convert(args), **_convert(kw_args))
+
+    return patched_f
+
+
+# Patch common plotting functions.
+plt.plot = patch(plt.plot)
+plt.scatter = patch(plt.scatter)
+plt.fill_between = patch(plt.fill_between)
+plt.errorbar = patch(plt.errorbar)
+plt.xlim = patch(plt.xlim)
+plt.ylim = patch(plt.ylim)
 
 
 def tex():
