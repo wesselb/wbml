@@ -19,6 +19,10 @@ indent_char = ' '  #: Indentation character.
 key_width = 10  #: Minimum width for printing keys, for alignment.
 streams = [sys.stdout]  #: Output streams.
 digits = 3  #: Number of digits to show.
+report_time = False  #: Report time.
+
+_time_start = time.time()  #: Start time of the program.
+_time_last_report = None  #: Last logged time stamp.
 
 
 def _print(msg, line_end='\n', indent=True, flush=False):
@@ -35,12 +39,38 @@ def _print(msg, line_end='\n', indent=True, flush=False):
     global indent_width
     global indent_char
 
+    global report_time
+    global _time_start
+    global _time_last_report
+
     if indent:
         # Construct total indentation.
         indent = indent_char * indent_width * indent_level
 
         # Indent the message and all newlines therein.
         msg = indent + msg.replace('\n', '\n' + indent)
+
+    if report_time:
+        time_delta = time.time() - _time_start
+
+        # Calculate passed hours, minutes, and seconds.
+        hours = int(time_delta / (60 * 60))
+        time_delta -= 60 * 60 * hours
+        minutes = int(time_delta / 60)
+        time_delta -= 60 * minutes
+        seconds = int(time_delta)
+
+        # Build time report.
+        time_report = f'{hours:02d}:{minutes:02d}:{seconds:02d}'
+
+        # Only print the time report if it is different from last report. Else,
+        # just indent.
+        indent = ' ' * len(time_report) + ' | '
+        if time_report != _time_last_report:
+            msg = time_report + ' | ' + msg.replace('\n', '\n' + indent)
+            _time_last_report = time_report
+        else:
+            msg = indent + msg.replace('\n', '\n' + indent)
 
     # Write the message plus line end.
     for stream in streams:

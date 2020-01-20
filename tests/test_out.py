@@ -2,6 +2,7 @@ import lab as B
 import numpy as np
 import tensorflow as tf
 import torch
+import time
 
 import wbml.out as out
 from .util import approx
@@ -27,16 +28,25 @@ class RecordingStream:
 
 
 class Mock:
-    """Mock the stream that `wbml.out` uses."""
+    """Mock the stream that `wbml.out` uses. Also reset s
+    `wbml.out._time_start`."""
 
     def __enter__(self):
         self.stream = RecordingStream()
+
+        # Save current stream and time started.
         self.saved_streams = list(out.streams)
-        out.streams = [self.stream]  # Mock stream.
+        self.saved_time_start = out._time_start
+
+        # Mock stream and time started.
+        out.streams = [self.stream]
+        out._time_start = time.time()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        out.streams = self.saved_streams  # Unmock stream.
+        # Unmock stream and time started.
+        out.streams = self.saved_streams
+        out._time_start = self.saved_time_start
 
     def __str__(self):
         return str(self.stream)
@@ -333,3 +343,29 @@ def test_progress():
     assert res == [4, 9]
     assert len(mock) == 8
     assert mock[0] == 'name:\n'
+
+
+def test_time_report():
+    out.report_time = True
+
+    # Test that time stamp is not repeated unnecessarily.
+    with Mock() as mock:
+        out.out('a')
+        out.out('b')
+        time.sleep(1.0)
+        out.out('c')
+
+    assert len(mock) == 3
+    assert mock[0] == '00:00:00 | a\n'
+    assert mock[1] == '         | b\n'
+    assert mock[2] == '00:00:01 | c\n'
+
+    # Test that time is correctly calculated.
+    with Mock() as mock:
+        out._time_start = time.time() - 2 * 60 * 60 - 2 * 60 - 2
+        out.out('a')
+
+    assert len(mock) == 1
+    assert mock[0] == '02:02:02 | a\n'
+
+    out.report_time = False

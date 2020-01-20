@@ -8,7 +8,7 @@ Features:
         ☐ rnn_sin @high
 
     Out:
-        ☐ Option to show time
+        ✓ Option to show time @done (20-01-20 19:50)
         ☐ Unit in kv
         ✓ Number of digits @done (19-10-29 19:59)
     Plot:
@@ -41,13 +41,15 @@ Features:
                 ☐ Python version
                 ☐ Git commit
                 ☐ Time/wd
-            ☐ Working directory.
+            ✓ Working directory. @done (20-01-20 19:50)
                 ☐ Copy call.
-                ☐ Log out.
+                ✓ Log out. @done (20-01-20 19:50)
                 ☐ Copy calling script.
-                ☐ Folder context.
+                ✓ Folder context. @done (20-01-20 19:50)
         ☐ Load/save Varz
         ☐ kfold + Tracker
+    Test:
+        ☐ experiment.py
 
     VOLMM:
         ☐ Test.
