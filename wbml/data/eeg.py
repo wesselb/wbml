@@ -6,6 +6,7 @@ from itertools import product
 
 import numpy as np
 import pandas as pd
+import wbml.out
 
 from .data import data_path, split_df
 
@@ -111,15 +112,8 @@ def parse():
     with open(cache_data, 'wb') as f:
         pickle.dump(data, f)
 
-    # Select all trials of the type 'c'.
-    trials = [(num, x)
-              for partition in partitions
-              for subject in data[partition].values()
-              if subject['type'] == 'c'
-              for num, x in subject['trials'].items()]
-
-    # For now, just use a single trial.
-    number, trial = trials[0]
+    # For the experiment, just use a single trial.
+    trial = data['train'][337]['trials'][0]
 
     # Select a number of fixed labels.
     labels = ['F3', 'F4', 'F5', 'F6'] + ['FZ', 'F1', 'F2']
