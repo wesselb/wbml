@@ -9,7 +9,7 @@ import pandas as pd
 
 from .data import data_path, split_df
 
-__all__ = ['load']
+__all__ = ['load', 'parse']
 
 
 def load():
