@@ -1,8 +1,12 @@
 import os
+import datetime
+import numpy as np
 
 import pandas as pd
 
-__all__ = ['split_df', 'data_path']
+__all__ = ['split_df',
+           'data_path',
+           'date_to_decimal_year']
 
 
 def data_path(*xs):
@@ -21,7 +25,7 @@ def data_path(*xs):
                                         *xs))
 
 
-def split_df(df, index_range, columns):
+def split_df(df, index_range, columns, iloc=False):
     """Split a data frame by selecting from columns a particular range.
 
     Args:
@@ -30,12 +34,18 @@ def split_df(df, index_range, columns):
             range to split the index by. If `index_range = (a, b)`, then
             `[a, b)` is taken.
         columns (list[object]): Columns to select.
+        iloc (bool, optional): The index range is the integer location instead
+            of the index value. Defaults to `False`.
 
     Returns:
         tuple[:class:`pd.DataFrame`]: Selected rows from selected columns
             and the remainder.
     """
-    rows = (df.index >= index_range[0]) & (df.index < index_range[1])
+    if iloc:
+        inds = np.arange(df.shape[0])
+        rows = (inds >= index_range[0]) & (inds < index_range[1])
+    else:
+        rows = (df.index >= index_range[0]) & (df.index < index_range[1])
     selected = pd.DataFrame([df[name][rows] for name in columns]).T
     remainder = pd.DataFrame([df[name][~rows] for name in columns] +
                              [df[name] for name in
@@ -47,3 +57,19 @@ def split_df(df, index_range, columns):
     remainder = remainder.reindex(df.columns, axis=1)
 
     return selected, remainder
+
+
+def date_to_decimal_year(date, format):
+    """Convert a date to decimal year.
+
+    Args:
+        date (str): Date as a string.
+        format (str): Format of the dat.
+
+    Returns:
+        float: Decimal year corresponding to the date.
+    """
+    date = datetime.datetime.strptime(date, format)
+    start = datetime.date(date.year, 1, 1).toordinal()
+    year_length = datetime.date(date.year + 1, 1, 1).toordinal() - start
+    return date.year + float(date.toordinal() - start) / year_length
