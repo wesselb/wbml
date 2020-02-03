@@ -6,7 +6,6 @@ from itertools import product
 
 import numpy as np
 import pandas as pd
-import wbml.out
 
 from .data import data_path, split_df
 
