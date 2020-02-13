@@ -3,12 +3,12 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from .data import data_path, split_df
+from .data import data_path, split_df, resource
 
 __all__ = ['load']
 
 
-def to_float(x):
+def _to_float(x):
     try:
         return float(x)
     except ValueError as e:
@@ -19,6 +19,8 @@ def to_float(x):
 
 
 def load():
+    _fetch()
+
     sites = ['Bra', 'Cam', 'Chi', 'Sot']
     features = [('DEPTH', 'height'), ('WSPD', 'speed'), ('ATMP', 'temp')]
 
@@ -41,7 +43,7 @@ def load():
 
             # Construct desired data frame.
             index = pd.MultiIndex.from_tuples(index, names=['site', 'date'])
-            df = pd.DataFrame({name_to: list(map(to_float, df[name_from]))
+            df = pd.DataFrame({name_to: list(map(_to_float, df[name_from]))
                                for name_from, name_to in features},
                               index=index)
             dfs.append(df)
@@ -92,3 +94,15 @@ def load():
         ds.append((df, train, [test1, test2, test1_ext, test2_ext]))
 
     return ds
+
+
+def _fetch():
+    site_urls = [('Cam', 'http://www.cambermet.co.uk/archive/2013/July/CSV/'),
+                 ('Chi', 'http://www.chimet.co.uk/archive/2013/July/CSV/'),
+                 ('Bra', 'http://www.bramblemet.co.uk/archive/2013/July/CSV/'),
+                 ('Sot', 'http://www.sotonmet.co.uk/archive/2013/July/CSV/')]
+    for day in range(1, 32):
+        for site, url in site_urls:
+            resource(target=data_path('air_temp',
+                                      f'{site}{day:02d}Jul2013.csv'),
+                     url=f'{url}{site}{day:02d}Jul2013.csv')

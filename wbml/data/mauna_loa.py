@@ -2,12 +2,14 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
-from .data import data_path
+from .data import data_path, resource
 
 __all__ = ['load']
 
 
 def load():
+    _fetch()
+
     df = pd.read_csv(data_path('mauna_loa', 'co2_mm_mlo.txt'),
                      delim_whitespace=True, header=72)
     df = df.iloc[:, [2, 3]]
@@ -24,3 +26,8 @@ def load():
     df['ppm_detrended'] = df['ppm'] - lr.predict(df.index[:, None])
 
     return df
+
+
+def _fetch():
+    resource(target=data_path('mauna_loa', 'co2_mm_mlo.txt'),
+             url='ftp://aftp.cmdl.noaa.gov/products/trends/co2/co2_mm_mlo.txt')

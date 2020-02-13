@@ -1,12 +1,17 @@
 import pandas as pd
 
-from .data import data_path, split_df, date_to_decimal_year
+from .data import data_path, split_df, date_to_decimal_year, resource
 
 __all__ = ['load']
 
 
 def load():
-    df = pd.read_csv(data_path('exchange', 'exchange.csv'))
+    _fetch()
+
+    df = pd.read_csv(data_path('exchange', 'exchange.csv'), header=1)
+
+    # Remove tail.
+    df = df.iloc[:-1, :]
 
     # Extract and invert rates.
     rates = 1 / df.iloc[:, 3:]
@@ -30,3 +35,22 @@ def load():
     test = pd.concat([test1, test2, test3], axis=1)
 
     return rates, train, test
+
+
+def _fetch():
+    resource(target=data_path('exchange', 'exchange.csv'),
+             url='http://fx.sauder.ubc.ca/cgi/fxdata',
+             post=True,
+             data={'b': 'USD',
+                   'c': ['X12', 'XC3'],
+                   'rd': '',
+                   'fd': '1',
+                   'fm': '1',
+                   'fy': '2007',
+                   'ld': '31',
+                   'lm': '12',
+                   'ly': '2007',
+                   'y': 'daily',
+                   'q': 'volume',
+                   'f': 'csv',
+                   'o': ''})

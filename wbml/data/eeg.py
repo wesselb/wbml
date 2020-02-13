@@ -6,21 +6,49 @@ from itertools import product
 
 import numpy as np
 import pandas as pd
+import wbml.out
 
-from .data import data_path, split_df
+from .data import data_path, split_df, resource, dependency
 
-__all__ = ['load', 'parse']
+__all__ = ['load']
+
+cache_data = data_path('eeg', 'data.pickle')
+cache_experiment = data_path('eeg', 'experiment.pickle')
 
 
 def load():
-    cache_experiment = data_path('eeg', 'experiment.pickle')
+    _fetch()
 
     # Generate cache if it does not exist.
     if not os.path.exists(cache_experiment):
-        parse()
+        _parse()
 
     with open(cache_experiment, 'rb') as f:
         return pickle.load(f)
+
+
+def _fetch():
+    # Training data:
+    resource(target=data_path('eeg', 'SMNI_CMI_TRAIN.tar.gz'),
+             url='https://archive.ics.uci.edu/ml/'
+                 'machine-learning-databases/eeg-mld/'
+                 'SMNI_CMI_TRAIN.tar.gz')
+    dependency(target=data_path('eeg', 'train'),
+               source=data_path('eeg', 'SMNI_CMI_TRAIN.tar.gz'),
+               commands=['tar xzf SMNI_CMI_TRAIN.tar.gz',
+                         'mv SMNI_CMI_TRAIN train',
+                         'find train | grep gz$ | xargs gunzip'])
+
+    # Test data:
+    resource(target=data_path('eeg', 'SMNI_CMI_TEST.tar.gz'),
+             url='https://archive.ics.uci.edu/ml/'
+                 'machine-learning-databases/eeg-mld/'
+                 'SMNI_CMI_TEST.tar.gz')
+    dependency(target=data_path('eeg', 'test'),
+               source=data_path('eeg', 'SMNI_CMI_TEST.tar.gz'),
+               commands=['tar xzf SMNI_CMI_TEST.tar.gz',
+                         'mv SMNI_CMI_TEST test',
+                         'find test | grep gz$ | xargs gunzip'])
 
 
 def _parse_trial(fp):
@@ -66,7 +94,9 @@ def _extract_trials(fps):
     return {k: v for k, v in zip(trial_numbers, parsed_trials)}
 
 
-def parse():
+def _parse():
+    wbml.out.out('Parsing EEG data. This make take a while.')
+
     numbers = [('c', n) for n in [337, 338, 339, 340, 341,
                                   342, 344, 345, 346, 347]] + \
               [('a', n) for n in [364, 365, 368, 369, 370,
@@ -74,8 +104,6 @@ def parse():
     partitions = ['train', 'test']
     subject_dir_format = data_path('eeg', '{partition}',
                                    'co2{type}{subject_n:07d}')
-    cache_data = data_path('eeg', 'data.pickle')
-    cache_experiment = data_path('eeg', 'experiment.pickle')
 
     # Create containers for the different partitions.
     data = {partition: {} for partition in partitions}

@@ -1,12 +1,117 @@
-import os
 import datetime
+import os
+import shutil
+import subprocess
+
 import numpy as np
-
 import pandas as pd
+import requests
+import urllib.request
+from contextlib import closing
+import wbml.out
 
-__all__ = ['split_df',
+__all__ = ['resource',
+           'dependency',
+           'asserted_dependency',
+           'split_df',
            'data_path',
            'date_to_decimal_year']
+
+
+class DependencyError(AssertionError):
+    """Exception raised in case of an erroneous dependency."""
+
+
+def resource(target, url, post=False, **kw_args):
+    """Specify a dependency on an online resource.
+
+    Further takes in keyword arguments that are passed to the appropriate method
+    from :mod:`requests` or :mod:`urllib`.
+
+    Args:
+        target (str): Target file.
+        url (str): Source URL.
+        post (bool, optional): Make a POST request instead of a GET request.
+            Only applicable if the URL starts with "http" or "https". Defaults
+            to `False`.
+    """
+    if not os.path.exists(target):
+        with wbml.out.Section('Downloading file'):
+            wbml.out.kv('Source', url)
+            wbml.out.kv('Target', target)
+
+            # Ensure that all directories in the path exist.
+            make_dirs(target)
+
+            # If the URL starts with "ftp", use the :mod:`urllib` library.
+            # Otherwise, use the :mod:`requests` library.
+            if url.startswith('ftp'):
+                with closing(urllib.request.urlopen(url, **kw_args)) as r:
+                    with open(target, 'wb') as f:
+                        shutil.copyfileobj(r, f)
+            else:
+                request = requests.post if post else requests.get
+                with request(url, stream=True, **kw_args) as r:
+                    with open(target, 'wb') as f:
+                        shutil.copyfileobj(r.raw, f)
+
+
+def dependency(target, source, commands):
+    """Specify a dependency that is generated from an existing file.
+
+    Args:
+        target (str): Target file.
+        source (str): Source file.
+        commands (list[str]): List of commands to generate target file.
+    """
+    if not os.path.exists(target):
+        with wbml.out.Section('Generating file'):
+            wbml.out.kv('Source', source)
+            wbml.out.kv('Target', target)
+
+            # Check that the source exists.
+            if not os.path.exists(source):
+                raise DependencyError(f'Source "{source}" asserted to exist, '
+                                      f'but it does not.')
+
+            # Save current working directory.
+            current_wd = os.getcwd()
+
+            # Ensure that all directories in the path exist.
+            make_dirs(target)
+
+            # Change working directory to directory of target file.
+            os.chdir(os.path.dirname(target))
+
+            # Perform commands.
+            for command in commands:
+                wbml.out.out(command)
+                subprocess.call(command, shell=True)
+
+            # Restore working directory.
+            os.chdir(current_wd)
+
+
+def asserted_dependency(target):
+    """Specify a dependency that cannot be fetched.
+
+    Args:
+        target (str): Target file.
+    """
+    if not os.path.exists(target):
+        raise DependencyError(f'Dependency "{target}" asserted to exist,'
+                              f'but it does not, and it cannot be '
+                              f'automatically fetched. Please put the file '
+                              f'into place manually.')
+
+
+def make_dirs(path):
+    """Make the directories in the path of a file.
+
+    Args:
+        path (url): Path of a file.
+    """
+    os.makedirs(os.path.dirname(path), exist_ok=True)
 
 
 def data_path(*xs):
