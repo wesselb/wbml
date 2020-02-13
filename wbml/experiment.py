@@ -1,4 +1,5 @@
 import os
+import pickle
 import shutil
 import time
 
@@ -31,7 +32,11 @@ class Logger:
     """
 
     def __init__(self, path):
-        self.stream = open(path, 'w')
+        self.path = path
+
+        # Empty file.
+        with open(self.path, 'w'):
+            pass
 
     def write(self, message):
         """Write to the file.
@@ -39,14 +44,12 @@ class Logger:
         Args:
             message (str): Message to write.
         """
-        self.stream.write(message)
+        with open(self.path, 'a') as f:
+            f.write(message)
 
     def flush(self):
         """Flush the stream."""
-        self.stream.flush()
-
-    def __del__(self):
-        self.stream.close()
+        # Nothing to do.
 
 
 class WorkingDirectory:
@@ -97,3 +100,24 @@ class WorkingDirectory:
             os.makedirs(path_dir, exist_ok=True)
 
         return path
+
+    def save(self, obj, *args, **kw_args):
+        """Save an object to a file.
+
+        Further takes in arguments and keyword arguments from
+        :meth:`.experiment.WorkingDirectory.file`.
+
+        Args:
+            obj (object): Object to save.
+        """
+        with open(self.file(*args, **kw_args), 'wb') as f:
+            pickle.dump(obj, f)
+
+    def load(self, *args, **kw_args):
+        """Load an object from a file.
+
+        Further takes in arguments and keyword arguments from
+        :meth:`.experiment.WorkingDirectory.file`.
+        """
+        with open(self.file(*args, **kw_args), 'rb') as f:
+            return pickle.load(f)
