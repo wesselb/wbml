@@ -8,6 +8,7 @@ requirements = ['six',
                 'numpy>=1.16',
                 'pandas',
                 'python-slugify',
+                'requests',
 
                 'plum-dispatch',
                 'backends>=0.3.1',
