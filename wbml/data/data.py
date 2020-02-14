@@ -80,16 +80,15 @@ def dependency(target, source, commands):
             # Ensure that all directories in the path exist.
             make_dirs(target)
 
-            # Change working directory to directory of target file.
-            os.chdir(os.path.dirname(target))
-
             # Perform commands.
             for command in commands:
                 wbml.out.out(command)
-                subprocess.call(command, shell=True)
 
-            # Restore working directory.
-            os.chdir(current_wd)
+                # Change working directory to directory of target file, run
+                # command, and restore working directory afterwards.
+                os.chdir(os.path.dirname(target))
+                subprocess.call(command, shell=True)
+                os.chdir(current_wd)
 
 
 def asserted_dependency(target):
