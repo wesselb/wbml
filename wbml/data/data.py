@@ -98,7 +98,7 @@ def asserted_dependency(target):
         target (str): Target file.
     """
     if not os.path.exists(target):
-        raise DependencyError(f'Dependency "{target}" asserted to exist,'
+        raise DependencyError(f'Dependency "{target}" is asserted to exist, '
                               f'but it does not, and it cannot be '
                               f'automatically fetched. Please put the file '
                               f'into place manually.')
