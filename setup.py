@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 from setuptools import find_packages, setup
 
 requirements = ['six',
@@ -9,6 +5,7 @@ requirements = ['six',
                 'pandas',
                 'python-slugify',
                 'requests',
+                'netCDF4',
 
                 'plum-dispatch',
                 'backends>=0.3.1',
