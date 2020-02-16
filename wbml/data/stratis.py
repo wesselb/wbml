@@ -12,6 +12,8 @@ __all__ = ['load']
 
 
 def load():
+    _fetch()
+
     # Load observations.
     data = nc.Dataset(data_path('stratis', 'erai_T2_1979-2016_daily.nc'))
     matrix = data['T2'][:].reshape(data['T2'].shape[0], -1)
