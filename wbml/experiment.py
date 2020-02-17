@@ -60,9 +60,11 @@ class WorkingDirectory:
             directories.
         override (bool, optional): Delete working directory if it already
             exists. Defaults to `False`.
+        log (str or None, optional): Initialise logger. Set to `None`
+            to disable. Defaults to `log.txt`.
     """
 
-    def __init__(self, *root, override=False):
+    def __init__(self, *root, override=False, log='log.txt'):
         self.root = os.path.join(*root)
 
         # Delete if the root already exists.
@@ -76,7 +78,8 @@ class WorkingDirectory:
         os.makedirs(self.root, exist_ok=True)
 
         # Initialise logger.
-        streams.append(Logger(self.file('log.txt')))
+        if log is not None:
+            streams.append(Logger(self.file(log)))
 
     def file(self, *name, exists=False):
         """Get the path of a file.
