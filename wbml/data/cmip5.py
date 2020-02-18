@@ -15,7 +15,7 @@ def load():
     _fetch()
 
     # Load observations.
-    data = nc.Dataset(data_path('stratis', 'erai_T2_1979-2016_daily.nc'))
+    data = nc.Dataset(data_path('cmip5', 'erai_T2_1979-2016_daily.nc'))
     matrix = data['T2'][:].reshape(data['T2'].shape[0], -1)
     obs = pd.DataFrame(matrix, index=pd.Index(data['time'][:], name='time'))
 
@@ -28,7 +28,7 @@ def load():
                         'longitude': lon.flatten()})
 
     # Find simulator files.
-    sim_files = os.listdir(data_path('stratis'))
+    sim_files = os.listdir(data_path('cmip5'))
     sim_files = [f for f in sim_files
                  if os.path.splitext(f)[1].lower() == '.nc'
                  if f != 'erai_T2_1979-2016_daily.nc']
@@ -36,7 +36,7 @@ def load():
     # Load olmm.
     sims = OrderedDict()
     for sim_file in sim_files:
-        data = nc.Dataset(data_path('stratis', sim_file))
+        data = nc.Dataset(data_path('cmip5', sim_file))
         matrix = data['tas'][:].reshape(data['tas'].shape[0], -1)
         sim_name = re.match(r'^cmip5_tas_amip_(.*)_r1i1p1_1979-2008.nc$',
                             sim_file).group(1)
@@ -77,4 +77,4 @@ def _fetch():
              'cmip5_tas_amip_inmcm4_r1i1p1_1979-2008.nc',
              'erai_T2_1979-2016_daily.nc']
     for file in files:
-        asserted_dependency(target=data_path('stratis', file))
+        asserted_dependency(target=data_path('cmip5', file))
