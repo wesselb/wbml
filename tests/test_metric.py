@@ -1,7 +1,8 @@
-import pytest
-import wbml.metric
-import pandas as pd
 import lab as B
+import pandas as pd
+import pytest
+
+import wbml.metric
 
 two_arg = ['mse', 'smse', 'rmse', 'srmse', 'r2']
 three_arg = ['mll', 'smll']
