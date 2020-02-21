@@ -1,11 +1,12 @@
+import datetime
 import os
 import pickle
 import shutil
 import subprocess
 import sys
 import time
-import datetime
 
+import lab as B
 import slugify
 
 from .out import out, kv, streams, Section
@@ -65,9 +66,10 @@ class WorkingDirectory:
             exists. Defaults to `False`.
         log (str or None, optional): Initialise logger. Set to `None`
             to disable. Defaults to `log.txt`.
+        seed (int, optional): Value of random seed. Defaults to `0`.
     """
 
-    def __init__(self, *root, override=False, log='log.txt'):
+    def __init__(self, *root, override=False, log='log.txt', seed=0):
         self.root = os.path.join(*root)
 
         # Delete if the root already exists.
@@ -109,6 +111,10 @@ class WorkingDirectory:
             shutil.copy(path, self.file('script.py'))
         else:
             out('Could not save calling script.')
+
+        # Sed and print random seed.
+        B.set_random_seed(seed)
+        kv('Seed', seed)
 
     def file(self, *name, exists=False):
         """Get the path of a file.
