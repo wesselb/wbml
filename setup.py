@@ -6,6 +6,7 @@ requirements = ['six',
                 'python-slugify',
                 'requests',
                 'netCDF4',
+                'sklearn',
 
                 'plum-dispatch',
                 'backends>=0.3.1',
