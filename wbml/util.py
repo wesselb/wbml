@@ -1,9 +1,36 @@
+import inspect
+import warnings
 from functools import reduce
 from operator import mul
 
 import lab as B
 
-__all__ = ['inv_perm', 'normal1d_logpdf', 'BatchVars']
+__all__ = ['warn_upmodule',
+           'inv_perm',
+           'normal1d_logpdf',
+           'BatchVars']
+
+
+def _get_module_name(frame_info):
+    return frame_info.frame.f_globals['__name__'].split('.')[0]
+
+
+def warn_upmodule(*args, **kw_args):
+    """Call :func:`warnings.warn`, but set the keyword argument `stacklevel`
+    corresponding to the first other module above the current module.
+    """
+    level = 2
+    stack = inspect.stack()[1:]
+    this_module = _get_module_name(stack[0])
+
+    # Up the level until the first other module is reached.
+    for frame_info in stack:
+        if _get_module_name(frame_info) != this_module:
+            break
+        else:
+            level += 1
+
+    warnings.warn(*args, stacklevel=level, **kw_args)
 
 
 def inv_perm(perm):
