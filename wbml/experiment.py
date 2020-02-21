@@ -55,6 +55,7 @@ class Logger:
         """Flush the stream."""
         # Nothing to do.
 
+_default_log = object()
 
 class WorkingDirectory:
     """Working directory.
@@ -62,6 +63,8 @@ class WorkingDirectory:
     Args:
         *root (str): Root of working directory. Use different arguments for
             directories.
+        subtle (bool, optional): Be subtle. For example, do not overwrite
+            the existing log and copied script. Defaults to `False.`
         override (bool, optional): Delete working directory if it already
             exists. Defaults to `False`.
         log (str or None, optional): Initialise logger. Set to `None`
@@ -69,7 +72,12 @@ class WorkingDirectory:
         seed (int, optional): Value of random seed. Defaults to `0`.
     """
 
-    def __init__(self, *root, override=False, log='log.txt', seed=0):
+    def __init__(self,
+                 *root,
+                 subtle=False,
+                 override=False,
+                 log=_default_log,
+                 seed=0):
         self.root = os.path.join(*root)
 
         # Delete if the root already exists.
@@ -79,6 +87,14 @@ class WorkingDirectory:
 
         # Create root directory.
         os.makedirs(self.root, exist_ok=True)
+
+        # Set default log.
+        if subtle:
+            if log is _default_log:
+                log = None
+        else:
+            if log is _default_log:
+                log = 'log.txt'
 
         # Initialise logger.
         if log is not None:
@@ -106,11 +122,12 @@ class WorkingDirectory:
             out('Git not available.')
 
         # Copy calling script.
-        path = os.path.abspath(sys.argv[0])
-        if os.path.exists(path):
-            shutil.copy(path, self.file('script.py'))
-        else:
-            out('Could not save calling script.')
+        if not subtle:
+            path = os.path.abspath(sys.argv[0])
+            if os.path.exists(path):
+                shutil.copy(path, self.file('script.py'))
+            else:
+                out('Could not save calling script.')
 
         # Sed and print random seed.
         B.set_random_seed(seed)
