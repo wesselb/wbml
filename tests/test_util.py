@@ -1,20 +1,9 @@
-import warnings
-
 import lab as B
 import numpy as np
 from stheno import Normal
-from wbml.util import warn_upmodule, inv_perm, normal1d_logpdf, BatchVars
 
+from wbml.util import inv_perm, normal1d_logpdf, BatchVars
 from .util import allclose
-
-
-def test_warn_upmodule(monkeypatch):
-    def mock_warn(*args, stacklevel, **kw_args):
-        assert stacklevel > 2
-
-    monkeypatch.setattr(warnings, 'warn', mock_warn)
-
-    warn_upmodule('Test warnings')
 
 
 def test_inv_perm():
