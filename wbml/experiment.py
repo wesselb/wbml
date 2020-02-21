@@ -1,11 +1,14 @@
 import os
 import pickle
 import shutil
+import subprocess
+import sys
 import time
+import datetime
 
 import slugify
 
-from .out import out, kv, streams
+from .out import out, kv, streams, Section
 
 __all__ = ['generate_root', 'WorkingDirectory']
 
@@ -72,14 +75,40 @@ class WorkingDirectory:
             out('Experiment directory already exists. Overwriting.')
             shutil.rmtree(self.root)
 
-        kv('Root', self.root)
-
         # Create root directory.
         os.makedirs(self.root, exist_ok=True)
 
         # Initialise logger.
         if log is not None:
             streams.append(Logger(self.file(log)))
+
+        kv('Root', self.root)
+        kv('Command', ' '.join(sys.argv))
+        kv('Now', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        kv('Python', sys.version)
+
+        # Print details about git.
+        try:
+            # This command will fail if we are not in a git repo.
+            subprocess.check_output(['git', 'status'])
+
+            sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+            sha = sha.decode('ascii').strip()
+            diff_stat = subprocess.check_output(['git', 'diff', '--shortstat'])
+            clean = diff_stat.decode('ascii').strip() == ''
+
+            with Section('Git'):
+                kv('Commit', sha)
+                kv('Dirty', 'no' if clean else 'yes')
+        except subprocess.CalledProcessError:
+            out('Git not available.')
+
+        # Copy calling script.
+        path = os.path.abspath(sys.argv[0])
+        if os.path.exists(path):
+            shutil.copy(path, self.file('script.py'))
+        else:
+            out('Could not save calling script.')
 
     def file(self, *name, exists=False):
         """Get the path of a file.
