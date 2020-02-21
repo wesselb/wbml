@@ -10,7 +10,8 @@ import urllib.request
 from contextlib import closing
 import wbml.out
 
-__all__ = ['resource',
+__all__ = ['DependencyError',
+           'resource',
            'dependency',
            'asserted_dependency',
            'split_df',
