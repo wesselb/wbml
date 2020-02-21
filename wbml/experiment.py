@@ -101,7 +101,7 @@ class WorkingDirectory:
             streams.append(Logger(self.file(log)))
 
         kv('Root', self.root)
-        kv('Command', ' '.join(sys.argv))
+        kv('Call', ' '.join(sys.argv))
         kv('Now', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         kv('Python', sys.version)
 
