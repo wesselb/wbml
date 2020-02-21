@@ -7,6 +7,7 @@ from plum import Dispatcher, Union
 
 __all__ = ['mse', 'smse',
            'rmse', 'srmse',
+           'mae',
            'mll', 'smll',
            'r2']
 
@@ -95,6 +96,21 @@ def srmse(mean, data):
         tensor: Standardised root mean squared error.
     """
     return rmse(mean, data) / rmse(data.mean(), data)
+
+
+@_auto_convert
+@_dispatch(_PandasOrScalar, _Pandas)
+def mae(mean, data):
+    """Mean absolute error.
+
+    Args:
+        mean (tensor): Mean of prediction.
+        data (tensor): Reference data.
+
+    Returns:
+        tensor: Mean absolute error.
+    """
+    return np.abs(mean - data).mean()
 
 
 @_auto_convert

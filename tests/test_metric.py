@@ -4,7 +4,7 @@ import pytest
 
 import wbml.metric
 
-two_arg = ['mse', 'smse', 'rmse', 'srmse', 'r2']
+two_arg = ['mse', 'smse', 'rmse', 'srmse', 'mae', 'r2']
 three_arg = ['mll', 'smll']
 
 two_arg_standardised = [('smse', 1), ('srmse', 1)]
