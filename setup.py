@@ -7,6 +7,7 @@ requirements = ['six',
                 'requests',
                 'netCDF4',
                 'sklearn',
+                'matplotlib',
 
                 'plum-dispatch',
                 'backends>=0.3.1',
