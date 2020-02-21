@@ -4,7 +4,7 @@ import lab as B
 import matplotlib.pyplot as plt
 from plum import Dispatcher
 
-__all__ = ['patch', 'tex', 'tweak']
+__all__ = ['patch', 'tex', 'tweak', 'style']
 
 _dispatch = Dispatcher()
 
@@ -38,22 +38,31 @@ def _convert(d):
     return {k: _convert(v) for k, v in d.items()}
 
 
-def patch(f):
+def patch(f, kind=None):
     """Decorator to patch a function to automatically convert arguments that
-    are of a framework type, like PyTorch, to NumPy.
+    are of a framework type, like PyTorch, to NumPy. Also allows a keyword
+    argument `style` to automatically expand the dictionary given by
+    :func:`.plot.style` into the keyword arguments.
     """
 
     @wraps(f)
     def patched_f(*args, **kw_args):
+        # Automatically expand style configuration.
+        if kind and 'style' in kw_args:
+            for k, v in style(kw_args['style'], kind).items():
+                if k not in kw_args:
+                    kw_args[k] = v
+            del kw_args['style']
+
         return f(*_convert(args), **_convert(kw_args))
 
     return patched_f
 
 
 # Patch common plotting functions.
-plt.plot = patch(plt.plot)
-plt.scatter = patch(plt.scatter)
-plt.fill_between = patch(plt.fill_between)
+plt.plot = patch(plt.plot, kind='line')
+plt.scatter = patch(plt.scatter, kind='scatter')
+plt.fill_between = patch(plt.fill_between, kind='fill')
 plt.errorbar = patch(plt.errorbar)
 plt.xlim = patch(plt.xlim)
 plt.ylim = patch(plt.ylim)
@@ -97,3 +106,54 @@ def tweak(grid=True, legend=True, spines=True, ticks=True):
         ax.xaxis.set_tick_params(width=1)
         ax.yaxis.set_ticks_position('left')
         ax.yaxis.set_tick_params(width=1)
+
+
+scheme = [
+    '#000000',  # Black
+    '#F5793A',  # Orange
+    '#4BA6FB',  # Modified blue (original was #85C0F9)
+    '#A95AA1',  # Pink
+]
+"""list[str]: Color scheme."""
+
+colour_map = {'train': scheme[0],
+              'test': scheme[1],
+              'pred': scheme[2],
+              'pred2': scheme[3]}
+"""dict[str, str]: Name to colour mapping."""
+
+line_style_map = {'train': '-',
+                  'test': '-',
+                  'pred': '--',
+                  'pred2': '-.'}
+"""dict[str, str]: Name to line style mapping."""
+
+scatter_style_map = {'train': 'o',
+                     'test': 'x',
+                     'pred': 's',
+                     'pred2': 'D'}
+"""dict[str, str]: Name to scatter style mapping."""
+
+
+def style(name, kind='line'):
+    """Generate style setting for functions in :mod:`matplotlib.pyplot`.
+
+    Args:
+        name (str): Name of style.
+        kind ('line', 'scatter', or 'fill'): Kind of settings.
+
+    Returns:
+        dict: Style settings.
+    """
+    if kind == 'line':
+        return {'c': colour_map[name],
+                'ls': line_style_map[name]}
+    elif kind == 'scatter':
+        return {'c': colour_map[name],
+                'marker': scatter_style_map[name],
+                's': 8}
+    elif kind == 'fill':
+        return {'facecolor': colour_map[name],
+                'alpha': .25}
+    else:
+        return ValueError(f'Unknown kind "{kind}".')
