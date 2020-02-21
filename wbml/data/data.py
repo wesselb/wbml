@@ -157,8 +157,8 @@ def split_df(df, index_range, columns, iloc=False):
                               set(df.columns) - set(columns)]).T
 
     # Fix order of columns.
-    selected_cols = [c for c in df.columns if c in columns]
-    selected = selected.reindex(selected_cols, axis=1)
+    selected_inds = [i for i, c in enumerate(df.columns) if c in columns]
+    selected = selected.reindex(df.columns[np.array(selected_inds)], axis=1)
     remainder = remainder.reindex(df.columns, axis=1)
 
     return selected, remainder
