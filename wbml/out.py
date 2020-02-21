@@ -45,12 +45,12 @@ def _print(msg, line_end='\n', indent=True, flush=False):
 
     if indent:
         # Construct total indentation.
-        indent = indent_char * indent_width * indent_level
+        msg_indent = indent_char * indent_width * indent_level
 
         # Indent the message and all newlines therein.
-        msg = indent + msg.replace('\n', '\n' + indent)
+        msg = msg_indent + msg.replace('\n', '\n' + msg_indent)
 
-    if report_time:
+    if report_time and indent:
         time_delta = time.time() - _time_start
 
         # Calculate passed hours, minutes, and seconds.
@@ -65,12 +65,12 @@ def _print(msg, line_end='\n', indent=True, flush=False):
 
         # Only print the time report if it is different from last report. Else,
         # just indent.
-        indent = ' ' * len(time_report) + ' | '
+        msg_indent = ' ' * len(time_report) + ' | '
         if time_report != _time_last_report:
-            msg = time_report + ' | ' + msg.replace('\n', '\n' + indent)
+            msg = time_report + ' | ' + msg.replace('\n', '\n' + msg_indent)
             _time_last_report = time_report
         else:
-            msg = indent + msg.replace('\n', '\n' + indent)
+            msg = msg_indent + msg.replace('\n', '\n' + msg_indent)
 
     # Write the message plus line end.
     for stream in streams:
@@ -170,7 +170,7 @@ def format(x, info):
 
 
 # If `info` is given as a keyword argument, the following method converts it to
-# a position argument. We handle it as a position argument to not rely on
+# a positional argument. We handle it as a positional argument to not rely on
 # default values in multiple places.
 @_dispatch(object)
 def format(x, info=True):

@@ -1,3 +1,5 @@
+import pytest
+
 import lab as B
 import numpy as np
 import tensorflow as tf
@@ -28,7 +30,7 @@ class RecordingStream:
 
 
 class Mock:
-    """Mock the stream that `wbml.out` uses. Also reset s
+    """Mock the stream that `wbml.out` uses. Also reset
     `wbml.out._time_start`."""
 
     def __enter__(self):
@@ -92,6 +94,8 @@ def test_out():
     assert len(mock) == 1
     assert str(mock) == 'message\n'
 
+
+def test_out_newlines():
     # Test that newlines are correctly indented.
     with Mock() as mock:
         out.out('a\nb')
@@ -119,6 +123,8 @@ def test_kv():
     assert mock[3] == '1.000e+03:  1.000e+03\n'
     assert mock[4] == '1000:       1000\n'
 
+
+def test_kv_dict():
     # Test giving a dictionary.
     with Mock() as mock:
         out.kv({'level1': {'level2': {1: 1}}})
@@ -128,6 +134,8 @@ def test_kv():
     assert mock[1] == '    level2:\n'
     assert mock[2] == '        1:          1\n'
 
+
+def test_kv_dict_as_value():
     # Test giving a key and a dictionary.
     with Mock() as mock:
         out.kv('dict', {1: 1})
@@ -136,6 +144,8 @@ def test_kv():
     assert mock[0] == 'dict:\n'
     assert mock[1] == '    1:          1\n'
 
+
+def test_kv_newlines():
     # Test values with newlines.
     with Mock() as mock:
         out.kv('a', 'b\nc')
@@ -145,71 +155,80 @@ def test_kv():
     assert mock[1] == '    b\n    c\n'
 
 
-def test_format():
+def test_format_object():
     class A:
         def __str__(self):
             return 'FormattedA()'
 
     assert out.format(A()) == 'FormattedA()'
 
-    # Test formatting of floats.
-    assert out.format(0.000012) == '1.200e-05'
-    assert out.format(0.00012) == '1.200e-04'
-    assert out.format(0.0012) == '1.200e-03'
-    assert out.format(0.012) == '0.012'
-    assert out.format(0.12) == '0.12'
-    assert out.format(1.2) == '1.2'
-    assert out.format(12.0) == '12.0'
-    assert out.format(120.0) == '120.0'
-    assert out.format(1200.0) == '1.200e+03'
-    assert out.format(12000.0) == '1.200e+04'
 
-    # Test formatting of special values.
-    assert out.format(np.nan) == 'nan'
-    assert out.format(np.inf) == 'inf'
-    assert out.format(-np.inf) == '-inf'
+@pytest.mark.parametrize(
+    'x, y',
+    [
+        # Floats:
+        (0.000012, '1.200e-05'),
+        (0.00012, '1.200e-04'),
+        (0.0012, '1.200e-03'),
+        (0.012, '0.012'),
+        (0.12, '0.12'),
+        (1.2, '1.2'),
+        (12.0, '12.0'),
+        (120.0, '120.0'),
+        (1200.0, '1.200e+03'),
+        (12000.0, '1.200e+04'),
 
-    # Test formatting of integers.
-    assert out.format(1) == '1'
-    assert out.format(1200) == '1200'
-    assert out.format(12000) == '12000'
+        # Integers:
+        (1, '1'),
+        (1200, '1200'),
+        (12000, '12000'),
 
-    # Test formatting of containers.
-    assert out.format([1, 1.0, 1000.0]) == '[1, 1.0, 1.000e+03]'
-    assert out.format((1, 1.0, 1000.0)) == '(1, 1.0, 1.000e+03)'
-    assert out.format({1}) == '{1}'
-    assert out.format({1.0}) == '{1.0}'
-    assert out.format({1000.0}) == '{1.000e+03}'
+        # NaN and infinity:
+        (np.nan, 'nan'),
+        (np.inf, 'inf'),
+        (-np.inf, '-inf'),
 
-    # Test formatting of NumPy objects.
-    assert out.format(np.array(0.000012)) == '1.200e-05'
-    assert out.format(B.ones(int, 3)) == '[1 1 1]'
-    assert out.format(B.ones(int, 3, 3)) == \
-           '(3x3 array of data type int64)\n[[1 1 1]\n [1 1 1]\n [1 1 1]]'
+        # Containers:
+        ([1, 1.0, 1000.0], '[1, 1.0, 1.000e+03]'),
+        ((1, 1.0, 1000.0), '(1, 1.0, 1.000e+03)'),
+        ({1}, '{1}'),
+        ({1.0}, '{1.0}'),
+        ({1000.0}, '{1.000e+03}'),
 
-    # Test the `info` flag.
+        # NumPy:
+        (np.array(0.000012), '1.200e-05'),
+        (B.ones(int, 3), '[1 1 1]'),
+        (B.ones(int, 3, 3),
+         '(3x3 array of data type int64)\n[[1 1 1]\n [1 1 1]\n [1 1 1]]'),
+
+        # PyTorch:
+        (B.ones(torch.int, 3), '[1 1 1]'),
+
+        # TensorFlow:
+        (B.ones(tf.int32, 3), '[1 1 1]')
+    ]
+)
+def test_format(x, y):
+    assert out.format(x) == y
+
+
+def test_format_info_flag():
     assert out.format(B.ones(int, 3, 3), False) == \
            '[[1 1 1]\n [1 1 1]\n [1 1 1]]'
 
-    # Test formatting of PyTorch objects.
-    assert out.format(B.ones(torch.int, 3)) == '[1 1 1]'
 
-    # Test formatting of TensorFlow objects.
-    ones = B.ones(tf.int32, 3)
-    assert out.format(ones) == '[1 1 1]'
+def _assert_counts(mock):
+    assert len(mock) == 8
+    assert mock[1] == '[flush]'
+    assert mock[2] == ' 1'
+    assert mock[3] == '[flush]'
+    assert mock[4] == ' 2'
+    assert mock[5] == '[flush]'
+    assert mock[6] == '\n'
+    assert mock[7] == '[flush]'
 
 
 def test_counter():
-    def assert_counts(mock_):
-        assert len(mock_) == 8
-        assert mock_[1] == '[flush]'
-        assert mock_[2] == ' 1'
-        assert mock_[3] == '[flush]'
-        assert mock_[4] == ' 2'
-        assert mock_[5] == '[flush]'
-        assert mock_[6] == '\n'
-        assert mock_[7] == '[flush]'
-
     # Test normal application.
     with Mock() as mock:
         with out.Counter() as counter:
@@ -217,30 +236,36 @@ def test_counter():
             counter.count()
 
     assert mock[0] == 'Counting:'
-    assert_counts(mock)
+    _assert_counts(mock)
 
+
+def test_counter_total():
     with Mock() as mock:
         with out.Counter(name='name', total=3) as counter:
             counter.count()
             counter.count()
 
     assert mock[0] == 'name (total: 3):'
-    assert_counts(mock)
+    _assert_counts(mock)
 
+
+def test_counter_map():
     # Test mapping.
     with Mock() as mock:
         res = out.Counter.map(lambda x: x ** 2, [2, 3])
 
     assert res == [4, 9]
     assert mock[0] == 'Mapping (total: 2):'
-    assert_counts(mock)
+    _assert_counts(mock)
 
+
+def test_counter_map2():
     with Mock() as mock:
         res = out.Counter.map(lambda x: x ** 2, [2, 3], name='name')
 
     assert res == [4, 9]
     assert mock[0] == 'name (total: 2):'
-    assert_counts(mock)
+    _assert_counts(mock)
 
 
 def test_compute_alpha():
@@ -264,7 +289,6 @@ def test_compute_alpha():
 
 def test_progress():
     # Test a simple case.
-
     with Mock() as mock:
         with out.Progress() as progress:
             progress(a=1)
@@ -276,6 +300,8 @@ def test_progress():
     assert mock[3] == '        a:          1\n'
     assert mock[4] == '    Done!\n'
 
+
+def test_progress_interval():
     # Test setting the total number of iterations and report interval as int.
     with Mock() as mock:
         with out.Progress(name='name', total=4, interval=3) as progress:
@@ -306,6 +332,8 @@ def test_progress():
     assert mock[12] == '        a:          d\n'
     assert mock[13] == '    Done!\n'
 
+
+def test_progress_filters():
     # Test filters, report interval as float, and giving a dictionary.
     with Mock() as mock:
         with out.Progress(name='name',
@@ -329,7 +357,8 @@ def test_progress():
     assert mock[8] == '        b:          1.0\n'
     assert mock[9] == '    Done!\n'
 
-    # Test mapping.
+
+def test_progress_map():
     with Mock() as mock:
         res = out.Progress.map(lambda x: x ** 2, [2, 3])
 
@@ -337,6 +366,8 @@ def test_progress():
     assert len(mock) == 8
     assert mock[0] == 'Mapping:\n'
 
+
+def test_progress_map2():
     with Mock() as mock:
         res = out.Progress.map(lambda x: x ** 2, [2, 3], name='name')
 
@@ -345,8 +376,8 @@ def test_progress():
     assert mock[0] == 'name:\n'
 
 
-def test_time_report():
-    out.report_time = True
+def test_time_report_interval(monkeypatch):
+    monkeypatch.setattr(out, 'report_time', True)
 
     # Test that time stamp is not repeated unnecessarily.
     with Mock() as mock:
@@ -360,6 +391,10 @@ def test_time_report():
     assert mock[1] == '         | b\n'
     assert mock[2] == '00:00:01 | c\n'
 
+
+def test_time_report_calculation(monkeypatch):
+    monkeypatch.setattr(out, 'report_time', True)
+
     # Test that time is correctly calculated.
     with Mock() as mock:
         out._time_start = time.time() - 2 * 60 * 60 - 2 * 60 - 2
@@ -368,4 +403,22 @@ def test_time_report():
     assert len(mock) == 1
     assert mock[0] == '02:02:02 | a\n'
 
-    out.report_time = False
+
+def test_time_report_with_progress(monkeypatch):
+    monkeypatch.setattr(out, 'report_time', True)
+
+    # Test normal application of counting, as above.
+    with Mock() as mock:
+        with out.Counter() as counter:
+            counter.count()
+            counter.count()
+
+    assert len(mock) == 8
+    assert mock[0] == '00:00:00 | Counting:'
+    assert mock[1] == '[flush]'
+    assert mock[2] == ' 1'
+    assert mock[3] == '[flush]'
+    assert mock[4] == ' 2'
+    assert mock[5] == '[flush]'
+    assert mock[6] == '\n'
+    assert mock[7] == '[flush]'
