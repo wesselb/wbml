@@ -44,6 +44,7 @@ def _import_and_execute(name, monkeypatch):
                          ['air_temp',
                           'eeg',
                           'exchange',
+                          'jura',
                           'mauna_loa',
                           'miso',
                           'toy_sines'])
