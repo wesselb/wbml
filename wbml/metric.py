@@ -126,7 +126,7 @@ def mll(mean, variance, data):
     Returns:
         tensor: Mean log loss.
     """
-    return (0.5 * np.log(2 * np.pi) +
+    return (0.5 * np.log(2 * np.pi * variance) +
             0.5 * (mean - data) ** 2 / variance).mean()
 
 
