@@ -5,6 +5,7 @@ from collections import OrderedDict
 import netCDF4 as nc
 import numpy as np
 import pandas as pd
+from datetime import datetime, timedelta
 
 from .data import data_path, asserted_dependency
 
@@ -17,7 +18,10 @@ def load():
     # Load observations.
     data = nc.Dataset(data_path('cmip5', 'erai_T2_1979-2016_daily.nc'))
     matrix = data['T2'][:].reshape(data['T2'].shape[0], -1)
-    obs = pd.DataFrame(matrix, index=pd.Index(data['time'][:], name='time'))
+    # Convert index to `datetime`s. Not sure what the time values represent...
+    times = [datetime(year=1979, month=1, day=1) + i * timedelta(days=1)
+             for i in range(len(data['time'][:]))]
+    obs = pd.DataFrame(matrix, index=pd.Index(times, name='time'))
 
     # Load locations.
     lat = data['latitude'][:]
@@ -33,7 +37,7 @@ def load():
                  if os.path.splitext(f)[1].lower() == '.nc'
                  if f != 'erai_T2_1979-2016_daily.nc']
 
-    # Load olmm.
+    # Load sims.
     sims = OrderedDict()
     for sim_file in sim_files:
         data = nc.Dataset(data_path('cmip5', sim_file))
