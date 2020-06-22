@@ -164,17 +164,18 @@ def split_df(df, index_range, columns, iloc=False):
     return selected, remainder
 
 
-def date_to_decimal_year(date, format):
+def date_to_decimal_year(date, format=None):
     """Convert a date to decimal year.
 
     Args:
         date (str): Date as a string.
-        format (str): Format of the dat.
+        format (str, optional): Format of the date if a conversion is needed.
 
     Returns:
         float: Decimal year corresponding to the date.
     """
-    date = datetime.datetime.strptime(date, format)
+    if format:
+        date = datetime.datetime.strptime(date, format)
     start = datetime.date(date.year, 1, 1).toordinal()
     year_length = datetime.date(date.year + 1, 1, 1).toordinal() - start
     return date.year + float(date.toordinal() - start) / year_length
