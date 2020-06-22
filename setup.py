@@ -8,6 +8,7 @@ requirements = ['six',
                 'netCDF4',
                 'sklearn',
                 'matplotlib',
+                'xarray',
 
                 'plum-dispatch',
                 'backends>=0.3.1',
