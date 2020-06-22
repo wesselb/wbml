@@ -28,8 +28,7 @@ def generate_root(name):
 
 
 class Logger:
-    """A logger to a file that automatically closes the stream if the
-    object is deleted.
+    """A logger to a file.
 
     Args:
         path (str): Path to file.
@@ -55,7 +54,9 @@ class Logger:
         """Flush the stream."""
         # Nothing to do.
 
+
 _default_log = object()
+
 
 class WorkingDirectory:
     """Working directory.
