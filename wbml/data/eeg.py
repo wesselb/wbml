@@ -14,16 +14,35 @@ __all__ = ['load']
 
 cache_data = data_path('eeg', 'data.pickle')
 cache_experiment = data_path('eeg', 'experiment.pickle')
+cache_experiment_extended = data_path('eeg', 'experiment_extended.pickle')
 
 
-def load():
+def load(extended=False):
+    """Load the EEG data.
+
+    Args:
+        extended (bool, optional): Return the train test splits of the first
+            train of all patients in the training data.
+
+    Returns:
+        tuple[:class:`pd.DataFrame`] or dict[int, :class:`pd.DataFrame`]:
+            All data, training data, and test data of the first trail of one
+            patient or all patients.
+    """
     _fetch()
 
     # Generate cache if it does not exist.
-    if not os.path.exists(cache_experiment):
+    if (
+            not os.path.exists(cache_experiment) or
+            not os.path.exists(cache_experiment_extended)
+    ):
         _parse()
 
-    with open(cache_experiment, 'rb') as f:
+    # Determine which cache to load.
+    path = cache_experiment_extended if extended else cache_experiment
+
+    # Return cached data.
+    with open(path, 'rb') as f:
         return pickle.load(f)
 
 
@@ -139,19 +158,31 @@ def _parse():
     with open(cache_data, 'wb') as f:
         pickle.dump(data, f)
 
-    # For the experiment, just use a single trial.
-    trial = data['train'][337]['trials'][0]
+    splits = {}
 
-    # Select a number of fixed labels.
-    labels = ['F3', 'F4', 'F5', 'F6'] + ['FZ', 'F1', 'F2']
-    trial = trial['df'][labels]
+    for _, n in numbers:
+        # Just use the first trial of all patients.
+        trial_numbers = data['train'][n]['trials'].keys()
+        trial = data['train'][n]['trials'][min(trial_numbers)]
 
-    # Split according to paper.
-    test, train = split_df(trial,
-                           index_range=(trial.shape[0] - 100, trial.shape[0]),
-                           columns=['FZ', 'F1', 'F2'],
-                           iloc=True)
+        # Select a number of fixed labels.
+        labels = ['F3', 'F4', 'F5', 'F6'] + ['FZ', 'F1', 'F2']
+        trial = trial['df'][labels]
+
+        # Split according to paper.
+        test, train = split_df(
+            trial,
+            index_range=(trial.shape[0] - 100, trial.shape[0]),
+            columns=['FZ', 'F1', 'F2'],
+            iloc=True
+        )
+
+        splits[n] = (trial, train, test)
 
     # Save experiment data.
     with open(cache_experiment, 'wb') as f:
-        pickle.dump((trial, train, test), f)
+        pickle.dump(splits[337], f)
+
+    # Save extended experiment data.
+    with open(cache_experiment_extended, 'wb') as f:
+        pickle.dump(splits, f)
