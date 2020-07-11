@@ -1,10 +1,11 @@
 from functools import wraps
 
+import subprocess
 import lab as B
 import matplotlib.pyplot as plt
 from plum import Dispatcher
 
-__all__ = ['patch', 'tex', 'tweak', 'style']
+__all__ = ['patch', 'tex', 'tweak', 'style', 'pdfcrop']
 
 _dispatch = Dispatcher()
 
@@ -14,6 +15,11 @@ plt.rcParams['figure.autolayout'] = True  # Use tight layouts.
 
 
 @_dispatch(object)
+def _convert(x):
+    return x
+
+
+@_dispatch(B.Number)
 def _convert(x):
     return x
 
@@ -73,26 +79,35 @@ def tex():
     plt.rcParams['text.usetex'] = True  # Use TeX for rendering.
 
 
-def tweak(grid=True, legend=True, spines=True, ticks=True):
+def tweak(grid=True,
+          legend=True,
+          legend_loc='upper right',
+          spines=True,
+          ticks=True,
+          ax=None):
     """Tweak a plot.
 
     Args:
         grid (bool, optional): Show grid. Defaults to `True`.
         legend (bool, optional): Show legend. Defaults to `True`.
+        legend_loc (str, optional): Position of the legend. Defaults to
+            "upper right".
         spines (bool, optional): Hide top and right spine. Defaults to `True`.
         ticks (bool, optional): Hide top and right ticks. Defaults to `True`.
+        ax (axis, optional): Axis to tune. Defaults to `plt.gca()`.
     """
-    ax = plt.gca()
+    if ax is None:
+        ax = plt.gca()
 
     if grid:
         ax.set_axisbelow(True)  # Show grid lines below other elements.
-        plt.grid(which='major', c='#c0c0c0', alpha=.5, lw=1)
+        ax.grid(which='major', c='#c0c0c0', alpha=.5, lw=1)
 
     if legend:
-        leg = plt.legend(facecolor='#eeeeee',
-                         framealpha=0.7,
-                         loc='upper right',
-                         labelspacing=0.25)
+        leg = ax.legend(facecolor='#eeeeee',
+                        framealpha=0.7,
+                        loc=legend_loc,
+                        labelspacing=0.25)
         leg.get_frame().set_linewidth(0)
 
     if spines:
@@ -157,3 +172,12 @@ def style(name, kind='line'):
                 'alpha': .25}
     else:
         return ValueError(f'Unknown kind "{kind}".')
+
+
+def pdfcrop(path):
+    """Run pdfcrop on a PDF.
+
+    Args:
+        path (str): Path of PDF.
+    """
+    subprocess.call(['pdfcrop', path, path])
