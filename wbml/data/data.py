@@ -178,4 +178,16 @@ def date_to_decimal_year(date, format=None):
         date = datetime.datetime.strptime(date, format)
     start = datetime.date(date.year, 1, 1).toordinal()
     year_length = datetime.date(date.year + 1, 1, 1).toordinal() - start
-    return date.year + float(date.toordinal() - start) / year_length
+
+    # Account for subday time.
+    subday_time = 0
+    if hasattr(date, 'hour'):
+        subday_time += date.hour / year_length / 24
+    if hasattr(date, 'minute'):
+        subday_time += date.minute / year_length / 24 / 60
+    if hasattr(date, 'second'):
+        subday_time += date.second / year_length / 24 / 60 / 60
+
+    return date.year + \
+           float(date.toordinal() - start) / year_length + \
+           subday_time
