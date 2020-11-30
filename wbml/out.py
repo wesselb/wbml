@@ -117,21 +117,35 @@ def out(msg):
 
 
 @_dispatch(object, object)
-def kv(key, value):
+def kv(key, value, fmt=None, unit=None):
     """Print a key-value pair.
 
     Args:
         key (str): Key.
         value (object): Value.
+        fmt (str, optional): Format for the value. Defaults to automatic
+            formatting.
+        unit (str, optional): Unit of the value. Defaults to no unit.
     """
     global key_width
 
     # Construct the format.
     f = '{{key:{width}}} {{value}}'.format(width=key_width + 1)
 
-    # Format the key and value.
+    # Add the unit to the format, if it is given.
+    if unit:
+        f += ' ' + unit
+
+    # Format the key.
     formatted_key = format(key)
-    formatted_value = format(value)
+
+    # Format the value.
+    if fmt:
+        # Use the given format.
+        formatted_value = ('{:' + fmt + '}').format(value)
+    else:
+        # Automatically format.
+        formatted_value = format(value)
 
     # If the value contains a newline, print it within a section.
     if '\n' in formatted_value:
@@ -142,16 +156,16 @@ def kv(key, value):
 
 
 @_dispatch(dict)
-def kv(dict_):
+def kv(dict_, **kw_args):
     for k, v in dict_.items():
-        kv(k, v)
+        kv(k, v, **kw_args)
 
 
 @_dispatch(object, dict)
-def kv(key, dict_):
+def kv(key, dict_, **kw_args):
     with Section(key):
         for k, v in dict_.items():
-            kv(k, v)
+            kv(k, v, **kw_args)
 
 
 @_dispatch(object, bool)
