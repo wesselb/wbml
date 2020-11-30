@@ -8,45 +8,25 @@ Features:
         ☐ rnn_sin @high
 
     Out:
-        ✓ Option to show time @done (20-01-20 19:50)
         ☐ Unit in kv
-        ✓ Number of digits @done (19-10-29 19:59)
     Plot:
         ☐ Twinx with zorder switch
     Metrics:
         ☐ Score ranking + significance table
         ☐ Summarisation
     Experimentation Tools:
-        ☐ Data sets
         ☐ Plotting conveniences.
             ☐ Standardised colours for types
             ☐ Move to seaborn
                 ☐ Extend plt
-            ☐ Perform config automatically
             ☐ Scatter + regression
             ☐ Bucketing
             ☐ Premade plots:
                 ☐ y vs yhat
                 ☐ (many) predictions in time
-        ☐ Remove data class and CSVReader in favour of pandas.
-        ☐ Metrics.
-            ☐ R2
-            ☐ SMSE
-            ☐ RMSE
         ☐ Yaml config structure. (CNP!)
             ☐ Docdict
             ☐ Parameters with default values.
-            ☐ Random seed!
-            ☐ Store basic info:
-                ☐ Python version
-                ☐ Git commit
-                ☐ Time/wd
-            ✓ Working directory. @done (20-01-20 19:50)
-                ☐ Copy call.
-                ✓ Log out. @done (20-01-20 19:50)
-                ☐ Copy calling script.
-                ✓ Folder context. @done (20-01-20 19:50)
-        ☐ Load/save Varz
         ☐ kfold + Tracker
     Test:
         ☐ experiment.py
@@ -74,6 +54,26 @@ Features:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✓ Perform config automatically @done (20-02-21 19:14) @project(Features / Experimentation Tools)
+ ✓ SMSE @done (20-02-21 19:13) @project(Features / Experimentation Tools)
+ ✓ Random seed! @done (20-02-21 19:13) @project(Features / Experimentation Tools)
+ ✓ RMSE @done (20-02-21 19:13) @project(Features / Experimentation Tools)
+ ✓ R2 @done (20-02-21 19:13) @project(Features / Experimentation Tools)
+ ✓ Metrics. @done (20-02-21 19:13) @project(Features / Experimentation Tools)
+ ✓ Time/wd @done (20-02-21 17:59) @project(Features / Experimentation Tools)
+ ✓ Store basic info: @done (20-02-21 17:59) @project(Features / Experimentation Tools)
+ ✓ Python version @done (20-02-21 17:59) @project(Features / Experimentation Tools)
+ ✓ Git commit @done (20-02-21 17:56) @project(Features / Experimentation Tools)
+ ✓ Copy calling script. @done (20-02-21 17:56) @project(Features / Experimentation Tools)
+ ✓ Copy call. @done (20-02-21 17:56) @project(Features / Experimentation Tools)
+ ✓ Remove data class and CSVReader in favour of pandas. @done (20-02-20 13:51) @project(Features / Experimentation Tools)
+ ✓ Data sets @done (20-02-20 13:49) @project(Features / Experimentation Tools)
+ ✓ Load/save Varz @done (20-02-20 13:48) @project(Features / Experimentation Tools)
+ ✓ Working directory. @done (20-01-20 19:50) @project(Features / Experimentation Tools)
+ ✓ Option to show time @done (20-01-20 19:50) @project(Features / Out)
+ ✓ Log out. @done (20-01-20 19:50) @project(Features / Experimentation Tools)
+ ✓ Folder context. @done (20-01-20 19:50) @project(Features / Experimentation Tools)
+ ✓ Number of digits @done (19-10-29 19:59) @project(Features / Out)
  ✓ Multiple streams @done (19-10-29 19:59) @project(Features / Out)
  ✓ VOLMM: pseudoobservations for latent processes @started @done (19-05-30 17:42) @project(Features / TODO)
  ✓ VOLMM: decouple xs + @started @done (19-05-30 17:42) @project(Features / TODO)

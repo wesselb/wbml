@@ -5,11 +5,7 @@ import numpy as np
 import pandas as pd
 from plum import Dispatcher, Union
 
-__all__ = ['mse', 'smse',
-           'rmse', 'srmse',
-           'mae',
-           'mll', 'smll',
-           'r2']
+__all__ = ["mse", "smse", "rmse", "srmse", "mae", "mll", "smll", "r2"]
 
 _dispatch = Dispatcher()
 _Pandas = Union(pd.DataFrame, pd.Series)
@@ -29,9 +25,11 @@ def _auto_convert(f):
             elif B.rank(arg) == 2:
                 converted_args += (pd.DataFrame(arg),)
             else:
-                raise ValueError(f'Argument {i} has rank {B.rank(arg)}, which '
-                                 f'cannot be automatically converted to a '
-                                 f'Pandas object.')
+                raise ValueError(
+                    f"Argument {i} has rank {B.rank(arg)}, which "
+                    f"cannot be automatically converted to a "
+                    f"Pandas object."
+                )
 
         return f(*converted_args)
 
@@ -80,7 +78,7 @@ def rmse(mean, data):
     Returns:
         tensor: Root mean squared error.
     """
-    return mse(mean, data) ** .5
+    return mse(mean, data) ** 0.5
 
 
 @_auto_convert
@@ -126,8 +124,9 @@ def mll(mean, variance, data):
     Returns:
         tensor: Mean log loss.
     """
-    return (0.5 * np.log(2 * np.pi * variance) +
-            0.5 * (mean - data) ** 2 / variance).mean()
+    return (
+        0.5 * np.log(2 * np.pi * variance) + 0.5 * (mean - data) ** 2 / variance
+    ).mean()
 
 
 @_auto_convert

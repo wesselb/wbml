@@ -3,16 +3,7 @@ import numpy as np
 import pytest
 from varz import Vars
 
-from wbml.net import (
-    Normalise,
-    Linear,
-    Activation,
-    Recurrent,
-    GRU,
-    Elman,
-    ff,
-    rnn
-)
+from wbml.net import Normalise, Linear, Activation, Recurrent, GRU, Elman, ff, rnn
 from .util import allclose, approx
 
 
@@ -150,12 +141,10 @@ def test_ff():
 
 
 def test_rnn():
-    for final_dense, gru, nn in [(True, False,
-                                  rnn(10, (20, 30), normalise=True, gru=False,
-                                      final_dense=True)),
-                                 (False, True,
-                                  rnn(10, (20, 30), normalise=True, gru=True,
-                                      final_dense=False))]:
+    for final_dense, gru, nn in [
+        (True, False, rnn(10, (20, 30), normalise=True, gru=False, final_dense=True)),
+        (False, True, rnn(10, (20, 30), normalise=True, gru=True, final_dense=False)),
+    ]:
         vs = Vars(np.float32)
         nn.initialise(5, vs)
         x = B.randn(2, 3, 5)
@@ -195,7 +184,6 @@ def test_rnn():
             assert nn.layers[6].width == 10
 
     # Check that normalisation layers disappear.
-    assert len(rnn(10, (20, 30),
-                   normalise=False,
-                   gru=True,
-                   final_dense=False).layers) == 5
+    assert (
+        len(rnn(10, (20, 30), normalise=False, gru=True, final_dense=False).layers) == 5
+    )

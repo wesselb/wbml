@@ -1,14 +1,14 @@
 import inspect
 import warnings
 
-__all__ = ['warn_upmodule']
+__all__ = ["warn_upmodule"]
 
 # By default show deprecation warnings.
-warnings.filterwarnings('always', category=DeprecationWarning)
+warnings.filterwarnings("always", category=DeprecationWarning)
 
 
 def _get_module_name(frame_info):
-    return frame_info.frame.f_globals['__name__'].split('.')[0]
+    return frame_info.frame.f_globals["__name__"].split(".")[0]
 
 
 def warn_upmodule(*args, **kw_args):

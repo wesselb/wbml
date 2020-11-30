@@ -4,14 +4,14 @@ import pytest
 
 import wbml.metric
 
-two_arg = ['mse', 'smse', 'rmse', 'srmse', 'mae', 'r2']
-three_arg = ['mll', 'smll']
+two_arg = ["mse", "smse", "rmse", "srmse", "mae", "r2"]
+three_arg = ["mll", "smll"]
 
-two_arg_standardised = [('smse', 1), ('srmse', 1)]
-three_arg_standardised = [('smll', 0)]
+two_arg_standardised = [("smse", 1), ("srmse", 1)]
+three_arg_standardised = [("smll", 0)]
 
 
-@pytest.mark.parametrize('name', two_arg)
+@pytest.mark.parametrize("name", two_arg)
 def test_two_arg(name):
     metric = getattr(wbml.metric, name)
 
@@ -29,7 +29,7 @@ def test_two_arg(name):
         metric(B.randn(10, 10, 10), B.randn(10, 10, 10))
 
 
-@pytest.mark.parametrize('name', three_arg)
+@pytest.mark.parametrize("name", three_arg)
 def test_three_arg(name):
     metric = getattr(wbml.metric, name)
 
@@ -37,25 +37,19 @@ def test_three_arg(name):
     assert isinstance(metric(1, 1, B.randn(10)), B.Number)
 
     # Test series usage.
-    assert isinstance(metric(B.randn(10),
-                             B.rand(10),
-                             B.randn(10)),
-                      B.Number)
+    assert isinstance(metric(B.randn(10), B.rand(10), B.randn(10)), B.Number)
 
     # Test matrix usage.
-    assert isinstance(metric(B.randn(10, 10),
-                             B.rand(10, 10),
-                             B.randn(10, 10)),
-                      pd.Series)
+    assert isinstance(
+        metric(B.randn(10, 10), B.rand(10, 10), B.randn(10, 10)), pd.Series
+    )
 
     # Check that higher-order tensors fail.
     with pytest.raises(ValueError):
-        metric(B.randn(10, 10, 10),
-               B.rand(10, 10, 10),
-               B.randn(10, 10, 10))
+        metric(B.randn(10, 10, 10), B.rand(10, 10, 10), B.randn(10, 10, 10))
 
 
-@pytest.mark.parametrize('name, neutral_value', two_arg_standardised)
+@pytest.mark.parametrize("name, neutral_value", two_arg_standardised)
 def test_two_arg_standardised(name, neutral_value):
     metric = getattr(wbml.metric, name)
     x = B.randn(10)
@@ -63,7 +57,7 @@ def test_two_arg_standardised(name, neutral_value):
     assert B.all(metric(mean, x) == neutral_value)
 
 
-@pytest.mark.parametrize('name, neutral_value', three_arg_standardised)
+@pytest.mark.parametrize("name, neutral_value", three_arg_standardised)
 def test_three_arg_standardised(name, neutral_value):
     metric = getattr(wbml.metric, name)
     x = B.randn(10)

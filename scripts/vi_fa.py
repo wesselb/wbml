@@ -22,8 +22,10 @@ def lik(x):
 
 # Construct q distribution.
 def construct_q(vs):
-    q = Normal(Diagonal(vs.positive(shape=[d], name='q/var')),
-               vs.get(shape=[d, 1], name='q/mean'))
+    q = Normal(
+        Diagonal(vs.positive(shape=[d], name="q/var")),
+        vs.get(shape=[d, 1], name="q/mean"),
+    )
     return q
 
 
@@ -38,5 +40,5 @@ objective_compiled = tf.function(objective, autograph=False)
 minimise_adam(objective_compiled, vs, trace=True, iters=2000, rate=5e-2)
 
 # Print result.
-out.kv('True', z_true)
-out.kv('Mean q', construct_q(vs).mean)
+out.kv("True", z_true)
+out.kv("Mean q", construct_q(vs).mean)

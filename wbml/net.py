@@ -2,15 +2,17 @@ from abc import ABCMeta, abstractmethod
 
 import lab as B
 
-__all__ = ['Normalise',
-           'Linear',
-           'Activation',
-           'Net',
-           'Recurrent',
-           'GRU',
-           'Elman',
-           'ff',
-           'rnn']
+__all__ = [
+    "Normalise",
+    "Linear",
+    "Activation",
+    "Net",
+    "Recurrent",
+    "GRU",
+    "Elman",
+    "ff",
+    "rnn",
+]
 
 
 class Layer(metaclass=ABCMeta):
@@ -153,7 +155,7 @@ class Net(Layer):
         elif x_rank == 3:
             pass
         else:
-            raise ValueError('Cannot handle inputs of rank {}.'.format(x_rank))
+            raise ValueError("Cannot handle inputs of rank {}.".format(x_rank))
 
         # Apply layers one by one.
         for layer in self.layers:
@@ -203,8 +205,7 @@ class Recurrent(Layer):
         elif x_rank == 3:
             x = B.transpose(x, perm=(1, 0, 2))
         else:
-            raise ValueError('Cannot handle inputs of rank {}.'
-                             ''.format(B.rank(x)))
+            raise ValueError(f"Cannot handle inputs of rank {B.rank(x)}.")
 
         # Recurrently apply the cell.
         n, batch_size, m = B.shape(x)
@@ -294,9 +295,11 @@ class GRU(Cell):
         return h, y
 
     def num_weights(self, input_size):
-        return self.f_z.num_weights(self._width + input_size) + \
-               self.f_r.num_weights(self._width + input_size) + \
-               self.f_h.num_weights(self._width + input_size)
+        return (
+            self.f_z.num_weights(self._width + input_size)
+            + self.f_r.num_weights(self._width + input_size)
+            + self.f_h.num_weights(self._width + input_size)
+        )
 
     @property
     def width(self):
@@ -365,12 +368,14 @@ def ff(output_size, widths, nonlinearity=B.relu, normalise=True):
     return Net(*layers)
 
 
-def rnn(output_size,
-        widths,
-        nonlinearity=B.relu,
-        normalise=False,
-        gru=True,
-        final_dense=False):
+def rnn(
+    output_size,
+    widths,
+    nonlinearity=B.relu,
+    normalise=False,
+    gru=True,
+    final_dense=False,
+):
     """A standard recurrent neural net.
 
     Args:

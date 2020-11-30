@@ -1,11 +1,6 @@
 import abc
 
-__all__ = ['Parser',
-           'Literal',
-           'Whitespace',
-           'Float',
-           'Integer',
-           'SkipUntil']
+__all__ = ["Parser", "Literal", "Whitespace", "Float", "Integer", "SkipUntil"]
 
 
 class Parser:
@@ -16,8 +11,8 @@ class Parser:
     """
 
     def __init__(self, path):
-        with open(path, 'r') as f:
-            self.lines = f.read().split('\n')
+        with open(path, "r") as f:
+            self.lines = f.read().split("\n")
 
     def find_line(self, match):
         """Find the next line containing a string.
@@ -29,8 +24,9 @@ class Parser:
             self.next_line()
 
             if not self.lines_left():
-                raise RuntimeError(f'Attempting to match "{match.lower()}", '
-                                   f'but no lines left.')
+                raise RuntimeError(
+                    f'Attempting to match "{match.lower()}", but no lines left.'
+                )
 
     def next_line(self):
         """Go to the next line."""
@@ -99,7 +95,7 @@ class Whitespace(RegexPart):
     """Whitespace."""
 
     def parse(self, data, results):
-        while data[0] in {' ', '\n'}:
+        while data[0] in {" ", "\n"}:
             data = data[1:]
         return data, results
 
@@ -108,13 +104,25 @@ class Float(RegexPart):
     """Floating point number."""
 
     def parse(self, data, results):
-        num = ''
-        while (
-                len(data) > 0 and  # Must be characters left to parse
-                data[0] in {'0', '1', '2', '3', '4',
-                            '5', '6', '7', '8', '9',
-                            '.', 'e', '-', '+', 'N', 'a'}
-        ):
+        num = ""
+        while len(data) > 0 and data[0] in {  # Must be characters left to parse
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            ".",
+            "e",
+            "-",
+            "+",
+            "N",
+            "a",
+        }:
             num += data[0]
             data = data[1:]
         return data, results + [float(num)]
@@ -124,12 +132,19 @@ class Integer(RegexPart):
     """Integer."""
 
     def parse(self, data, results):
-        num = ''
-        while (
-                len(data) > 0 and  # Must be characters left to parse
-                data[0] in {'0', '1', '2', '3', '4',
-                            '5', '6', '7', '8', '9'}
-        ):
+        num = ""
+        while len(data) > 0 and data[0] in {  # Must be characters left to parse
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+        }:
             num += data[0]
             data = data[1:]
         return data, results + [int(num)]
@@ -153,9 +168,11 @@ class Literal(RegexPart):
                 i += 1
                 data = data[1:]
             else:
-                raise RuntimeError(f'When parsing literal "{self.literal}" at '
-                                   f'position {i + 1}, expected '
-                                   f'"{self.literal[i]}" but got "{data[0]}".')
+                raise RuntimeError(
+                    f'When parsing literal "{self.literal}" at '
+                    f"position {i + 1}, expected "
+                    f'"{self.literal[i]}" but got "{data[0]}".'
+                )
         return data, results
 
 
@@ -179,5 +196,7 @@ class SkipUntil(RegexPart):
 
     def _check_data_left(self, data):
         if len(data) == 0:
-            raise RuntimeError(f'When attempting to skip until character '
-                               f'"{self.char}", the line was exhausted.')
+            raise RuntimeError(
+                f"When attempting to skip until character "
+                f'"{self.char}", the line was exhausted.'
+            )

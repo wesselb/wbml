@@ -10,13 +10,15 @@ import urllib.request
 from contextlib import closing
 import wbml.out
 
-__all__ = ['DependencyError',
-           'resource',
-           'dependency',
-           'asserted_dependency',
-           'split_df',
-           'data_path',
-           'date_to_decimal_year']
+__all__ = [
+    "DependencyError",
+    "resource",
+    "dependency",
+    "asserted_dependency",
+    "split_df",
+    "data_path",
+    "date_to_decimal_year",
+]
 
 
 class DependencyError(AssertionError):
@@ -37,23 +39,23 @@ def resource(target, url, post=False, **kw_args):
             to `False`.
     """
     if not os.path.exists(target):
-        with wbml.out.Section('Downloading file'):
-            wbml.out.kv('Source', url)
-            wbml.out.kv('Target', target)
+        with wbml.out.Section("Downloading file"):
+            wbml.out.kv("Source", url)
+            wbml.out.kv("Target", target)
 
             # Ensure that all directories in the path exist.
             make_dirs(target)
 
             # If the URL starts with "ftp", use the :mod:`urllib` library.
             # Otherwise, use the :mod:`requests` library.
-            if url.startswith('ftp'):
+            if url.startswith("ftp"):
                 with closing(urllib.request.urlopen(url, **kw_args)) as r:
-                    with open(target, 'wb') as f:
+                    with open(target, "wb") as f:
                         shutil.copyfileobj(r, f)
             else:
                 request = requests.post if post else requests.get
                 with request(url, stream=True, **kw_args) as r:
-                    with open(target, 'wb') as f:
+                    with open(target, "wb") as f:
                         shutil.copyfileobj(r.raw, f)
 
 
@@ -66,14 +68,15 @@ def dependency(target, source, commands):
         commands (list[str]): List of commands to generate target file.
     """
     if not os.path.exists(target):
-        with wbml.out.Section('Generating file'):
-            wbml.out.kv('Source', source)
-            wbml.out.kv('Target', target)
+        with wbml.out.Section("Generating file"):
+            wbml.out.kv("Source", source)
+            wbml.out.kv("Target", target)
 
             # Check that the source exists.
             if not os.path.exists(source):
-                raise DependencyError(f'Source "{source}" asserted to exist, '
-                                      f'but it does not.')
+                raise DependencyError(
+                    f'Source "{source}" asserted to exist, but it does not.'
+                )
 
             # Save current working directory.
             current_wd = os.getcwd()
@@ -99,10 +102,12 @@ def asserted_dependency(target):
         target (str): Target file.
     """
     if not os.path.exists(target):
-        raise DependencyError(f'Dependency "{target}" is asserted to exist, '
-                              f'but it does not, and it cannot be '
-                              f'automatically fetched. Please put the file '
-                              f'into place manually.')
+        raise DependencyError(
+            f'Dependency "{target}" is asserted to exist, '
+            f"but it does not, and it cannot be "
+            f"automatically fetched. Please put the file "
+            f"into place manually."
+        )
 
 
 def make_dirs(path):
@@ -123,11 +128,9 @@ def data_path(*xs):
     Returns:
         str: Absolute path.
     """
-    return os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                        os.pardir,
-                                        os.pardir,
-                                        'data',
-                                        *xs))
+    return os.path.abspath(
+        os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, "data", *xs)
+    )
 
 
 def split_df(df, index_range, columns, iloc=False):
@@ -152,9 +155,10 @@ def split_df(df, index_range, columns, iloc=False):
     else:
         rows = (df.index >= index_range[0]) & (df.index < index_range[1])
     selected = pd.DataFrame([df[name][rows] for name in columns]).T
-    remainder = pd.DataFrame([df[name][~rows] for name in columns] +
-                             [df[name] for name in
-                              set(df.columns) - set(columns)]).T
+    remainder = pd.DataFrame(
+        [df[name][~rows] for name in columns]
+        + [df[name] for name in set(df.columns) - set(columns)]
+    ).T
 
     # Fix order of columns.
     selected_inds = [i for i, c in enumerate(df.columns) if c in columns]
@@ -181,13 +185,11 @@ def date_to_decimal_year(date, format=None):
 
     # Account for subday time.
     subday_time = 0
-    if hasattr(date, 'hour'):
+    if hasattr(date, "hour"):
         subday_time += date.hour / year_length / 24
-    if hasattr(date, 'minute'):
+    if hasattr(date, "minute"):
         subday_time += date.minute / year_length / 24 / 60
-    if hasattr(date, 'second'):
+    if hasattr(date, "second"):
         subday_time += date.second / year_length / 24 / 60 / 60
 
-    return date.year + \
-           float(date.toordinal() - start) / year_length + \
-           subday_time
+    return date.year + float(date.toordinal() - start) / year_length + subday_time

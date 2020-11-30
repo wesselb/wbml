@@ -18,7 +18,7 @@ def test_normal1d_logpdf():
     logpdfs = normal1d_logpdf(x, covs, means)
     for i in range(3):
         for j in range(3):
-            dist = Normal(covs[i:i + 1, j:j + 1], means[i:i + 1, j:j + 1])
+            dist = Normal(means[i : i + 1, j : j + 1], covs[i : i + 1, j : j + 1])
             allclose(logpdfs[i, j], dist.logpdf(x[i, j]))
 
 

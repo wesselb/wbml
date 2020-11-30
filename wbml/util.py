@@ -5,14 +5,11 @@ from operator import mul
 
 import lab as B
 
-__all__ = ['warn_upmodule',
-           'inv_perm',
-           'normal1d_logpdf',
-           'BatchVars']
+__all__ = ["warn_upmodule", "inv_perm", "normal1d_logpdf", "BatchVars"]
 
 
 def _get_module_name(frame_info):
-    return frame_info.frame.f_globals['__name__'].split('.')[0]
+    return frame_info.frame.f_globals["__name__"].split(".")[0]
 
 
 def warn_upmodule(*args, **kw_args):
@@ -83,6 +80,6 @@ class BatchVars:
             tensor: Batch of tensors of shape `shape`.
         """
         length = reduce(mul, shape, 1)
-        res = self.source[:, self.index:self.index + length]
+        res = self.source[:, self.index : self.index + length]
         self.index += length
         return B.reshape(res, -1, *shape)

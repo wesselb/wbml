@@ -4,7 +4,7 @@ from stheno import Normal
 
 dispatch = Dispatcher()
 
-__all__ = ['elbo']
+__all__ = ["elbo"]
 
 
 @dispatch(object, object, object)
