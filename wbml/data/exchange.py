@@ -43,7 +43,7 @@ def load(extended=False, nguyen=False):
         # Also return the rates from years 2000 to 2010.
         return rates, train, test, pd.concat([
             _load_csv(data_path('exchange', f'exchange{year}.csv'))
-            for year in range(2000, 2010 + 1)
+            for year in range(1990, 2015 + 1)
         ], axis=0)
 
     return rates, train, test
@@ -74,7 +74,7 @@ def _load_csv(path):
 
 
 def _fetch():
-    for year in range(2000, 2011):
+    for year in range(1990, 2015 + 1):
         resource(target=data_path('exchange', f'exchange{year}.csv'),
                  url='http://fx.sauder.ubc.ca/cgi/fxdata',
                  post=True,
