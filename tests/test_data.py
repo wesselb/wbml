@@ -51,6 +51,7 @@ def test_import(name, monkeypatch):
 @pytest.mark.parametrize(
     "name", ["cmip5", "stratis", "station", "snp"]  # Only test `stratis` here.
 )
+@pytest.mark.xfail()
 def test_import_unable_to_fetch(name, monkeypatch):
     _import_and_execute(name, monkeypatch)
 
