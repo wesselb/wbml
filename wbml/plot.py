@@ -80,13 +80,14 @@ def tex():
 
 
 def tweak(
-    grid=True, legend=True, legend_loc="upper right", spines=True, ticks=True, ax=None
+    grid=True, legend=None, legend_loc="upper right", spines=True, ticks=True, ax=None
 ):
     """Tweak a plot.
 
     Args:
         grid (bool, optional): Show grid. Defaults to `True`.
-        legend (bool, optional): Show legend. Defaults to `True`.
+        legend (bool, optional): Show legend. Automatically shows a legend if any labels
+            are set.
         legend_loc (str, optional): Position of the legend. Defaults to
             "upper right".
         spines (bool, optional): Hide top and right spine. Defaults to `True`.
@@ -99,6 +100,9 @@ def tweak(
     if grid:
         ax.set_axisbelow(True)  # Show grid lines below other elements.
         ax.grid(which="major", c="#c0c0c0", alpha=0.5, lw=1)
+
+    if legend is None:
+        legend = len(ax.get_legend_handles_labels()[0]) > 0
 
     if legend:
         leg = ax.legend(
