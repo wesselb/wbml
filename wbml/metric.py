@@ -14,11 +14,16 @@ _PandasOrScalar = Union[_Pandas, B.Number]
 
 
 def _auto_convert(f):
-    @_dispatch
     @wraps(f)
-    def _convert(*args: B.Numeric):
+    def wrapped_f(*args):
         converted_args = ()
         for i, arg in enumerate(args):
+            # Check if the argument is already a Pandas object.
+            if isinstance(arg, (pd.Series, pd.DataFrame)):
+                converted_args += (arg,)
+                continue
+
+            # It is not already a Pandas object. Attempt to convert.
             if B.rank(arg) == 0:
                 converted_args += (arg,)
             elif B.rank(arg) == 1:
@@ -34,7 +39,7 @@ def _auto_convert(f):
 
         return f(*converted_args)
 
-    return f
+    return wrapped_f
 
 
 @_auto_convert
