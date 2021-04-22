@@ -292,7 +292,7 @@ def test_compute_alpha():
 
     # Check damping in dB.
     ratio = 10 * np.log10(np.mean(y ** 2) / np.mean(x ** 2))
-    approx(ratio, -3, atol=1e-3)
+    approx(ratio, -3, atol=5e-2)
 
     # Check not setting the cut-off.
     assert out._compute_alpha(None) == 1
