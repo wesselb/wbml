@@ -2,7 +2,7 @@ import lab as B
 from stheno import Normal
 
 from wbml.vi import elbo
-from .util import allclose
+from .util import approx
 
 
 def rand_normal(n=3):
@@ -19,4 +19,4 @@ def test_elbo():
     # Check that the two implementations are consistent.
     estimate1 = elbo.invoke(object, Normal, Normal)(lik.logpdf, p, q, num_samples=50000)
     estimate2 = elbo.invoke(object, object, object)(lik.logpdf, p, q, num_samples=50000)
-    allclose(estimate1, estimate2, rtol=1e-2)
+    approx(estimate1, estimate2, rtol=1e-2)

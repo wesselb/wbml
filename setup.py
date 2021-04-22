@@ -10,11 +10,11 @@ requirements = [
     "sklearn",
     "matplotlib",
     "xarray",
-    "plum-dispatch",
-    "backends>=0.3.1",
-    "backends-matrix",
-    "stheno",
-    "varz>=0.3.0",
+    "plum-dispatch>=1",
+    "backends>=1",
+    "backends-matrix>=1",
+    "stheno>=1",
+    "varz>=0.6",
 ]
 
 setup(

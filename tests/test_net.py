@@ -4,7 +4,7 @@ import pytest
 from varz import Vars
 
 from wbml.net import Normalise, Linear, Activation, Recurrent, GRU, Elman, ff, rnn
-from .util import allclose, approx
+from .util import approx, approx
 
 
 def check_batch_consistency(layer, xs):
@@ -14,7 +14,7 @@ def check_batch_consistency(layer, xs):
 
     # Test consistency. This tests that rank 2 and 3 tensors are of the correct
     # shape.
-    allclose(layer(xs), B.stack(*outs, axis=0))
+    approx(layer(xs), B.stack(*outs, axis=0))
 
 
 def test_normalise():
@@ -31,8 +31,8 @@ def test_normalise():
 
     # Check correctness
     out = layer(x)
-    approx(B.std(out, axis=2), B.ones(10, 5))
-    approx(B.mean(out, axis=2), B.zeros(10, 5))
+    approx(B.std(out, axis=2), B.ones(10, 5), rtol=1e-4)
+    approx(B.mean(out, axis=2), B.zeros(10, 5), atol=1e-4)
 
 
 def test_linear():
@@ -52,7 +52,7 @@ def test_linear():
     check_batch_consistency(layer, x)
 
     # Check correctness.
-    allclose(layer(x), B.matmul(x, layer.A[None, :, :]) + layer.b[None, :, :])
+    approx(layer(x), B.matmul(x, layer.A[None, :, :]) + layer.b[None, :, :])
 
 
 def test_activation():
@@ -68,7 +68,7 @@ def test_activation():
     assert layer.width == 3
 
     # Check correctness
-    allclose(layer(x), B.relu(x))
+    approx(layer(x), B.relu(x))
 
 
 def test_recurrent():
@@ -77,7 +77,7 @@ def test_recurrent():
     # Test setting the initial hidden state.
     layer = Recurrent(GRU(10), B.zeros(1, 10))
     layer.initialise(5, vs)
-    allclose(layer.h0, B.zeros(1, 10))
+    approx(layer.h0, B.zeros(1, 10))
 
     layer = Recurrent(GRU(10))
     layer.initialise(5, vs)
@@ -130,7 +130,7 @@ def test_ff():
     # Check that one-dimensional calls are okay.
     vs = Vars(np.float32)
     nn.initialise(1, vs)
-    allclose(nn(B.linspace(0, 1, 10)), nn(B.linspace(0, 1, 10)[:, None]))
+    approx(nn(B.linspace(0, 1, 10)), nn(B.linspace(0, 1, 10)[:, None]))
 
     # Check that zero-dimensional calls fail.
     with pytest.raises(ValueError):

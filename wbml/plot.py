@@ -14,33 +14,33 @@ plt.rcParams["mathtext.fontset"] = "cm"  # Use CM for math font.
 plt.rcParams["figure.autolayout"] = True  # Use tight layouts.
 
 
-@_dispatch(object)
+@_dispatch
 def _convert(x):
     return x
 
 
-@_dispatch(B.Number)
-def _convert(x):
+@_dispatch
+def _convert(x: B.Number):
     return x
 
 
-@_dispatch(B.Numeric)
-def _convert(x):
+@_dispatch
+def _convert(x: B.Numeric):
     return B.squeeze(B.to_numpy(x))
 
 
-@_dispatch(tuple)
-def _convert(xs):
+@_dispatch
+def _convert(xs: tuple):
     return tuple(_convert(x) for x in xs)
 
 
-@_dispatch(list)
-def _convert(xs):
+@_dispatch
+def _convert(xs: list):
     return [_convert(x) for x in xs]
 
 
-@_dispatch(dict)
-def _convert(d):
+@_dispatch
+def _convert(d: dict):
     return {k: _convert(v) for k, v in d.items()}
 
 

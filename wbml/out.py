@@ -5,7 +5,7 @@ from collections import defaultdict
 
 import lab as B
 import numpy as np
-from plum import Dispatcher, Referentiable, Self
+from plum import Dispatcher
 
 __all__ = ["Section", "out", "kv", "format", "Counter", "Progress"]
 
@@ -116,7 +116,7 @@ def out(msg):
     _print(msg)
 
 
-@_dispatch(object, object)
+@_dispatch
 def kv(key, value, fmt=None, unit=None):
     """Print a key-value pair.
 
@@ -155,21 +155,21 @@ def kv(key, value, fmt=None, unit=None):
         _print(f.format(key=formatted_key + ":", value=formatted_value))
 
 
-@_dispatch(dict)
-def kv(dict_, **kw_args):
+@_dispatch
+def kv(dict_: dict, **kw_args):
     for k, v in dict_.items():
         kv(k, v, **kw_args)
 
 
-@_dispatch(object, dict)
-def kv(key, dict_, **kw_args):
+@_dispatch
+def kv(key, dict_: dict, **kw_args):
     with Section(key):
         for k, v in dict_.items():
             kv(k, v, **kw_args)
 
 
-@_dispatch(object, bool)
-def format(x, info):
+@_dispatch
+def format(x, info: bool):
     """Format an object.
 
     Args:
@@ -186,13 +186,13 @@ def format(x, info):
 # If `info` is given as a keyword argument, the following method converts it to
 # a positional argument. We handle it as a positional argument to not rely on
 # default values in multiple places.
-@_dispatch(object)
+@_dispatch
 def format(x, info=True):
     return format(x, info)
 
 
-@_dispatch(B.Number, bool)
-def format(x, info):
+@_dispatch
+def format(x: B.Number, info: bool):
     global digits
 
     # Format number in scientific notation.
@@ -205,28 +205,28 @@ def format(x, info):
     return out
 
 
-@_dispatch(B.Int, bool)
-def format(x, info):
+@_dispatch
+def format(x: B.Int, info: bool):
     return str(x)
 
 
-@_dispatch(list, bool)
-def format(xs, info=True):
+@_dispatch
+def format(xs: list, info: bool = True):
     return "[{}]".format(", ".join([format(x, info) for x in xs]))
 
 
-@_dispatch(tuple, bool)
-def format(xs, info=True):
+@_dispatch
+def format(xs: tuple, info: bool = True):
     return "({})".format(", ".join([format(x, info) for x in xs]))
 
 
-@_dispatch(set, bool)
-def format(xs, info=True):
+@_dispatch
+def format(xs: set, info: bool = True):
     return "{{{}}}".format(", ".join([format(x, info) for x in xs]))
 
 
-@_dispatch(B.NPNumeric, bool)
-def format(x, info=True):
+@_dispatch
+def format(x: B.NPNumeric, info: bool = True):
     # A NumPy array can be a scalar.
     if x.shape == ():
         return format.invoke(B.Number, bool)(x, info)
@@ -245,13 +245,13 @@ def format(x, info=True):
     return x_str
 
 
-@_dispatch(B.TorchNumeric, bool)
-def format(x, info):
+@_dispatch
+def format(x: B.TorchNumeric, info: bool):
     return format(x.detach().numpy(), info)
 
 
-@_dispatch(B.TFNumeric, bool)
-def format(x, info):
+@_dispatch
+def format(x: B.TFNumeric, info: bool):
     return format(x.numpy(), info)
 
 
@@ -330,7 +330,7 @@ def _compute_alpha(cutoff_lag):
         return a - 1 + np.sqrt(a ** 2 - 4 * a + 3)
 
 
-class Progress(metaclass=Referentiable):
+class Progress:
     """Display progress.
 
     Args:
@@ -345,8 +345,6 @@ class Progress(metaclass=Referentiable):
             default smoother, in number of lags.
 
     """
-
-    _dispatch = Dispatcher(in_class=Self)
 
     def __init__(
         self, name="Progress", total=None, filter=None, interval=1.0, filter_global=5
@@ -384,12 +382,12 @@ class Progress(metaclass=Referentiable):
         out("Done!")
         self.section.__exit__(exc_type, exc_val, exc_tb)
 
-    @_dispatch()
+    @_dispatch
     def __call__(self, **updates):
         return self(updates)
 
-    @_dispatch(dict)
-    def __call__(self, updates):
+    @_dispatch
+    def __call__(self, updates: dict):
         now = time.time()
 
         # Increase iteration counter.

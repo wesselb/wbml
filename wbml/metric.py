@@ -8,14 +8,15 @@ from plum import Dispatcher, Union
 __all__ = ["mse", "smse", "rmse", "srmse", "mae", "mll", "smll", "r2"]
 
 _dispatch = Dispatcher()
-_Pandas = Union(pd.DataFrame, pd.Series)
-_PandasOrScalar = Union(_Pandas, B.Number)
+
+_Pandas = Union[pd.DataFrame, pd.Series]
+_PandasOrScalar = Union[_Pandas, B.Number]
 
 
 def _auto_convert(f):
-    @_dispatch([B.Numeric])
+    @_dispatch
     @wraps(f)
-    def _convert(*args):
+    def _convert(*args: B.Numeric):
         converted_args = ()
         for i, arg in enumerate(args):
             if B.rank(arg) == 0:
@@ -37,8 +38,8 @@ def _auto_convert(f):
 
 
 @_auto_convert
-@_dispatch(_PandasOrScalar, _Pandas)
-def mse(mean, data):
+@_dispatch
+def mse(mean: _PandasOrScalar, data: _Pandas):
     """Mean squared error.
 
     Args:
@@ -52,8 +53,8 @@ def mse(mean, data):
 
 
 @_auto_convert
-@_dispatch(_PandasOrScalar, _Pandas)
-def smse(mean, data):
+@_dispatch
+def smse(mean: _PandasOrScalar, data: _Pandas):
     """Standardised mean squared error.
 
     Args:
@@ -67,8 +68,8 @@ def smse(mean, data):
 
 
 @_auto_convert
-@_dispatch(_PandasOrScalar, _Pandas)
-def rmse(mean, data):
+@_dispatch
+def rmse(mean: _PandasOrScalar, data: _Pandas):
     """Root mean squared error.
 
     Args:
@@ -82,8 +83,8 @@ def rmse(mean, data):
 
 
 @_auto_convert
-@_dispatch(_PandasOrScalar, _Pandas)
-def srmse(mean, data):
+@_dispatch
+def srmse(mean: _PandasOrScalar, data: _Pandas):
     """Standardised root mean squared error.
 
     Args:
@@ -97,8 +98,8 @@ def srmse(mean, data):
 
 
 @_auto_convert
-@_dispatch(_PandasOrScalar, _Pandas)
-def mae(mean, data):
+@_dispatch
+def mae(mean: _PandasOrScalar, data: _Pandas):
     """Mean absolute error.
 
     Args:
@@ -112,8 +113,8 @@ def mae(mean, data):
 
 
 @_auto_convert
-@_dispatch(_PandasOrScalar, _PandasOrScalar, _Pandas)
-def mll(mean, variance, data):
+@_dispatch
+def mll(mean: _PandasOrScalar, variance: _PandasOrScalar, data: _Pandas):
     """Mean log loss.
 
     Args:
@@ -130,8 +131,8 @@ def mll(mean, variance, data):
 
 
 @_auto_convert
-@_dispatch(_PandasOrScalar, _PandasOrScalar, _Pandas)
-def smll(mean, variance, data):
+@_dispatch
+def smll(mean: _PandasOrScalar, variance: _PandasOrScalar, data: _Pandas):
     """Standardised mean log loss.
 
     Args:
@@ -146,8 +147,8 @@ def smll(mean, variance, data):
 
 
 @_auto_convert
-@_dispatch(_PandasOrScalar, _Pandas)
-def r2(mean, data):
+@_dispatch
+def r2(mean: _PandasOrScalar, data: _Pandas):
     """R-squared.
 
     Args:

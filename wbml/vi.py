@@ -2,12 +2,12 @@ import lab as B
 from plum import Dispatcher
 from stheno import Normal
 
-dispatch = Dispatcher()
-
 __all__ = ["elbo"]
 
+_dispatch = Dispatcher()
 
-@dispatch(object, object, object)
+
+@_dispatch
 def elbo(lik, p, q, num_samples=1):
     """Construct the ELBO.
 
@@ -28,6 +28,6 @@ def elbo(lik, p, q, num_samples=1):
     return log_lik + log_p - log_q
 
 
-@dispatch(object, Normal, Normal)
-def elbo(lik, p, q, num_samples=1):
+@_dispatch
+def elbo(lik, p: Normal, q: Normal, num_samples=1):
     return B.mean(lik(q.sample(num_samples))) - q.kl(p)
