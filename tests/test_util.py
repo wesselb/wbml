@@ -10,8 +10,8 @@ def test_indented_kv():
     assert indented_kv("a", "b") == " a=b"
     assert indented_kv("a", "b\nb2") == " a=b\n   b2"
     assert (
-        indented_kv("a", "b\nb2", separator=": ", indent=2, suffix=",\n") ==
-        "  a: b\n     b2,\n"
+        indented_kv("a", "b\nb2", separator=": ", indent=2, suffix=",\n")
+        == "  a: b\n     b2,\n"
     )
 
 
