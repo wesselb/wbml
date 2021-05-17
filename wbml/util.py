@@ -5,7 +5,27 @@ from operator import mul
 
 import lab as B
 
-__all__ = ["warn_upmodule", "inv_perm", "normal1d_logpdf", "BatchVars"]
+__all__ = ["indented_kv", "warn_upmodule", "inv_perm", "normal1d_logpdf", "BatchVars"]
+
+
+def indented_kv(key: str, value: str, indent=1, separator="=", suffix=""):
+    """Print something as a key-value pair whilst properly indenting. This is useful
+    for implementations of`str` and `repr`.
+
+    Args:
+        key (str): Key.
+        value (str): Value.
+        indent (int, optional): Number of spaces to indent. Defaults to 1.
+        separator (str, optional): Separator between the key and value. Defaults to "=".
+        suffix (str, optional): Extra to print at the end. You can set this, e.g., to
+            ",\n" or ">". Defaults to no suffix.
+
+    Returns
+        str: Key-value representation with proper indentation.
+    """
+    key_string = f"{indent * ' '}{key}{separator}"
+    value_string = value.strip().replace("\n", "\n" + " " * len(key_string))
+    return key_string + value_string + suffix
 
 
 def _get_module_name(frame_info):

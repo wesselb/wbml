@@ -2,8 +2,17 @@ import lab as B
 import numpy as np
 from stheno import Normal
 
-from wbml.util import inv_perm, normal1d_logpdf, BatchVars
+from wbml.util import indented_kv, inv_perm, normal1d_logpdf, BatchVars
 from .util import approx
+
+
+def test_indented_kv():
+    assert indented_kv("a", "b") == " a=b"
+    assert indented_kv("a", "b\nb2") == " a=b\n   b2"
+    assert (
+        indented_kv("a", "b\nb2", separator=": ", indent=2, suffix=",\n") ==
+        "  a: b\n     b2,\n"
+    )
 
 
 def test_inv_perm():
