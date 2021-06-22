@@ -183,12 +183,9 @@ def format(x, info: bool):
     return str(x)
 
 
-# If `info` is given as a keyword argument, the following method converts it to
-# a positional argument. We handle it as a positional argument to not rely on
-# default values in multiple places.
 @_dispatch
-def format(x, info=True):
-    return format(x, info)
+def format(x):
+    return format(x, True)
 
 
 @_dispatch
@@ -211,22 +208,22 @@ def format(x: B.Int, info: bool):
 
 
 @_dispatch
-def format(xs: list, info: bool = True):
+def format(xs: list, info: bool):
     return "[{}]".format(", ".join([format(x, info) for x in xs]))
 
 
 @_dispatch
-def format(xs: tuple, info: bool = True):
+def format(xs: tuple, info: bool):
     return "({})".format(", ".join([format(x, info) for x in xs]))
 
 
 @_dispatch
-def format(xs: set, info: bool = True):
+def format(xs: set, info: bool):
     return "{{{}}}".format(", ".join([format(x, info) for x in xs]))
 
 
 @_dispatch
-def format(x: B.NPNumeric, info: bool = True):
+def format(x: B.NPNumeric, info: bool):
     # A NumPy array can be a scalar.
     if x.shape == ():
         return format.invoke(B.Number, bool)(x, info)
@@ -246,13 +243,8 @@ def format(x: B.NPNumeric, info: bool = True):
 
 
 @_dispatch
-def format(x: B.TorchNumeric, info: bool):
-    return format(x.detach().numpy(), info)
-
-
-@_dispatch
-def format(x: B.TFNumeric, info: bool):
-    return format(x.numpy(), info)
+def format(x: B.Numeric, info: bool):
+    return format(B.to_numpy(x), info)
 
 
 class Counter:
