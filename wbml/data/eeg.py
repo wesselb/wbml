@@ -32,9 +32,9 @@ def load(extended=False):
     _fetch()
 
     # Generate cache if it does not exist.
-    if not os.path.exists(cache_experiment) or not os.path.exists(
-        cache_experiment_extended
-    ):
+    need_parse = not os.path.exists(cache_experiment)
+    need_parse |= not os.path.exists(cache_experiment_extended)
+    if need_parse:
         _parse()
 
     # Determine which cache to load.
@@ -105,7 +105,9 @@ def _parse_trial(fp):
 
     return {
         "df": pd.DataFrame(
-            np.stack(ys, axis=0).T, index=pd.Index(x, name="time"), columns=site_names
+            np.stack(ys, axis=0).T,
+            index=pd.Index(x, name="time"),
+            columns=site_names,
         )
     }
 
@@ -129,9 +131,8 @@ def _extract_trials(fps):
 def _parse():
     wbml.out.out("Parsing EEG data. This may take a while.")
 
-    numbers = [("c", n) for n in [337, 338, 339, 340, 341, 342, 344, 345, 346, 347]] + [
-        ("a", n) for n in [364, 365, 368, 369, 370, 371, 372, 375, 377, 378]
-    ]
+    numbers = [("c", n) for n in [337, 338, 339, 340, 341, 342, 344, 345, 346, 347]]
+    numbers += [("a", n) for n in [364, 365, 368, 369, 370, 371, 372, 375, 377, 378]]
     partitions = ["train", "test"]
     subject_dir_format = data_path("eeg", "{partition}", "co2{type}{subject_n:07d}")
 
@@ -147,7 +148,9 @@ def _parse():
 
         # Determine directory of subject.
         subject_dir = subject_dir_format.format(
-            partition=partition, type=subject_type, subject_n=subject_n
+            partition=partition,
+            type=subject_type,
+            subject_n=subject_n,
         )
 
         # Get all trials files and extract data.
