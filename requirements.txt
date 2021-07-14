@@ -7,5 +7,6 @@ pytest-cov
 coveralls
 autograd
 tensorflow
+tensorflow-probability
 torch
 
