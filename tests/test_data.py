@@ -27,12 +27,12 @@ class _SetDataAside:
             os.rename(self.path + "_set_aside", self.path)
 
 
-def _import_and_execute(name, monkeypatch):
+def _import_and_execute(name, kw_args, monkeypatch):
     # Kill showing any plots.
     monkeypatch.setattr(plt, "show", lambda: None)
 
     module = importlib.import_module(f"wbml.data.{name}")
-    module.load()
+    module.load(**kw_args)
 
     # Test any other possible methods.
     for method in ["stats_and_vis"]:
@@ -41,9 +41,19 @@ def _import_and_execute(name, monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "name", ["air_temp", "eeg", "exchange", "jura", "mauna_loa", "miso", "toy_sines"]
+    "name, kw_args",
+    [
+        ("air_temp", {}),
+        ("eeg", {}),
+        ("exchange", {}),
+        ("jura", {}),
+        ("mauna_loa", {"detrend_method": "gp"}),
+        ("mauna_loa", {"detrend_method": "linear"}),
+        ("miso", {}),
+        ("toy_sines", {}),
+    ],
 )
-def test_import(name, monkeypatch):
+def test_import(name, kw_args, monkeypatch):
     with _SetDataAside(name):
         _import_and_execute(name, monkeypatch)
 
@@ -53,11 +63,11 @@ def test_import(name, monkeypatch):
 )
 @pytest.mark.xfail()
 def test_import_unable_to_fetch(name, monkeypatch):
-    _import_and_execute(name, monkeypatch)
+    _import_and_execute(name, {}, monkeypatch)
 
 
 @pytest.mark.parametrize("name", ["cmip5", "station", "snp"])
 def test_import_fail_unable_to_fetch(name, monkeypatch):
     with _SetDataAside(name):
         with pytest.raises(DependencyError):
-            _import_and_execute(name, monkeypatch)
+            _import_and_execute(name, {}, monkeypatch)
