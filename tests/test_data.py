@@ -55,7 +55,7 @@ def _import_and_execute(name, kw_args, monkeypatch):
 )
 def test_import(name, kw_args, monkeypatch):
     with _SetDataAside(name):
-        _import_and_execute(name, monkeypatch)
+        _import_and_execute(name, kw_args, monkeypatch)
 
 
 @pytest.mark.parametrize(
