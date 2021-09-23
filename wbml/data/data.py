@@ -2,12 +2,13 @@ import datetime
 import os
 import shutil
 import subprocess
+import urllib.request
+from contextlib import closing
 
 import numpy as np
 import pandas as pd
 import requests
-import urllib.request
-from contextlib import closing
+
 import wbml.out
 
 __all__ = [
@@ -47,11 +48,12 @@ def resource(target, url, post=False, **kw_args):
             make_dirs(target)
 
             # If the URL starts with "ftp", use the :mod:`urllib` library.
-            # Otherwise, use the :mod:`requests` library.
             if url.startswith("ftp"):
                 with closing(urllib.request.urlopen(url, **kw_args)) as r:
                     with open(target, "wb") as f:
                         shutil.copyfileobj(r, f)
+
+            # By default, use the :mod:`requests` library.
             else:
                 request = requests.post if post else requests.get
                 with request(url, stream=True, **kw_args) as r:

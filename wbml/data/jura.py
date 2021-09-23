@@ -36,11 +36,9 @@ def load():
 def _fetch():
     resource(
         target=data_path("jura", "prediction.dat"),
-        url="https://drive.google.com/uc"
-        "?export=download&id=0B6subVejOkD_Vm8teTQtWjB3QzQ",
+        url="https://www.dropbox.com/s/n7jamwpsi9p4wvs/prediction.dat?dl=1"
     )
     resource(
         target=data_path("jura", "validation.dat"),
-        url="https://drive.google.com/uc"
-        "?export=download&id=0B6subVejOkD_UjFadE5qVHNRTGM",
+        url="https://www.dropbox.com/s/slvclnw8qr6gjv8/validation.dat?dl=1"
     )
