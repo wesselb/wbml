@@ -98,7 +98,7 @@ def _fetch_full():
         source=data_path("eeg", "eeg_full.tar"),
         commands=[
             "mkdir full",
-            "tar xzf eeg_full.tar -C full",
+            "tar xf eeg_full.tar -C full",
             "ls full | grep gz$ | xargs -I {} tar xzf full/{} -C full",
             "ls full | grep gz$ | xargs -I {} rm full/{}",
             "find full | grep gz$ | xargs gunzip",
