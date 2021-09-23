@@ -146,7 +146,7 @@ def _extract_trials(subject_path):
 
 
 def _extract_subjects(path):
-    paths = glob.glob(path + "/co2*")
+    paths = glob.glob(path + "/co*")
 
     # Safe determine the subject types.
     type_map = {"co2a": "2a", "co2c": "22c", "co3a": "3a"}
@@ -167,7 +167,7 @@ def _extract_subjects(path):
 def _parse_experiment():
     wbml.out.out("Parsing EEG data. This should be fairly quick.")
 
-    data = _extract_subjects("train")
+    data = _extract_subjects(data_path("eeg", "train"))
 
     splits = {}
 
@@ -202,7 +202,7 @@ def _parse_experiment():
 def _parse_full():
     wbml.out.out("Parsing full EEG data. This may take a while.")
 
-    data = _extract_subjects("full")
+    data = _extract_subjects(data_path("eeg", "full"))
 
     with open(cache_full, "wb") as f:
         pickle.dump(data, f)
