@@ -44,7 +44,9 @@ def _import_and_execute(name, kw_args, monkeypatch):
     "name, kw_args",
     [
         ("air_temp", {}),
-        ("eeg", {}),
+        ("eeg", {"extended": False}),
+        ("eeg", {"extended": True}),
+        # We don't test the full EEG data set, because that is too big to run on CI.
         ("exchange", {}),
         ("jura", {}),
         ("mauna_loa", {"detrend_method": "gp"}),
