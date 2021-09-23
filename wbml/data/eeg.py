@@ -149,7 +149,7 @@ def _extract_subjects(path):
     paths = glob.glob(path + "/co*")
 
     # Safe determine the subject types.
-    type_map = {"co2a": "2a", "co2c": "22c", "co3a": "3a"}
+    type_map = {"co2a": "2a", "co2c": "2c", "co3a": "3a", "co3c": "3c"}
 
     # Extract all subjects.
     subjects = {}
