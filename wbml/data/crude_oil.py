@@ -8,12 +8,14 @@ __all__ = ["load"]
 def load():
     _fetch()
 
-    data = pd.read_csv(data_path("crude_oil", "crude_oil.csv"))
-    data.columns = [c.lower() for c in data.columns]
-    data.rename(columns={"close/last": "close"})
-    data.date = list(map(lambda x: date_to_decimal_year(x, "%m/%d/%Y"), data.date))
+    df = pd.read_csv(data_path("crude_oil", "crude_oil.csv"))
+    df.columns = [c.lower() for c in df.columns]
+    df.rename(columns={"close/last": "close"})
+    df.date = list(map(lambda x: date_to_decimal_year(x, "%m/%d/%Y"), df.date))
+    df.set_index("date", inplace=True)
+    df.sort_index(inplace=True)
 
-    return data
+    return df
 
 
 def _fetch():
