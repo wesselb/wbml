@@ -33,9 +33,7 @@ def load():
 
     # Arrange into convenient data frames.
     angles = pd.MultiIndex.from_frame(
-        pd.DataFrame(
-            {"azimuth": azimuths.flatten(), "elevantion": elevations.flatten()}
-        )
+        pd.DataFrame({"azimuth": azimuths.flatten(), "elevation": elevations.flatten()})
     )
     left = pd.DataFrame(left.reshape(len(angles), -1).T, columns=angles, index=t)
     right = pd.DataFrame(right.reshape(len(angles), -1).T, columns=angles, index=t)
