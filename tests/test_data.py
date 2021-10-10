@@ -49,6 +49,7 @@ def _import_and_execute(name, kw_args, monkeypatch):
         # We don't test the full EEG data set, because that is too big to run on CI.
         ("exchange", {}),
         ("crude_oil", {}),
+        ("kemar", {}),
         ("jura", {}),
         ("mauna_loa", {"detrend_method": "gp"}),
         ("mauna_loa", {"detrend_method": "linear"}),
