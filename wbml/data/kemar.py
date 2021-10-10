@@ -56,6 +56,6 @@ def _fetch():
         source=data_path("kemar", "standard_kemar.tar"),
         commands=[
             "mkdir standard_kemar",
-            "tar xzf standard_kemar.tar -C standard_kemar",
+            "tar xf standard_kemar.tar -C standard_kemar",
         ],
     )
