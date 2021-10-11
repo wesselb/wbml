@@ -10,7 +10,7 @@ def load():
 
     df = pd.read_csv(data_path("snp", "snp500_vol.csv"))
     df = df[["date", "vol"]]
-    df.columns = ["date", "volume"]
+    df.columns = ["date", "vol"]
 
     # Convert date to decimal years and make index.
     df["date"] = [date_to_decimal_year(date, "%Y-%m-%d") for date in df["date"]]
