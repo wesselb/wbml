@@ -1,3 +1,19 @@
+TODO:
+    ☐ Fix HRIR database @high
+    ☐ Add VIX data @high
+
+Bugs:
+    ☐ `warn_upmodule` in two places @high
+    ☐ fix `tex`: @high
+        ```
+        matplotlib.rc(“text”, usetex=True)
+        matplotlib.rc(“font”, **{“family”: “sans-serif”})
+        params = {“text.latex.preamble”: [r”\usepackage{amsmath}”, r”\usepackage{amsfonts}”]}
+        plt.rcParams.update(params)
+        ```
+Test:
+    ☐ experiment.py
+
 Features:
     Plot:
         ☐ Twinx with zorder switch
@@ -12,18 +28,6 @@ Features:
                 ☐ y vs yhat
                 ☐ (many) predictions in time
         ☐ kfold + Tracker
-    Test:
-        ☐ experiment.py
-
-Bugs:
-    ☐ `warn_upmodule` in two places @high
-    ☐ fix `tex`: @high
-        ```
-        matplotlib.rc(“text”, usetex=True)
-        matplotlib.rc(“font”, **{“family”: “sans-serif”})
-        params = {“text.latex.preamble”: [r”\usepackage{amsmath}”, r”\usepackage{amsfonts}”]}
-        plt.rcParams.update(params)
-        ```
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
