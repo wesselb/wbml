@@ -1,14 +1,4 @@
 Features:
-    ☐ Move to TF2 @critical
-
-    Examples:
-        ☐ bnn_quadratic @high
-        ☐ brnn_sin @high
-        ☐ nn_quadratic @high
-        ☐ rnn_sin @high
-
-    Out:
-        ☐ Unit in kv
     Plot:
         ☐ Twinx with zorder switch
     Metrics:
@@ -16,44 +6,49 @@ Features:
         ☐ Summarisation
     Experimentation Tools:
         ☐ Plotting conveniences.
-            ☐ Standardised colours for types
-            ☐ Move to seaborn
-                ☐ Extend plt
             ☐ Scatter + regression
             ☐ Bucketing
             ☐ Premade plots:
                 ☐ y vs yhat
                 ☐ (many) predictions in time
-        ☐ Yaml config structure. (CNP!)
-            ☐ Docdict
-            ☐ Parameters with default values.
         ☐ kfold + Tracker
     Test:
         ☐ experiment.py
 
-    VOLMM:
-        ☐ Test.
-        ☐ Compute term analytically for variance reduction.
-
 Bugs:
-    ☐ Fix optimal U. @high
-        ☐ Test gradients equal to zero.
-
-Other:
-    ☐ Compare performance of NNs with TF's implementation.
-    ☐ Refactor tests to use PyTest: remove raises, fixtures, and parametrisation. @high
-
-Features:
-    Net:
-        ☐ Xavier initialisation.
-    Models:
-        ☐ Basic conditional models.
-    Inference:
-        ☐ SVGD.
-        ☐ IWAE and RWS objectives.
+    ☐ `warn_upmodule` in two places @high
+    ☐ fix `tex`: @high
+        ```
+        matplotlib.rc(“text”, usetex=True)
+        matplotlib.rc(“font”, **{“family”: “sans-serif”})
+        params = {“text.latex.preamble”: [r”\usepackage{amsmath}”, r”\usepackage{amsfonts}”]}
+        plt.rcParams.update(params)
+        ```
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ x Test. @cancelled (22-03-30 18:19) @project(Features / VOLMM)
+ x Refactor tests to use PyTest: remove raises, fixtures, and parametrisation. @high @cancelled (22-03-30 18:19) @project(Other)
+ x Compute term analytically for variance reduction. @cancelled (22-03-30 18:19) @project(Features / VOLMM)
+ x Xavier initialisation. @cancelled (22-03-30 18:18) @project(Features / Net)
+ x Test gradients equal to zero. @cancelled (22-03-30 18:18) @project(Bugs)
+ x SVGD. @cancelled (22-03-30 18:18) @project(Features / Inference)
+ x IWAE and RWS objectives. @cancelled (22-03-30 18:18) @project(Features / Inference)
+ x Fix optimal U. @high @cancelled (22-03-30 18:18) @project(Bugs)
+ x Compare performance of NNs with TF's implementation. @cancelled (22-03-30 18:18) @project(Other)
+ x Basic conditional models. @cancelled (22-03-30 18:18) @project(Features / Models)
+ ✓ Unit in kv @done (22-03-30 18:17) @project(Features / Out)
+ ✓ Standardised colours for types @done (22-03-30 18:17) @project(Features / Experimentation Tools)
+ ✓ Move to TF2 @critical @done (22-03-30 18:17) @project(Features)
+ x rnn_sin @high @cancelled (22-03-30 18:17) @project(Features / Examples)
+ x nn_quadratic @high @cancelled (22-03-30 18:17) @project(Features / Examples)
+ x brnn_sin @high @cancelled (22-03-30 18:17) @project(Features / Examples)
+ x bnn_quadratic @high @cancelled (22-03-30 18:17) @project(Features / Examples)
+ x Yaml config structure. (CNP!) @cancelled (22-03-30 18:17) @project(Features / Experimentation Tools)
+ x Parameters with default values. @cancelled (22-03-30 18:17) @project(Features / Experimentation Tools)
+ x Move to seaborn @cancelled (22-03-30 18:17) @project(Features / Experimentation Tools)
+ x Extend plt @cancelled (22-03-30 18:17) @project(Features / Experimentation Tools)
+ x Docdict @cancelled (22-03-30 18:17) @project(Features / Experimentation Tools)
  ✓ Perform config automatically @done (20-02-21 19:14) @project(Features / Experimentation Tools)
  ✓ SMSE @done (20-02-21 19:13) @project(Features / Experimentation Tools)
  ✓ Random seed! @done (20-02-21 19:13) @project(Features / Experimentation Tools)
