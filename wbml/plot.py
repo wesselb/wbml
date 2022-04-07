@@ -1,9 +1,11 @@
+import subprocess
 from functools import wraps
 
-import subprocess
 import lab as B
 import matplotlib.pyplot as plt
 from plum import Dispatcher
+
+from .warning import warn_upmodule
 
 __all__ = ["patch", "tex", "tweak", "style", "pdfcrop"]
 
@@ -76,7 +78,13 @@ plt.ylim = patch(plt.ylim)
 
 def tex():
     """Use TeX for rendering."""
-    plt.rcParams["text.usetex"] = True  # Use TeX for rendering.
+    if subprocess.call("which latex", shell=True) == 0:
+        plt.rcParams["text.usetex"] = True  # Use TeX for rendering.
+    else:
+        warn_upmodule(
+            "No LaTeX installation found, so LaTeX will not be used to render "
+            "`matplotlib` figures."
+        )
 
 
 def tweak(
@@ -189,4 +197,10 @@ def pdfcrop(path):
     Args:
         path (str): Path of PDF.
     """
-    subprocess.call(["pdfcrop", path, path])
+    if subprocess.call("which pdfcrop", shell=True) == 0:
+        subprocess.call(["pdfcrop", path, path])
+    else:
+        warn_upmodule(
+            "External tool `pdfcrop` cannot be found. "
+            "Skipping the application of `pdfcrop`."
+        )
