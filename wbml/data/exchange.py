@@ -107,4 +107,3 @@ def _fetch():
                 "o": "",
             },
         )
-        break

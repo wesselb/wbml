@@ -46,7 +46,6 @@ def _import_and_execute(name, kw_args, monkeypatch):
         ("air_temp", {}),
         ("eeg", {"extended": False}),
         ("eeg", {"extended": True}),
-        # We don't test the full EEG data set, because that is too big to run on CI.
         ("exchange", {}),
         ("crude_oil", {}),
         ("kemar", {}),
@@ -63,9 +62,7 @@ def test_import(name, kw_args, monkeypatch):
         _import_and_execute(name, kw_args, monkeypatch)
 
 
-@pytest.mark.parametrize(
-    "name", ["cmip5", "stratis", "station", "snp"]  # Only test `stratis` here.
-)
+@pytest.mark.parametrize("name", ["cmip5", "station", "snp"])
 @pytest.mark.xfail()
 def test_import_unable_to_fetch(name, monkeypatch):
     _import_and_execute(name, {}, monkeypatch)
