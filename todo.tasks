@@ -1,6 +1,7 @@
 TODO:
-    ☐ Fix HRIR database @high
-    ☐ Add VIX data @high
+    ✓ Fix HRIR database @high @done (22-04-07 12:48)
+    ✓ Add VIX data @high @done (22-04-07 12:48)
+    ☐ Return full data; only returns splits from paper upon flag
 
 Bugs:
     ☐ `warn_upmodule` in two places @high
