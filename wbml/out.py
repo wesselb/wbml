@@ -319,7 +319,7 @@ def _compute_alpha(cutoff_lag):
         return 1
     else:
         a = np.cos(2 * np.pi / cutoff_lag)
-        return a - 1 + np.sqrt(a ** 2 - 4 * a + 3)
+        return a - 1 + np.sqrt(a**2 - 4 * a + 3)
 
 
 class Progress:

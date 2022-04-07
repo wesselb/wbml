@@ -263,7 +263,7 @@ def test_counter_total():
 def test_counter_map():
     # Test mapping.
     with Mock() as mock:
-        res = out.Counter.map(lambda x: x ** 2, [2, 3])
+        res = out.Counter.map(lambda x: x**2, [2, 3])
 
     assert res == [4, 9]
     assert mock[0] == "Mapping (total: 2):"
@@ -272,7 +272,7 @@ def test_counter_map():
 
 def test_counter_map2():
     with Mock() as mock:
-        res = out.Counter.map(lambda x: x ** 2, [2, 3], name="name")
+        res = out.Counter.map(lambda x: x**2, [2, 3], name="name")
 
     assert res == [4, 9]
     assert mock[0] == "name (total: 2):"
@@ -291,7 +291,7 @@ def test_compute_alpha():
     y = np.array(y)
 
     # Check damping in dB.
-    ratio = 10 * np.log10(np.mean(y ** 2) / np.mean(x ** 2))
+    ratio = 10 * np.log10(np.mean(y**2) / np.mean(x**2))
     approx(ratio, -3, atol=5e-2)
 
     # Check not setting the cut-off.
@@ -370,7 +370,7 @@ def test_progress_filters():
 
 def test_progress_map():
     with Mock() as mock:
-        res = out.Progress.map(lambda x: x ** 2, [2, 3])
+        res = out.Progress.map(lambda x: x**2, [2, 3])
 
     assert res == [4, 9]
     assert len(mock) == 8
@@ -379,7 +379,7 @@ def test_progress_map():
 
 def test_progress_map2():
     with Mock() as mock:
-        res = out.Progress.map(lambda x: x ** 2, [2, 3], name="name")
+        res = out.Progress.map(lambda x: x**2, [2, 3], name="name")
 
     assert res == [4, 9]
     assert len(mock) == 8

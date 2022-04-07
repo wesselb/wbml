@@ -106,7 +106,10 @@ def tweak(
 
     if legend:
         leg = ax.legend(
-            facecolor="#eeeeee", framealpha=0.7, loc=legend_loc, labelspacing=0.25
+            facecolor="#eeeeee",
+            framealpha=0.7,
+            loc=legend_loc,
+            labelspacing=0.25,
         )
         leg.get_frame().set_linewidth(0)
 
@@ -128,6 +131,7 @@ scheme = [
     "#F5793A",  # Orange
     "#4BA6FB",  # Modified blue (original was #85C0F9)
     "#A95AA1",  # Pink
+    "#689948",  # Green: not optimal for colour-blind people
 ]
 """list[str]: Color scheme."""
 
@@ -136,13 +140,26 @@ colour_map = {
     "test": scheme[1],
     "pred": scheme[2],
     "pred2": scheme[3],
+    "pred3": scheme[4],
 }
 """dict[str, str]: Name to colour mapping."""
 
-line_style_map = {"train": "-", "test": "-", "pred": "--", "pred2": "-."}
+line_style_map = {
+    "train": "-",
+    "test": "-",
+    "pred": "--",
+    "pred2": "-.",
+    "pred3": (0, (3, 1, 1, 1, 1, 1)),
+}
 """dict[str, str]: Name to line style mapping."""
 
-scatter_style_map = {"train": "o", "test": "x", "pred": "s", "pred2": "D"}
+scatter_style_map = {
+    "train": "o",
+    "test": "x",
+    "pred": "s",
+    "pred2": "D",
+    "pred3": "*",
+}
 """dict[str, str]: Name to scatter style mapping."""
 
 
