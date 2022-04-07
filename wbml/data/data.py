@@ -93,7 +93,7 @@ def dependency(target, source, commands):
                 # Change working directory to directory of target file, run
                 # command, and restore working directory afterwards.
                 os.chdir(os.path.dirname(target))
-                subprocess.call(command, shell=True)
+                subprocess.check_call(command, shell=True)
                 os.chdir(current_wd)
 
 

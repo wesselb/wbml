@@ -2,7 +2,7 @@ import datetime
 
 import pandas as pd
 
-from .data import data_path, resource
+from .data import data_path, resource, dependency
 
 __all__ = ["load"]
 
@@ -36,11 +36,24 @@ def load():
 
 
 def _fetch():
-    for i in range(365):
-        date = start + i * day
-        date_str = date.strftime("%Y%m%d")
+    current = start
+
+    for i in range(1, 12 + 1):
+        # Get all the files for that month.
+        month = datetime.datetime(2019, i, 1)
+        date_str_month = month.strftime("%Y%m")
         resource(
-            target=data_path("miso", f"{date_str}_rt_lmp_final.csv"),
+            target=data_path("miso", f"{date_str_month}_rt_lmp_final_csv.zip"),
             url=f"https://docs.misoenergy.org/marketreports/"
-            f"{date_str}_rt_lmp_final.csv",
+            f"{date_str_month}_rt_lmp_final_csv.zip",
         )
+
+        # Unzip the downloaded files until we hit the next month.
+        while current.month == i:
+            date_str_current = current.strftime("%Y%m%d")
+            dependency(
+                target=data_path("miso", f"{date_str_current}_rt_lmp_final.csv"),
+                source=data_path("miso", f"{date_str_month}_rt_lmp_final_csv.zip"),
+                commands=[f"unzip -n {date_str_month}_rt_lmp_final_csv.zip"],
+            )
+            current += day

@@ -8,6 +8,9 @@ __all__ = ["load"]
 def load(extended=False, nguyen=False):
     """Load the data.
 
+    Source:
+        https://fx.sauder.ubc.ca/data.html
+
     Args:
         extended (bool, optional): Also return years 2000 to 2010. Defaults
             to `False`.
@@ -86,7 +89,7 @@ def _fetch():
     for year in range(1990, 2015 + 1):
         resource(
             target=data_path("exchange", f"exchange{year}.csv"),
-            url="http://fx.sauder.ubc.ca/cgi/fxdata",
+            url="https://fx.sauder.ubc.ca/cgi/fxdata",
             post=True,
             data={
                 "b": "USD",
@@ -104,3 +107,4 @@ def _fetch():
                 "o": "",
             },
         )
+        break
