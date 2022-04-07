@@ -8,19 +8,19 @@ __all__ = ["load"]
 
 
 def load():
-    """Crude oil data.
+    """VIX data.
 
     Source:
-        The historical data at the maximum window was downloaded at 9 Oct 2021 from the
-        following link:
-            https://www.nasdaq.com/market-activity/commodities/cl:nmx/historical
+        The history starting at 2 Jan 1990 until the time of download is downloaded
+        from the following link:
+            https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv
 
     Returns:
-        :class:`pd.DataFrame`: Crude oil data.
+        :class:`pd.DataFrame`: VIX data.
     """
     _fetch()
 
-    df = pd.read_csv(data_path("crude_oil", "crude_oil.csv"))
+    df = pd.read_csv(data_path("vix", "vix.csv"))
     df.columns = [c.lower() for c in df.columns]
     df.rename(columns={"close/last": "close"})
     df.date = list(map(lambda x: datetime.strptime(x, "%m/%d/%Y"), df.date))
@@ -32,6 +32,6 @@ def load():
 
 def _fetch():
     resource(
-        target=data_path("crude_oil", "crude_oil.csv"),
-        url="https://www.dropbox.com/s/6ah5l0b64w9n78l/crude_oil.csv?dl=1",
+        target=data_path("vix", "vix.csv"),
+        url="https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv",
     )

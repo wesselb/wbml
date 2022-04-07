@@ -8,6 +8,14 @@ __all__ = ["load"]
 
 
 def load():
+    """HRIRs from subject 21 from the standard KEMAR data set.
+
+    Source:
+        https://www.ece.ucdavis.edu/cipic/spatial-sound/hrtf-data/
+
+    Returns:
+        dict: Left and right HRIRs from subject 21.
+    """
     _fetch()
 
     # Compute angles.

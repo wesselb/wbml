@@ -55,6 +55,7 @@ def _import_and_execute(name, kw_args, monkeypatch):
         ("mauna_loa", {"detrend_method": "linear"}),
         ("miso", {}),
         ("toy_sines", {}),
+        ("vix", {}),
     ],
 )
 def test_import(name, kw_args, monkeypatch):
