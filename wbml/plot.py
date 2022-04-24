@@ -72,6 +72,7 @@ plt.plot = patch(plt.plot, kind="line")
 plt.scatter = patch(plt.scatter, kind="scatter")
 plt.fill_between = patch(plt.fill_between, kind="fill")
 plt.errorbar = patch(plt.errorbar)
+plt.imshow = patch(plt.imshow)
 plt.xlim = patch(plt.xlim)
 plt.ylim = patch(plt.ylim)
 
@@ -88,7 +89,12 @@ def tex():
 
 
 def tweak(
-    grid=True, legend=None, legend_loc="upper right", spines=True, ticks=True, ax=None
+    grid=True,
+    legend=None,
+    legend_loc="upper right",
+    spines=True,
+    ticks=True,
+    ax=None,
 ):
     """Tweak a plot.
 
@@ -171,12 +177,12 @@ scatter_style_map = {
 """dict[str, str]: Name to scatter style mapping."""
 
 
-def style(name, kind="line"):
+def style(name, kind):
     """Generate style setting for functions in :mod:`matplotlib.pyplot`.
 
     Args:
         name (str): Name of style.
-        kind ('line', 'scatter', or 'fill'): Kind of settings.
+        kind (str): Kind of setting.
 
     Returns:
         dict: Style settings.
