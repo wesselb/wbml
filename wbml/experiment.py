@@ -9,7 +9,7 @@ import time
 import lab as B
 import slugify
 
-from .out import out, kv, streams, Section
+from .out import out, kv, streams
 
 __all__ = ["generate_root", "WorkingDirectory"]
 
@@ -28,7 +28,7 @@ def generate_root(name):
 
 
 class Logger:
-    """A logger to a file.
+    """A logger to a file. Open the file every time a message is written.
 
     Args:
         path (str): Path to file.
@@ -42,7 +42,7 @@ class Logger:
             pass
 
     def write(self, message):
-        """Write to the file.
+        """Write to the stream.
 
         Args:
             message (str): Message to write.
@@ -55,7 +55,33 @@ class Logger:
         # Nothing to do.
 
 
+class MultiStream:
+    """Combine multiple streams into one.
+
+    Args:
+        *streams (stream): Streams.
+    """
+
+    def __init__(self, *streams):
+        self.streams = streams
+
+    def write(self, message):
+        """Write to the stream.
+
+        Args:
+            message (str): Message to write.
+        """
+        for stream in self.streams:
+            stream.write(message)
+
+    def flush(self):
+        """Flush the stream."""
+        for stream in self.streams:
+            stream.flush()
+
+
 _default_log = object()
+_default_diff = object()
 
 
 class WorkingDirectory:
@@ -66,14 +92,24 @@ class WorkingDirectory:
             directories.
         observe (bool, optional): Observe the results. For example, do not overwrite
             the existing log and copied script. Defaults to `False.`
-        override (bool, optional): Delete working directory if it already
-            exists. Defaults to `False`.
-        log (str or None, optional): Initialise logger. Set to `None`
-            to disable. Defaults to `log.txt`.
+        override (bool, optional): Delete working directory if it already exists.
+            Defaults to `False`.
+        log (str or None, optional): Log. Set to `None` to disable. Defaults to
+            `log.txt`.
+        diff (str or None, optional): Record the output of `git diff`. Set to `None`
+            to disable. Defaults to `diff.txt`.
         seed (int, optional): Value of random seed. Defaults to `0`.
     """
 
-    def __init__(self, *root, observe=False, override=False, log=_default_log, seed=0):
+    def __init__(
+        self,
+        *root,
+        observe=False,
+        override=False,
+        log=_default_log,
+        diff=_default_diff,
+        seed=0,
+    ):
         self.root = os.path.join(*root)
 
         # Delete if the root already exists.
@@ -88,34 +124,53 @@ class WorkingDirectory:
         if observe:
             if log is _default_log:
                 log = None
+            if diff is _default_diff:
+                diff = None
         else:
             if log is _default_log:
                 log = "log.txt"
+            if diff is _default_diff:
+                diff = "diff.txt"
 
-        # Initialise logger.
+        # Initialise loggers.
         if log is not None:
-            streams.append(Logger(self.file(log)))
+            # The standard log tracks standard out and standard error.
+            logger = Logger(self.file(log))
+            sys.stdout = MultiStream(sys.stdout, logger)
+            sys.stderr = MultiStream(sys.stderr, logger)
+
+            # Also setup a log which only tracks the output of :mod:`out`.
+            base, ext = os.path.splitext(log)
+            log_out = base + "_out" + ext
+            streams.append(Logger(self.file(log_out)))
 
         kv("Root", self.root)
         kv("Call", " ".join(sys.argv))
         kv("Now", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         kv("Python", sys.version)
 
-        # Print details about git.
         try:
             # This command will fail if we are not in a git repo.
-            subprocess.check_output(["git", "status"])
+            subprocess.check_output(
+                ["git", "status"],
+                # Hide the output if it fails.
+                stderr=subprocess.DEVNULL,
+            )
 
             sha = subprocess.check_output(["git", "rev-parse", "HEAD"])
             sha = sha.decode("ascii").strip()
-            diff_stat = subprocess.check_output(["git", "diff", "--shortstat"])
-            clean = diff_stat.decode("ascii").strip() == ""
 
-            with Section("Git"):
-                kv("Commit", sha)
-                kv("Dirty", "no" if clean else "yes")
+            # Print details about git.
+            kv("Commit", sha)
+
+            # Write the output of `git diff`.
+            if diff:
+                git_diff = subprocess.check_output(["git", "diff"])
+                with open(self.file(diff), "w") as f:
+                    f.write(git_diff.decode("utf8"))
+
         except subprocess.CalledProcessError:
-            out("Git not available.")
+            pass
 
         # Copy calling script.
         if not observe:

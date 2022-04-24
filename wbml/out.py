@@ -9,6 +9,24 @@ from plum import Dispatcher
 
 __all__ = ["Section", "out", "kv", "format", "Counter", "Progress"]
 
+
+class _StdOut:
+    """A stream which writes to :obj:`sys.stdout`. This is useful in the case that
+    the value of :obj:`sys.stdout` can change."""
+
+    def write(self, message):
+        """Write to the stream.
+
+        Args:
+            message (str): Message to write.
+        """
+        sys.stdout.write(message)
+
+    def flush(self):
+        """Flush the stream."""
+        sys.stdout.flush()
+
+
 log = logging.getLogger(__name__)
 
 _dispatch = Dispatcher()
@@ -17,7 +35,7 @@ indent_level = 0  #: Indentation level.
 indent_width = 4  #: Number of indentation characters per level.
 indent_char = " "  #: Indentation character.
 key_width = 10  #: Minimum width for printing keys, for alignment.
-streams = [sys.stdout]  #: Output streams.
+streams = [_StdOut()]  #: Output streams.
 digits = 3  #: Number of digits to show.
 report_time = False  #: Report time.
 
