@@ -44,6 +44,7 @@ def _import_and_execute(name, kw_args, monkeypatch):
     "name, kw_args",
     [
         ("air_temp", {}),
+        ("air_temp", {"split": "requeima19"}),
         ("eeg", {"extended": False}),
         ("eeg", {"extended": True}),
         ("exchange", {}),
