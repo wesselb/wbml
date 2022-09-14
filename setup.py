@@ -4,6 +4,7 @@ requirements = [
     "six",
     "numpy>=1.16",
     "pandas",
+    "pyarrow",
     "python-slugify",
     "requests",
     "netCDF4",
