@@ -90,8 +90,8 @@ class WorkingDirectory:
     Args:
         *root (str): Root of working directory. Use different arguments for
             directories.
-        observe (bool, optional): Observe the results. For example, do not overwrite
-            the existing log and copied script. Defaults to `False.`
+        observe (bool, optional): Observe the results. Only set the random seed and do
+            not do anything else. Defaults to `False.`
         override (bool, optional): Delete working directory if it already exists.
             Defaults to `False`.
         log (str or None, optional): Log. Set to `None` to disable. Defaults to
@@ -111,6 +111,11 @@ class WorkingDirectory:
         seed=0,
     ):
         self.root = os.path.join(*root)
+        B.set_random_seed(seed)
+
+        # If we're just observing the directory, don't execute anything from here on.
+        if observe:
+            return
 
         # Delete if the root already exists.
         if os.path.exists(self.root) and override:
@@ -121,16 +126,10 @@ class WorkingDirectory:
         os.makedirs(self.root, exist_ok=True)
 
         # Set default log.
-        if observe:
-            if log is _default_log:
-                log = None
-            if diff is _default_diff:
-                diff = None
-        else:
-            if log is _default_log:
-                log = "log.txt"
-            if diff is _default_diff:
-                diff = "diff.txt"
+        if log is _default_log:
+            log = "log.txt"
+        if diff is _default_diff:
+            diff = "diff.txt"
 
         # Initialise loggers.
         if log is not None:
@@ -148,6 +147,7 @@ class WorkingDirectory:
         kv("Call", " ".join(sys.argv))
         kv("Now", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         kv("Python", sys.version)
+        kv("Seed", seed)
 
         try:
             # This command will fail if we are not in a git repo.
@@ -179,10 +179,6 @@ class WorkingDirectory:
                 shutil.copy(path, self.file("script.py"))
             else:
                 out("Could not save calling script.")
-
-        # Sed and print random seed.
-        B.set_random_seed(seed)
-        kv("Seed", seed)
 
     def file(self, *name, exists=False):
         """Get the path of a file.
