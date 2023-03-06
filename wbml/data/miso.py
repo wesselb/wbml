@@ -2,7 +2,7 @@ import datetime
 
 import pandas as pd
 
-from .data import data_path, resource, dependency
+from .data import data_path, dependency, resource
 
 __all__ = ["load"]
 
@@ -40,7 +40,7 @@ def _fetch():
 
     for i in range(1, 12 + 1):
         # Get all the files for that month.
-        month = datetime.datetime(2019, i, 1)
+        month = datetime.datetime(start.year, i, 1)
         date_str_month = month.strftime("%Y%m")
         resource(
             target=data_path("miso", f"{date_str_month}_rt_lmp_final_csv.zip"),

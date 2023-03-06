@@ -26,7 +26,7 @@ def _load(cache, parse):
 
 def load(extended=False):
     """Load the EEG data, which is a particular split of the first trial of subject
-    337 in the large training data
+    337 in the large training data.
 
     Args:
         extended (bool, optional): Return the train test splits of the first

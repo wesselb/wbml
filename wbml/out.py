@@ -5,7 +5,7 @@ from collections import defaultdict
 
 import lab as B
 import numpy as np
-from plum import Dispatcher
+from plum import Dispatcher, isinstance
 
 __all__ = ["Section", "out", "kv", "format", "Counter", "Progress"]
 
@@ -409,7 +409,6 @@ class Progress:
 
         # Update tracked values.
         for name, value in updates.items():
-
             # Perform smoothing if `value` is numeric.
             if name in self.values and isinstance(value, B.Numeric):
                 alpha = self.alpha[name]

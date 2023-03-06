@@ -1,8 +1,8 @@
 import lab as B
 import pandas as pd
 import pytest
-
 import wbml.metric
+from plum import isinstance
 
 two_arg = ["mse", "smse", "rmse", "srmse", "mae", "r2"]
 three_arg = ["mll", "smll"]

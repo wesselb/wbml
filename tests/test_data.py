@@ -4,8 +4,7 @@ import shutil
 
 import matplotlib.pyplot as plt
 import pytest
-
-from wbml.data import data_path, DependencyError
+from wbml.data import DependencyError, data_path
 
 
 class _SetDataAside:
@@ -43,10 +42,6 @@ def _import_and_execute(name, kw_args, monkeypatch):
 @pytest.mark.parametrize(
     "name, kw_args",
     [
-        ("air_temp", {}),
-        ("air_temp", {"split": "requeima19"}),
-        ("eeg", {"extended": False}),
-        ("eeg", {"extended": True}),
         ("exchange", {}),
         ("crude_oil", {}),
         ("kemar", {}),
@@ -57,6 +52,11 @@ def _import_and_execute(name, kw_args, monkeypatch):
         ("predprey", {}),
         ("toy_sines", {}),
         ("vix", {}),
+        # Do these last, because they take such a long time.
+        ("air_temp", {}),
+        ("air_temp", {"split": "requeima19"}),
+        ("eeg", {"extended": False}),
+        ("eeg", {"extended": True}),
     ],
 )
 def test_import(name, kw_args, monkeypatch):

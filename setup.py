@@ -11,7 +11,7 @@ requirements = [
     "sklearn",
     "matplotlib",
     "xarray",
-    "plum-dispatch>=1",
+    "plum-dispatch>=2",
     "backends>=1",
     "backends-matrix>=1",
     "stheno>=1",

@@ -1,9 +1,10 @@
 from functools import wraps
+from typing import Union
 
 import lab as B
 import numpy as np
 import pandas as pd
-from plum import Dispatcher, Union
+from plum import Dispatcher
 
 __all__ = ["mse", "smse", "rmse", "srmse", "mae", "mll", "smll", "r2"]
 
