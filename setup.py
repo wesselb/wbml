@@ -8,7 +8,7 @@ requirements = [
     "python-slugify",
     "requests",
     "netCDF4",
-    "sklearn",
+    "scikit-learn",
     "matplotlib",
     "xarray",
     "plum-dispatch>=2",
