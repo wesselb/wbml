@@ -121,7 +121,8 @@ def tweak(
     if legend:
         leg = ax.legend(
             facecolor="#eeeeee",
-            framealpha=0.7,
+            edgecolor="#ffffff",
+            framealpha=0.85,
             loc=legend_loc,
             labelspacing=0.25,
         )
