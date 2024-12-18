@@ -35,8 +35,9 @@ def load(detrend_method="gp"):
         model = LinearRegression()
     else:
         raise ValueError('`detrend_method` must be "gp" or "linear".')
-    model.fit(np.array(df.index)[:, None], df["ppm"])
-    trend = model.predict(df.index[:, None])
+    index = np.array(df.index)[:, None]
+    model.fit(index, df["ppm"])
+    trend = model.predict(index)
     df["ppm_trend"] = trend
     df["ppm_detrended"] = df["ppm"] - trend
 
